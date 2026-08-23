@@ -1,0 +1,134 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../data/providers.dart';
+import '../../features/auth/otp_screen.dart';
+import '../../features/auth/phone_screen.dart';
+import '../../features/auth/welcome_screen.dart';
+import '../../features/family/family_setup_screen.dart';
+import '../../features/family/members_screen.dart';
+import '../../features/home/home_screen.dart';
+import '../../features/notifications/notifications_screen.dart';
+import '../../features/settings/settings_screen.dart';
+import '../../features/shell/app_shell.dart';
+import '../../features/tasks/task_details_screen.dart';
+import '../../features/tasks/task_form_screen.dart';
+import '../../features/tasks/tasks_screen.dart';
+
+final routerProvider = Provider<GoRouter>((ref) {
+  final refresh = _RouterRefresh(ref);
+  ref.onDispose(refresh.dispose);
+
+  return GoRouter(
+    initialLocation: '/welcome',
+    refreshListenable: refresh,
+    redirect: (context, state) {
+      final auth = ref.read(authUidProvider);
+      final userAsync = ref.read(currentUserProvider);
+      final loc = state.matchedLocation;
+      final public = loc == '/welcome' ||
+          loc == '/login' ||
+          loc == '/otp' ||
+          loc == '/settings-public';
+
+      if (auth.isLoading) return null;
+      final uid = auth.valueOrNull;
+      if (uid == null) return public ? null : '/welcome';
+
+      if (userAsync.isLoading) return null;
+      final user = userAsync.valueOrNull;
+      if (user == null) return null;
+
+      if (!user.hasFamily) {
+        return loc == '/family-setup' ? null : '/family-setup';
+      }
+      if (public || loc == '/family-setup' || loc == '/') {
+        return '/app/home';
+      }
+      return null;
+    },
+    routes: [
+      GoRoute(path: '/welcome', builder: (context, state) => const WelcomeScreen()),
+      GoRoute(path: '/login', builder: (context, state) => const PhoneScreen()),
+      GoRoute(
+        path: '/otp',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          return OtpScreen(
+            verificationId: extra['verificationId'] as String? ?? '',
+            phone: extra['phone'] as String? ?? '',
+            name: extra['name'] as String? ?? '',
+            language: extra['language'] as String? ?? 'en',
+          );
+        },
+      ),
+      GoRoute(
+        path: '/family-setup',
+        builder: (context, state) => const FamilySetupScreen(),
+      ),
+      GoRoute(
+        path: '/settings-public',
+        builder: (context, state) => const SettingsScreen(publicMode: true),
+      ),
+      GoRoute(
+        path: '/notifications',
+        builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: '/tasks/new',
+        builder: (context, state) => const TaskFormScreen(),
+      ),
+      GoRoute(
+        path: '/tasks/:id',
+        builder: (context, state) => TaskDetailsScreen(
+          taskId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/tasks/:id/edit',
+        builder: (context, state) => TaskFormScreen(
+          taskId: state.pathParameters['id'],
+        ),
+      ),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return AppShell(navigationShell: navigationShell);
+        },
+        branches: [
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/app/home',
+              builder: (context, state) => const HomeScreen(),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/app/tasks',
+              builder: (context, state) => const TasksScreen(),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/app/family',
+              builder: (context, state) => const MembersScreen(),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/app/settings',
+              builder: (context, state) => const SettingsScreen(),
+            ),
+          ]),
+        ],
+      ),
+    ],
+  );
+});
+
+class _RouterRefresh extends ChangeNotifier {
+  _RouterRefresh(Ref ref) {
+    ref.listen(authUidProvider, (_, _) => notifyListeners());
+    ref.listen(currentUserProvider, (_, _) => notifyListeners());
+  }
+}

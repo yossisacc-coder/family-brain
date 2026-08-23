@@ -1,0 +1,45 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data;
+    }
+
+    function sameFamily(familyId) {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        userDoc(request.auth.uid).familyId == familyId;
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn() &&
+        (request.auth.uid == userId ||
+         (resource.data.familyId != null &&
+          userDoc(request.auth.uid).familyId == resource.data.familyId));
+      allow create: if signedIn() && request.auth.uid == userId;
+      allow update: if signedIn() && request.auth.uid == userId;
+    }
+
+    match /families/{familyId} {
+      allow read: if sameFamily(familyId);
+      allow create: if signedIn();
+      allow update: if sameFamily(familyId) ||
+        (signedIn() && request.resource.data.inviteCode == resource.data.inviteCode);
+    }
+
+    match /tasks/{taskId} {
+      allow read, write: if sameFamily(resource.data.familyId) ||
+        (request.resource.data.familyId != null &&
+         sameFamily(request.resource.data.familyId));
+    }
+
+    match /notifications/{notificationId} {
+      allow read, update: if signedIn() && resource.data.userId == request.auth.uid;
+      allow create: if signedIn();
+    }
+  }
+}
