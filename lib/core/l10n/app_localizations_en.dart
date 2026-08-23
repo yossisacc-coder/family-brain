@@ -23,11 +23,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get continueWithPhone => 'Continue with phone number';
 
   @override
-  String get demoSignIn => 'Try a demo family';
+  String get demoSignIn => 'Development demo login';
 
   @override
   String get demoHint =>
-      'Development sign-in uses a test phone number. No SMS is sent.';
+      'Opens Home, Family, Tasks, and Notifications on this phone. No SMS and no Firebase required. Data stays on the device.';
+
+  @override
+  String get demoModeLabel => 'Development / Demo';
+
+  @override
+  String get demoModeSettings =>
+      'This build uses on-device demo data. Phone/OTP architecture is unchanged for production Firebase.';
+
+  @override
+  String get orDivider => 'or';
 
   @override
   String get phoneTitle => 'Your phone number';

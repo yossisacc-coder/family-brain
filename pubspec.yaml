@@ -1,7 +1,7 @@
 name: family_brain
 description: Family Brain — a simple digital workspace for families
 publish_to: "none"
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.13.1

@@ -23,10 +23,21 @@ class AppLocalizationsHe extends AppLocalizations {
   String get continueWithPhone => 'המשך עם מספר טלפון';
 
   @override
-  String get demoSignIn => 'כניסה למשפחת הדגמה';
+  String get demoSignIn => 'כניסת הדגמה לפיתוח';
 
   @override
-  String get demoHint => 'במצב פיתוח נעשה שימוש במספר בדיקה. לא נשלח SMS.';
+  String get demoHint =>
+      'פותח את המסכים בית, משפחה, משימות והתראות במכשיר הזה. בלי SMS ובלי Firebase. הנתונים נשמרים בטלפון.';
+
+  @override
+  String get demoModeLabel => 'פיתוח / הדגמה';
+
+  @override
+  String get demoModeSettings =>
+      'הגרסה הזו משתמשת בנתוני הדגמה במכשיר. ארכיטקטורת הטלפון/OTP נשארה לייצור עם Firebase.';
+
+  @override
+  String get orDivider => 'או';
 
   @override
   String get phoneTitle => 'מספר הטלפון שלך';

@@ -125,14 +125,32 @@ abstract class AppLocalizations {
   /// No description provided for @demoSignIn.
   ///
   /// In en, this message translates to:
-  /// **'Try a demo family'**
+  /// **'Development demo login'**
   String get demoSignIn;
 
   /// No description provided for @demoHint.
   ///
   /// In en, this message translates to:
-  /// **'Development sign-in uses a test phone number. No SMS is sent.'**
+  /// **'Opens Home, Family, Tasks, and Notifications on this phone. No SMS and no Firebase required. Data stays on the device.'**
   String get demoHint;
+
+  /// No description provided for @demoModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Development / Demo'**
+  String get demoModeLabel;
+
+  /// No description provided for @demoModeSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'This build uses on-device demo data. Phone/OTP architecture is unchanged for production Firebase.'**
+  String get demoModeSettings;
+
+  /// No description provided for @orDivider.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get orDivider;
 
   /// No description provided for @phoneTitle.
   ///

@@ -88,35 +88,102 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 Text(_error!, style: const TextStyle(color: AppColors.urgent)),
                 const SizedBox(height: 12),
               ],
+              _DemoLoginCard(
+                loading: _loading,
+                onPressed: _demo,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.orDivider,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textMuted,
+                    ),
+              ),
+              const SizedBox(height: 16),
               PrimaryButton(
                 label: l10n.continueWithPhone,
                 icon: Icons.phone_iphone_rounded,
-                onPressed: () => context.push('/login'),
+                onPressed: _loading ? null : () => context.push('/login'),
               ),
-              if (AppConfig.useEmulator) ...[
-                const SizedBox(height: 10),
-                OutlinedButton(
-                  onPressed: _loading ? null : _demo,
-                  child: _loading
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(l10n.demoSignIn),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.demoHint,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textMuted,
-                      ),
-                ),
-              ],
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _DemoLoginCard extends StatelessWidget {
+  const _DemoLoginCard({
+    required this.loading,
+    required this.onPressed,
+  });
+
+  final bool loading;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+      decoration: BoxDecoration(
+        color: AppColors.urgentSoft,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.accent.withValues(alpha: 0.55)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.accent.withValues(alpha: 0.28),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                l10n.demoModeLabel,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primaryDark,
+                    ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            onPressed: loading ? null : onPressed,
+            icon: loading
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.science_outlined),
+            label: Text(l10n.demoSignIn),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            l10n.demoHint,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textMuted,
+                  height: 1.4,
+                ),
+          ),
+          if (AppConfig.useLocalDemo) ...[
+            const SizedBox(height: 6),
+            Text(
+              l10n.demoModeSettings,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textMuted,
+                    height: 1.35,
+                  ),
+            ),
+          ],
+        ],
       ),
     );
   }

@@ -21,7 +21,7 @@ Use Flutter 3.22 or newer: https://docs.flutter.dev/get-started/install
 
 ### 2. Start the local cloud emulators
 
-This first MVP is configured to talk to the Firebase Emulator Suite so the app can be used without paid SMS or a production Firebase project.
+Default builds use an on-device **Development / Demo** login so you can open the app on a real phone without SMS or production Firebase. Phone/OTP screens and the Firebase auth implementation are still in the project.
 
 ```bash
 npm install -g firebase-tools
@@ -51,19 +51,27 @@ flutter run -d web-server --web-hostname 0.0.0.0 --web-port 5173 --dart-define=U
 
 Then open **http://127.0.0.1:5173** in a browser. The app is framed like a phone.
 
-**Android**
+**Android APK (physical phone)**
+
+The published debug APK uses on-device demo data. Install `dist/family_brain_android.zip` from this repository (unzip and install `family_brain.apk`). On the welcome screen tap **Development demo login**. No SMS and no Firebase connection are required.
 
 ```bash
-flutter run -d android --dart-define=USE_EMULATOR=true
+flutter run -d android
+```
+
+To exercise the unchanged Phone/OTP + Firebase path (emulator):
+
+```bash
+flutter run -d android --dart-define=BACKEND_MODE=firebase --dart-define=USE_EMULATOR=true
 ```
 
 On the Android emulator, `127.0.0.1` is remapped to `10.0.2.2` automatically.
 
 ### 4. Try it
 
-On the welcome screen, tap **Try a demo family** (development only), or enter any name and a phone number with country code. With the emulator, open the Auth emulator UI if you need the one-time code.
+On the welcome screen, tap **Development demo login**. The app opens a seeded demo family so you can use Home, Family, Tasks, Notifications, and Hebrew/English RTL immediately.
 
-Then create a family, add a task, open it, change its status, and switch language in Settings.
+Phone/OTP remains available for the Firebase backend (`BACKEND_MODE=firebase`). With the emulator, open the Auth emulator UI if you need the one-time code.
 
 ## Production Firebase
 
@@ -73,7 +81,7 @@ Before a public release:
 2. Enable Authentication (Phone), Cloud Firestore, and Cloud Messaging.
 3. Run `flutterfire configure` and replace `lib/firebase_options.dart`.
 4. Deploy `firestore.rules`.
-5. Run the app with `--dart-define=USE_EMULATOR=false`.
+5. Run the app with `--dart-define=BACKEND_MODE=firebase --dart-define=USE_EMULATOR=false`.
 
 Phone SMS in production requires a Firebase project with Phone Authentication enabled.
 
@@ -81,7 +89,7 @@ Phone SMS in production requires a Firebase project with Phone Authentication en
 
 - `lib/core` — theme, routing, reusable UI, localization
 - `lib/domain` — models and repository interfaces
-- `lib/data` — Firebase implementations
+- `lib/data` — Firebase implementations plus the on-device local demo store
 - `lib/features` — screens and feature controllers
 - `DEVELOPMENT_STATUS.md` — current progress and known limits
 

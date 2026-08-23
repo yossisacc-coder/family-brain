@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide Family;
 
+import '../core/config/app_config.dart';
 import '../domain/models/app_notification.dart';
 import '../domain/models/app_user.dart';
 import '../domain/models/family.dart';
@@ -15,24 +16,52 @@ import 'firebase/firestore_notification_repository.dart';
 import 'firebase/firestore_task_repository.dart';
 import 'firebase/firestore_user_repository.dart';
 import 'firebase/notification_service.dart';
+import 'local/local_auth_repository.dart';
+import 'local/local_family_repository.dart';
+import 'local/local_json_store.dart';
+import 'local/local_notification_repository.dart';
+import 'local/local_task_repository.dart';
+import 'local/local_user_repository.dart';
+
+final localStoreProvider = Provider<LocalJsonStore>((ref) {
+  return LocalJsonStore();
+});
 
 final userRepositoryProvider = Provider<UserRepository>((ref) {
+  if (AppConfig.useLocalDemo) {
+    return LocalUserRepository(ref.watch(localStoreProvider));
+  }
   return FirestoreUserRepository();
 });
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  if (AppConfig.useLocalDemo) {
+    return LocalAuthRepository(ref.watch(localStoreProvider));
+  }
   return FirebaseAuthRepository(users: ref.watch(userRepositoryProvider));
 });
 
 final familyRepositoryProvider = Provider<FamilyRepository>((ref) {
+  if (AppConfig.useLocalDemo) {
+    return LocalFamilyRepository(
+      store: ref.watch(localStoreProvider),
+      users: ref.watch(userRepositoryProvider),
+    );
+  }
   return FirestoreFamilyRepository(users: ref.watch(userRepositoryProvider));
 });
 
 final taskRepositoryProvider = Provider<TaskRepository>((ref) {
+  if (AppConfig.useLocalDemo) {
+    return LocalTaskRepository(ref.watch(localStoreProvider));
+  }
   return FirestoreTaskRepository();
 });
 
 final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
+  if (AppConfig.useLocalDemo) {
+    return LocalNotificationRepository(ref.watch(localStoreProvider));
+  }
   return FirestoreNotificationRepository();
 });
 

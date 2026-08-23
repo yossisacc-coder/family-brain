@@ -2,13 +2,13 @@
 
 ## Current phase
 
-MVP complete for this repository. Production Firebase/SMS still needs the owner’s Firebase project.
+MVP complete for this repository. The Android APK uses an on-device **Development / Demo** login so Home, Family, Tasks, Notifications, and Hebrew/English RTL can be tested on a real phone without SMS or production Firebase. Phone/OTP + Firebase architecture is unchanged.
 
 ## Completed phases
 
 1. **Project foundation** — Flutter app for Android, iOS, and web; theme; EN/HE localization; mobile navigation.
 2. **Backend** — Firebase Auth + Firestore repositories, emulator configuration, security rules.
-3. **Authentication** — Welcome, phone number, OTP, session restore, development demo sign-in.
+3. **Authentication** — Welcome, phone number, OTP, session restore. Development demo login is on-device (no SMS/Firebase). Phone/OTP still uses `FirebaseAuthRepository` when `BACKEND_MODE=firebase`.
 4. **Family** — Create family, join with invite code, members list, invite sharing.
 5. **Tasks** — Create, list, details, edit, status changes, assignment, filters.
 6. **Home** — Greeting, family name, attention cards, quick actions, upcoming tasks, empty states.
@@ -19,7 +19,7 @@ MVP complete for this repository. Production Firebase/SMS still needs the owner�
 ## Current functionality
 
 - Real navigation between all MVP screens
-- Persistent shared data through Firestore (emulator by default)
+- Persistent shared data through the on-device demo store by default, or Firestore when `BACKEND_MODE=firebase`
 - Mobile-first phone layout, including a phone frame on wide web previews
 - Loading, empty, and error states
 
@@ -36,16 +36,17 @@ MVP complete for this repository. Production Firebase/SMS still needs the owner�
 
 - **Flutter** so Android ships first and iOS/web can be added without rebuilding the product.
 - **Firebase** (Auth, Firestore, Messaging) as the free-tier cloud backend. UI does not talk to Firestore directly; it uses repositories.
-- **Firebase Emulator Suite by default** because this build does not have the owner’s production Firebase credentials or SMS billing. Production is enabled with `--dart-define=USE_EMULATOR=false` after `flutterfire configure`.
+- **On-device local demo backend by default** so a physical Android APK can sign in without SMS, the Firebase Emulator, or production credentials. Phone/OTP screens and `FirebaseAuthRepository` are unchanged. Firebase/emulator mode is `--dart-define=BACKEND_MODE=firebase`.
+- **Firebase Emulator Suite** remains available for the Firebase auth path (`USE_EMULATOR=true`, default when that backend is selected). Production is `--dart-define=BACKEND_MODE=firebase --dart-define=USE_EMULATOR=false` after `flutterfire configure`.
 - **Family as the first workspace type** (`workspaceType: family`) so later workspace types do not require a rewrite.
 - **All family members have the same permissions** in this MVP.
 
 ## Known issues / limits
 
-- Production SMS requires a real Firebase project with Phone Authentication enabled.
+- Production SMS requires a real Firebase project with Phone Authentication enabled. The APK’s **Development demo login** does not use SMS.
 - Push notifications need a production Firebase app + `google-services.json` / APNs. In-app notifications work without that.
-- Emulator data is local to the machine that runs the emulators.
-- A 159 MB debug APK was built locally but was not uploaded as a chat artifact (too large for that channel). It is at `build/app/outputs/flutter-apk/app-debug.apk` after a local Android build.
+- Demo data is stored on the phone and is not shared between devices.
+- Download the current Android APK zip from the GitHub repository: `dist/family_brain_android.zip` on this branch (contains `family_brain.apk`).
 
 ## How to run the current version
 
@@ -66,10 +67,16 @@ flutter run -d web-server --web-hostname 0.0.0.0 --web-port 5173 --dart-define=U
 
 Then open **http://127.0.0.1:5173**
 
-Android:
+Android (on-device demo login, no emulators required):
 
 ```bash
-flutter run -d android --dart-define=USE_EMULATOR=true
+flutter run -d android
 ```
 
-On the welcome screen, tap **Try a demo family**, then create a family and add a task.
+On the welcome screen, tap **Development demo login**. The app opens a seeded demo family so Home, Family, Tasks, Notifications, and language/RTL can be tested immediately.
+
+Firebase/emulator path (Phone/OTP architecture):
+
+```bash
+flutter run -d android --dart-define=BACKEND_MODE=firebase --dart-define=USE_EMULATOR=true
+```

@@ -1,14 +1,33 @@
 /// Runtime configuration for Family Brain.
 ///
-/// Production uses a real Firebase project. Local development defaults to the
-/// Firebase Emulator Suite so the MVP can run without paid SMS or owner
-/// credentials during this first build.
+/// Default APK/device builds use an on-device local demo backend so Home,
+/// Family, Tasks, Notifications, and language/RTL can be tested without SMS
+/// or production Firebase. The Phone/OTP + Firebase architecture is unchanged
+/// and is selected with `--dart-define=BACKEND_MODE=firebase`.
+enum BackendMode { localDemo, firebase }
+
 class AppConfig {
   static const String appName = 'Family Brain';
-  static const String version = '1.0.0';
+  static const String version = '1.0.1';
 
   /// Family is the first workspace type on a platform that can grow later.
   static const String defaultWorkspaceType = 'family';
+
+  static const String backendModeName = String.fromEnvironment(
+    'BACKEND_MODE',
+    defaultValue: 'localDemo',
+  );
+
+  static BackendMode get backendMode {
+    switch (backendModeName) {
+      case 'firebase':
+        return BackendMode.firebase;
+      default:
+        return BackendMode.localDemo;
+    }
+  }
+
+  static bool get useLocalDemo => backendMode == BackendMode.localDemo;
 
   static const bool useEmulator = bool.fromEnvironment(
     'USE_EMULATOR',
@@ -26,4 +45,10 @@ class AppConfig {
   static const String demoPhone = '+16505551234';
   static const String demoOtp = '123456';
   static const String demoName = 'Alex';
+  static const String demoPartnerName = 'Maya';
+  static const String demoFamilyName = 'The Cohens';
+  static const String demoUserId = 'demo-user-alex';
+  static const String demoPartnerId = 'demo-user-maya';
+  static const String demoFamilyId = 'demo-family';
+  static const String demoInviteCode = 'DEMO01';
 }
