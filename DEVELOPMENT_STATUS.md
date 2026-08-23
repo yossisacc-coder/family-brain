@@ -20,6 +20,7 @@ MVP complete for this repository. The Android APK uses an on-device **Developmen
 
 - Real navigation between all MVP screens
 - Persistent shared data through the on-device demo store by default, or Firestore when `BACKEND_MODE=firebase`
+- Android system Back pops in-app routes (details, create/edit, notifications) and returns from Family/Tasks/Settings to Home; it only leaves the app from root Home
 - Mobile-first phone layout, including a phone frame on wide web previews
 - Loading, empty, and error states
 

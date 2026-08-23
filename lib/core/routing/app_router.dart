@@ -1,8 +1,9 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../data/providers.dart';
+import 'app_back_button_binder.dart';
 import '../../features/auth/otp_screen.dart';
 import '../../features/auth/phone_screen.dart';
 import '../../features/auth/welcome_screen.dart';
@@ -16,11 +17,14 @@ import '../../features/tasks/task_details_screen.dart';
 import '../../features/tasks/task_form_screen.dart';
 import '../../features/tasks/tasks_screen.dart';
 
+final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
+
 final routerProvider = Provider<GoRouter>((ref) {
   final refresh = _RouterRefresh(ref);
   ref.onDispose(refresh.dispose);
 
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: '/welcome',
     refreshListenable: refresh,
     redirect: (context, state) {
@@ -49,6 +53,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      ShellRoute(
+        builder: (context, state, child) {
+          return AppBackButtonBinder(child: child);
+        },
+        routes: [
       GoRoute(path: '/welcome', builder: (context, state) => const WelcomeScreen()),
       GoRoute(path: '/login', builder: (context, state) => const PhoneScreen()),
       GoRoute(
@@ -120,6 +129,8 @@ final routerProvider = Provider<GoRouter>((ref) {
               builder: (context, state) => const SettingsScreen(),
             ),
           ]),
+        ],
+      ),
         ],
       ),
     ],
