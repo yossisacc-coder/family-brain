@@ -1,0 +1,11 @@
+{
+  "name": "family-brain",
+  "private": true,
+  "description": "Local tooling for the Family Brain Flutter MVP (Firebase emulators).",
+  "scripts": {
+    "emulators": "firebase emulators:start --project family-brain-dev"
+  },
+  "devDependencies": {
+    "firebase-tools": "^15.28.1"
+  }
+}
