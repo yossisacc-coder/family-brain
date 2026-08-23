@@ -46,7 +46,7 @@ MVP complete for this repository. The Android APK uses an on-device **Developmen
 - Production SMS requires a real Firebase project with Phone Authentication enabled. The APK’s **Development demo login** does not use SMS.
 - Push notifications need a production Firebase app + `google-services.json` / APNs. In-app notifications work without that.
 - Demo data is stored on the phone and is not shared between devices.
-- Download the current Android APK zip from the GitHub repository: `dist/family_brain_android.zip` on this branch (contains `family_brain.apk`).
+- Download the current Android APK zip (version 1.0.1+2, on-device demo login) from the GitHub repository: `dist/family_brain_android.zip` on this branch (contains `family_brain.apk`).
 
 ## How to run the current version
 
