@@ -72,6 +72,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         actions: [
           if (pendingUndo)
             TextButton(
+              key: const Key('task-trash-undo-appbar'),
               onPressed: () => TaskTrash.undo(ref),
               child: Text(
                 l10n.undo,
@@ -97,23 +98,19 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             icon: const Icon(Icons.add_rounded),
           ),
         ],
-        bottom: occupyUndoSlot
-            ? PreferredSize(
-                preferredSize: const Size.fromHeight(64),
-                child: pendingUndo
-                    ? const Padding(
-                        padding: EdgeInsets.fromLTRB(12, 0, 12, 10),
-                        child: TrashUndoBar(),
-                      )
-                    : const SizedBox(height: 64),
-              )
-            : null,
       ),
-      body: AbsorbPointer(
-        absorbing: occupyUndoSlot,
-        child: Column(
-          children: [
-            Expanded(
+      body: Column(
+        children: [
+          if (occupyUndoSlot)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+              child: pendingUndo
+                  ? const TrashUndoBar()
+                  : const SizedBox(height: 52),
+            ),
+          Expanded(
+            child: AbsorbPointer(
+              absorbing: occupyUndoSlot,
               child: tasksAsync.when(
                 loading: () => LoadingView(label: l10n.loading),
                 error: (_, _) => ErrorView(
@@ -234,8 +231,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 },
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

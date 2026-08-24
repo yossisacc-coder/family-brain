@@ -126,9 +126,18 @@ class TaskTrash {
     _timer?.cancel();
     _timer = null;
     try {
+      debugPrint(
+        'FamilyBrain undo restore ${request.task.id} ${request.task.title}',
+      );
       await request.repo.restoreTask(request.task.copyWith(clearDeleted: true));
-    } catch (_) {
-      // Restore is best-effort; still unhide the list row.
+      final viaRef = ref?.read(taskRepositoryProvider);
+      if (viaRef != null && !identical(viaRef, request.repo)) {
+        await viaRef.restoreTask(request.task.copyWith(clearDeleted: true));
+      }
+      ref?.invalidate(familyTasksProvider);
+      ref?.invalidate(trashedTasksProvider);
+    } catch (error) {
+      debugPrint('FamilyBrain undo restore failed: $error');
     } finally {
       request.onUndo?.call();
       _undoCompleted = true;
@@ -192,38 +201,34 @@ class TrashUndoBar extends ConsumerWidget {
       },
       onPointerUp: (event) => TaskTrash.endUndoGesture(event.pointer, ref),
       onPointerCancel: (event) => TaskTrash.endUndoGesture(event.pointer, ref),
-      child: Material(
-        color: const Color(0xFF323232),
-        elevation: 6,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          key: TaskTrash.undoButtonKey,
-          onTap: () => TaskTrash.undo(ref),
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.taskMovedToTrash,
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-                Semantics(
-                  button: true,
-                  label: l10n.undo,
-                  child: Text(
-                    l10n.undo,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+      child: FilledButton(
+        key: TaskTrash.undoButtonKey,
+        onPressed: () => TaskTrash.undo(ref),
+        style: FilledButton.styleFrom(
+          backgroundColor: const Color(0xFF323232),
+          foregroundColor: Colors.white,
+          minimumSize: const Size.fromHeight(52),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                l10n.taskMovedToTrash,
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+            Text(
+              l10n.undo,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
         ),
       ),
     );
