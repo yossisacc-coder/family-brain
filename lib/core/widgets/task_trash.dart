@@ -86,8 +86,6 @@ class TaskTrash {
       await ref.read(taskRepositoryProvider).restoreTask(request.task);
     } finally {
       request.onUndo?.call();
-      ref.invalidate(familyTasksProvider);
-      ref.invalidate(trashedTasksProvider);
       dismiss(ref);
     }
   }
@@ -142,28 +140,29 @@ class TrashUndoBar extends ConsumerWidget {
       color: const Color(0xFF323232),
       elevation: 6,
       borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 6, 4, 6),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                l10n.taskMovedToTrash,
-                style: const TextStyle(color: Colors.white),
+      child: InkWell(
+        key: TaskTrash.undoButtonKey,
+        onTap: () => TaskTrash.undo(ref),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.taskMovedToTrash,
+                  style: const TextStyle(color: Colors.white),
+                ),
               ),
-            ),
-            FilledButton(
-              key: TaskTrash.undoButtonKey,
-              onPressed: () => TaskTrash.undo(ref),
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: const Color(0xFF323232),
-                minimumSize: const Size(88, 40),
-                tapTargetSize: MaterialTapTargetSize.padded,
+              Text(
+                l10n.undo,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
-              child: Text(l10n.undo),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

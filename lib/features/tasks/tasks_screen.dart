@@ -80,14 +80,18 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             icon: const Icon(Icons.add_rounded),
           ),
         ],
+        bottom: pendingUndo
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(64),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(12, 0, 12, 10),
+                  child: TrashUndoBar(),
+                ),
+              )
+            : null,
       ),
       body: Column(
         children: [
-          if (pendingUndo)
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
-              child: TrashUndoBar(),
-            ),
           Expanded(
             child: tasksAsync.when(
         loading: () => LoadingView(label: l10n.loading),
@@ -110,7 +114,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
 
           return Column(
             children: [
-              SingleChildScrollView(
+              if (!pendingUndo)
+                SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                 child: Row(

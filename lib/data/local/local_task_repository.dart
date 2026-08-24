@@ -47,17 +47,14 @@ class LocalTaskRepository implements TaskRepository {
   @override
   Future<TaskItem> restoreTask(TaskItem task) async {
     final stored = _store.tasks[task.id];
-    final current =
-        stored == null ? task : TaskItem.fromMap(Map<String, dynamic>.from(stored));
-    final restored = current.copyWith(
-      clearDeleted: true,
-      updatedAt: DateTime.now(),
-    );
-    final map = restored.toMap();
-    map.remove('deletedAt');
+    final map = stored != null
+        ? Map<String, dynamic>.from(stored)
+        : task.toMap();
+    map['deletedAt'] = null;
+    map['updatedAt'] = DateTime.now().toIso8601String();
     _store.tasks[task.id] = map;
     await _store.commit();
-    return restored;
+    return TaskItem.fromMap(map);
   }
 
   @override

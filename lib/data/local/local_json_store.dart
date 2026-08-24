@@ -49,11 +49,16 @@ class LocalJsonStore {
       ..addAll(_asDocMap(data['notifications']));
   }
 
+  Future<void> _write = Future.value();
+
   Future<void> commit() async {
     _changes.add(null);
     if (!persist) return;
-    final prefs = await _prefs();
-    await prefs.setString(storageKey, jsonEncode(toMap()));
+    _write = _write.then((_) async {
+      final prefs = await _prefs();
+      await prefs.setString(storageKey, jsonEncode(toMap()));
+    });
+    await _write;
   }
 
   Map<String, dynamic> toMap() {
