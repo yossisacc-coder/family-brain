@@ -55,9 +55,10 @@ class AppConfig {
   static const String demoFamilyId = 'demo-family';
   static const String demoInviteCode = 'DEMO01';
 
-  /// Public URL of the AI gateway (no secrets). Empty = on-device parser only.
+  /// Public HTTPS origin of the AI gateway (no secrets).
+  /// Override with `--dart-define=AI_BACKEND_URL=` (empty keeps on-device only).
   static const String aiBackendUrl = String.fromEnvironment(
     'AI_BACKEND_URL',
-    defaultValue: '',
+    defaultValue: 'https://family-brain-ai.onrender.com',
   );
 }

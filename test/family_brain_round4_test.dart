@@ -1,12 +1,16 @@
+import 'dart:io';
+
 import 'package:family_brain/core/brain/family_brain_ai.dart';
 import 'package:family_brain/core/brain/family_brain_ask.dart';
 import 'package:family_brain/core/brain/family_brain_parser.dart';
+import 'package:family_brain/core/config/app_config.dart';
 import 'package:family_brain/core/notifications/local_reminder_scheduler.dart';
 import 'package:family_brain/data/local/local_json_store.dart';
 import 'package:family_brain/data/local/local_task_repository.dart';
 import 'package:family_brain/domain/models/app_user.dart';
 import 'package:family_brain/domain/models/task_item.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   final now = DateTime(2026, 8, 24, 10, 0);
@@ -162,13 +166,35 @@ void main() {
       expect(drafts, isEmpty);
     });
 
+    test('defaults to the public Render AI gateway origin', () {
+      expect(
+        AppConfig.aiBackendUrl,
+        'https://family-brain-ai.onrender.com',
+      );
+    });
+
     test('local parser is used when the cloud gateway is not configured', () async {
       final result = await FamilyBrainAi.understand(
         text: 'Buy milk, bread and eggs.',
         now: now,
+        backendUrl: '',
       );
       expect(result.isOk, isTrue);
       expect(result.usedCloud, isFalse);
+      expect(result.drafts.single.kind, InformationKind.list);
+    });
+
+    test('falls back to the local parser after one failed gateway call', () async {
+      final result = await FamilyBrainAi.understand(
+        text: 'Buy milk, bread and eggs.',
+        now: now,
+        backendUrl: 'https://family-brain-ai.onrender.com',
+        client: _OfflineClient(),
+      );
+      expect(result.isOk, isTrue);
+      expect(result.usedCloud, isFalse);
+      expect(result.usedFallback, isTrue);
+      expect(result.error, 'offline');
       expect(result.drafts.single.kind, InformationKind.list);
     });
   });
@@ -250,4 +276,11 @@ void main() {
       );
     });
   });
+}
+
+class _OfflineClient extends http.BaseClient {
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) {
+    throw const SocketException('offline');
+  }
 }

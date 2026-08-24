@@ -40,8 +40,9 @@ class FamilyBrainAi {
     String? mimeType,
     http.Client? client,
     Duration timeout = const Duration(seconds: 12),
+    String? backendUrl,
   }) async {
-    final url = AppConfig.aiBackendUrl;
+    final url = _origin(backendUrl ?? AppConfig.aiBackendUrl);
     if (url.isNotEmpty) {
       try {
         final cloud = await _cloudUnderstand(
@@ -94,6 +95,8 @@ class FamilyBrainAi {
     );
     return BrainUnderstandResult(drafts: local, originalText: text);
   }
+
+  static String _origin(String url) => url.trim().replaceAll(RegExp(r'/+$'), '');
 
   static Future<BrainUnderstandResult> _cloudUnderstand({
     required String url,

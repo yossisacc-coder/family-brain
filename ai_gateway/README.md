@@ -9,11 +9,17 @@ export GEMINI_API_KEY=your_google_ai_studio_key
 node ai_gateway/server.mjs
 ```
 
-Then run the app with:
+The Flutter app defaults to the public Render origin:
+
+`https://family-brain-ai.onrender.com`
+
+Override only when needed:
 
 ```bash
-flutter run --dart-define=AI_BACKEND_URL=http://<host>:8787
+flutter run --dart-define=AI_BACKEND_URL=https://family-brain-ai.onrender.com
 ```
+
+Empty `AI_BACKEND_URL` keeps on-device parsing only.
 
 Default model is `gemini-3.5-flash-lite` (`GEMINI_MODEL`), the current
 stable Flash-Lite ID on the Gemini API with a free tier, text + image
