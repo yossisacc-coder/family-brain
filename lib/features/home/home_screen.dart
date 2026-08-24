@@ -1,7 +1,13 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 import '../../core/brain/family_brain_parser.dart';
 import '../../core/theme/app_colors.dart';
@@ -16,6 +22,7 @@ import '../../core/widgets/loading_view.dart';
 import '../../core/widgets/quick_action_card.dart';
 import '../../core/widgets/stat_card.dart';
 import '../../core/widgets/task_card.dart';
+import '../../core/widgets/app_notice.dart';
 import '../../data/providers.dart';
 import '../../domain/models/app_user.dart';
 import '../../domain/models/task_item.dart';
@@ -29,10 +36,18 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _composer = TextEditingController();
+  final _speech = SpeechToText();
+  final _picker = ImagePicker();
   var _sending = false;
+  var _listening = false;
+  String? _imagePath;
+  Timer? _listenWatchdog;
+
+  static const _maxImageBytes = 8 * 1024 * 1024;
 
   @override
   void dispose() {
+    _listenWatchdog?.cancel();
     _composer.dispose();
     super.dispose();
   }
@@ -174,9 +189,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   _ComposerCard(
                     controller: _composer,
                     sending: _sending,
+                    listening: _listening,
+                    imagePath: _imagePath,
                     onSubmit: () => _submitComposer(context, l10n, members),
                     onAskAi: () => context.push('/brain/ask'),
-                    onComingSoon: () => _comingSoon(context, l10n),
+                    onAttach: () => _pickImage(l10n),
+                    onMic: () => _toggleVoice(l10n),
+                    onRemoveImage: () => setState(() => _imagePath = null),
                   ),
                   const SizedBox(height: AppSpacing.section),
                   AppSectionHeader(
@@ -257,10 +276,94 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return matches.take(4).toList();
   }
 
-  void _comingSoon(BuildContext context, AppLocalizations l10n) {
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(l10n.comingSoon)));
+  Future<void> _pickImage(AppLocalizations l10n) async {
+    try {
+      final file = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+        maxWidth: 1920,
+      );
+      if (file == null) return;
+      final bytes = await file.length();
+      if (!mounted) return;
+      if (bytes <= 0) {
+        AppNotice.show(context, l10n.imageFailed);
+        return;
+      }
+      if (bytes > _maxImageBytes) {
+        AppNotice.show(context, l10n.imageTooLarge);
+        return;
+      }
+      setState(() => _imagePath = file.path);
+    } catch (_) {
+      if (mounted) AppNotice.show(context, l10n.imageFailed);
+    }
+  }
+
+  Future<void> _toggleVoice(AppLocalizations l10n) async {
+    if (_listening) {
+      await _stopVoice();
+      return;
+    }
+    try {
+      final ready = await _speech.initialize(
+        onError: (_) {
+          if (!mounted) return;
+          setState(() => _listening = false);
+          AppNotice.show(context, l10n.voiceFailed);
+        },
+        onStatus: (status) {
+          if (!mounted) return;
+          if (status == 'notListening' || status == 'done') {
+            setState(() => _listening = false);
+          }
+        },
+      );
+      if (!ready) {
+        if (mounted) AppNotice.show(context, l10n.voiceUnavailable);
+        return;
+      }
+      if (!mounted) return;
+      setState(() => _listening = true);
+      _listenWatchdog?.cancel();
+      _listenWatchdog = Timer(const Duration(seconds: 8), () {
+        _stopVoice();
+      });
+      await _speech.listen(
+        listenOptions: SpeechListenOptions(
+          listenFor: Duration(seconds: 8),
+          pauseFor: Duration(seconds: 2),
+          partialResults: true,
+          listenMode: ListenMode.dictation,
+        ),
+        onResult: (result) {
+          if (!mounted) return;
+          final text = result.recognizedWords.trim();
+          if (text.isEmpty) return;
+          _composer.value = TextEditingValue(
+            text: text,
+            selection: TextSelection.collapsed(offset: text.length),
+          );
+          if (result.finalResult) {
+            _stopVoice();
+          }
+        },
+      );
+    } catch (_) {
+      if (mounted) {
+        setState(() => _listening = false);
+        AppNotice.show(context, l10n.voiceUnavailable);
+      }
+    }
+  }
+
+  Future<void> _stopVoice() async {
+    _listenWatchdog?.cancel();
+    _listenWatchdog = null;
+    try {
+      await _speech.stop();
+    } catch (_) {}
+    if (mounted) setState(() => _listening = false);
   }
 
   void _submitComposer(
@@ -270,33 +373,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   ) {
     if (_sending) return;
     final text = _composer.text.trim();
-    if (text.isEmpty) {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(l10n.emptyBrainInput)));
+    final imagePath = _imagePath;
+    if (text.isEmpty && imagePath == null) {
+      AppNotice.show(context, l10n.emptyBrainInput);
       return;
     }
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() => _sending = true);
     try {
-      final result = FamilyBrainParser.parse(
-        text,
-        now: DateTime.now(),
-        members: members,
-      );
-      if (!result.isOk || result.draft == null) {
-        ScaffoldMessenger.of(context)
-          ..clearSnackBars()
-          ..showSnackBar(SnackBar(content: Text(l10n.brainUnclear)));
-        return;
+      BrainDraft? draft;
+      if (text.isEmpty) {
+        draft = BrainDraft(
+          kind: InformationKind.task,
+          title: l10n.photoAttached,
+          originalText: l10n.photoAttached,
+          imagePath: imagePath,
+        );
+      } else {
+        final result = FamilyBrainParser.parse(
+          text,
+          now: DateTime.now(),
+          members: members,
+        );
+        if (!result.isOk || result.draft == null) {
+          AppNotice.show(context, l10n.brainUnclear);
+          return;
+        }
+        draft = result.draft!.copyWith(imagePath: imagePath);
       }
       _composer.clear();
-      ref.read(pendingBrainDraftProvider.notifier).state = result.draft;
+      setState(() => _imagePath = null);
+      ref.read(pendingBrainDraftProvider.notifier).state = draft;
       context.push('/brain/confirm');
     } catch (_) {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(l10n.errorUnavailable)));
+      AppNotice.show(context, l10n.errorUnavailable);
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -314,16 +424,24 @@ class _ComposerCard extends StatelessWidget {
   const _ComposerCard({
     required this.controller,
     required this.onSubmit,
-    required this.onComingSoon,
     required this.onAskAi,
+    required this.onAttach,
+    required this.onMic,
+    required this.onRemoveImage,
     this.sending = false,
+    this.listening = false,
+    this.imagePath,
   });
 
   final TextEditingController controller;
   final VoidCallback onSubmit;
-  final VoidCallback onComingSoon;
   final VoidCallback onAskAi;
+  final VoidCallback onAttach;
+  final VoidCallback onMic;
+  final VoidCallback onRemoveImage;
   final bool sending;
+  final bool listening;
+  final String? imagePath;
 
   @override
   Widget build(BuildContext context) {
@@ -354,6 +472,32 @@ class _ComposerCard extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: AppSpacing.md),
+          if (imagePath != null && !kIsWeb) ...[
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: AppRadii.card,
+                  child: Image.file(
+                    File(imagePath!),
+                    height: 140,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                  ),
+                ),
+                PositionedDirectional(
+                  top: 4,
+                  end: 4,
+                  child: IconButton.filled(
+                    tooltip: l10n.removePhoto,
+                    onPressed: onRemoveImage,
+                    icon: const Icon(Icons.close_rounded, size: 18),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
           TextField(
             controller: controller,
             minLines: 1,
@@ -371,13 +515,16 @@ class _ComposerCard extends StatelessWidget {
             children: [
               IconButton(
                 tooltip: l10n.attachInformation,
-                onPressed: onComingSoon,
+                onPressed: sending ? null : onAttach,
                 icon: const Icon(Icons.attach_file_outlined),
               ),
               IconButton(
-                tooltip: l10n.voiceInput,
-                onPressed: onComingSoon,
-                icon: const Icon(Icons.mic_none_rounded),
+                tooltip: listening ? l10n.listening : l10n.voiceInput,
+                onPressed: sending ? null : onMic,
+                icon: Icon(
+                  listening ? Icons.stop_circle_outlined : Icons.mic_none_rounded,
+                  color: listening ? AppColors.urgent : null,
+                ),
               ),
               IconButton(
                 tooltip: l10n.askAi,

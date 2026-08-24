@@ -47,6 +47,12 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Family Brain uses the microphone so you can dictate information.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Family Brain converts your speech into text for tasks and reminders.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Family Brain lets you attach a photo to send to Family Brain.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

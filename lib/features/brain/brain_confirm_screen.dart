@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +11,7 @@ import 'package:uuid/uuid.dart';
 import '../../core/brain/family_brain_parser.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/widgets/app_notice.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../core/widgets/secondary_button.dart';
@@ -105,6 +109,22 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
           AppCard(
             child: _editing ? _editForm(l10n, members, draft) : _summary(l10n, draft),
           ),
+          if (!_editing &&
+              draft.imagePath != null &&
+              draft.imagePath!.isNotEmpty &&
+              !kIsWeb) ...[
+            const SizedBox(height: AppSpacing.md),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.file(
+                File(draft.imagePath!),
+                height: 180,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => const SizedBox.shrink(),
+              ),
+            ),
+          ],
           if (_error != null) ...[
             const SizedBox(height: AppSpacing.md),
             Text(_error!, style: const TextStyle(color: AppColors.urgent)),
@@ -290,10 +310,8 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
       await ref.read(taskRepositoryProvider).createTask(task);
       if (!mounted) return;
       ref.read(pendingBrainDraftProvider.notifier).state = null;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.brainSaved)),
-      );
       context.go('/app/home');
+      AppNotice.showAfterNavigation(l10n.brainSaved);
     } catch (_) {
       if (!mounted) return;
       setState(() {

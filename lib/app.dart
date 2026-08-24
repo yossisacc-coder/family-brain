@@ -3,6 +3,7 @@ import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/routing/app_router.dart';
+import 'core/routing/root_keys.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/phone_shell.dart';
 import 'data/providers.dart';

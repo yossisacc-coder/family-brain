@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/task_semantics.dart';
+import '../../core/widgets/app_notice.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
 import '../../core/widgets/primary_button.dart';
@@ -241,10 +242,8 @@ class TaskDetailsScreen extends ConsumerWidget {
           );
     }
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.taskCompleted)),
-    );
     context.pop();
+    AppNotice.showAfterNavigation(l10n.taskCompleted);
   }
 
   Future<void> _reopen(
@@ -260,9 +259,7 @@ class TaskDetailsScreen extends ConsumerWidget {
           ),
         );
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.taskReopened)),
-    );
+    AppNotice.show(context, l10n.taskReopened);
   }
 
   Future<void> _confirmDelete(
@@ -288,10 +285,8 @@ class TaskDetailsScreen extends ConsumerWidget {
   ) async {
     await ref.read(taskRepositoryProvider).restoreTask(task);
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.taskRestored)),
-    );
     context.pop();
+    AppNotice.showAfterNavigation(l10n.taskRestored);
   }
 
   Future<void> _permanentlyDelete(
@@ -320,9 +315,7 @@ class TaskDetailsScreen extends ConsumerWidget {
     if (confirmed != true || !context.mounted) return;
     await ref.read(taskRepositoryProvider).permanentlyDelete(task.id);
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.taskDeletedForever)),
-    );
     context.pop();
+    AppNotice.showAfterNavigation(l10n.taskDeletedForever);
   }
 }

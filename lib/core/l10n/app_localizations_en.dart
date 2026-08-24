@@ -737,4 +737,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get askSubmit => 'Ask';
+
+  @override
+  String get photoAttached => 'Attached photo';
+
+  @override
+  String get removePhoto => 'Remove photo';
+
+  @override
+  String get listening => 'Listening…';
+
+  @override
+  String get voiceUnavailable => 'Voice input is not available on this device.';
+
+  @override
+  String get voiceDenied => 'Microphone permission was denied.';
+
+  @override
+  String get voiceFailed => 'Could not understand the speech. Try again.';
+
+  @override
+  String get imageFailed => 'Could not open the photo picker.';
+
+  @override
+  String get imageTooLarge => 'That photo is too large. Choose a smaller one.';
 }

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/widgets/app_notice.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
@@ -102,9 +103,7 @@ class TrashScreen extends ConsumerWidget {
   ) async {
     await ref.read(taskRepositoryProvider).restoreTask(task);
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.taskRestored)),
-    );
+    AppNotice.show(context, l10n.taskRestored);
   }
 
   Future<void> _permanentlyDelete(
@@ -133,9 +132,7 @@ class TrashScreen extends ConsumerWidget {
     if (confirmed != true || !context.mounted) return;
     await ref.read(taskRepositoryProvider).permanentlyDelete(task.id);
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.taskDeletedForever)),
-    );
+    AppNotice.show(context, l10n.taskDeletedForever);
   }
 
   Future<void> _emptyTrash(
@@ -165,8 +162,6 @@ class TrashScreen extends ConsumerWidget {
     if (confirmed != true || !context.mounted) return;
     await ref.read(taskRepositoryProvider).emptyTrash(family.id);
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.trashEmptied)),
-    );
+    AppNotice.show(context, l10n.trashEmptied);
   }
 }

@@ -260,5 +260,13 @@
   "askFamilyBrain": "Ask Family Brain",
   "askFamilyBrainHint": "Ask about tasks, lists, or what is happening.",
   "askExample": "What tasks are due today?",
-  "askSubmit": "Ask"
+  "askSubmit": "Ask",
+  "photoAttached": "Attached photo",
+  "removePhoto": "Remove photo",
+  "listening": "Listening…",
+  "voiceUnavailable": "Voice input is not available on this device.",
+  "voiceDenied": "Microphone permission was denied.",
+  "voiceFailed": "Could not understand the speech. Try again.",
+  "imageFailed": "Could not open the photo picker.",
+  "imageTooLarge": "That photo is too large. Choose a smaller one."
 }

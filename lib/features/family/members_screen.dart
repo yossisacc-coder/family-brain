@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' hide Family;
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/widgets/app_notice.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/family_member_item.dart';
@@ -99,9 +100,7 @@ class MembersScreen extends ConsumerWidget {
                         ClipboardData(text: family.inviteCode),
                       );
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(l10n.copied)),
-                        );
+                        AppNotice.show(context, l10n.copied);
                       }
                     },
                     borderRadius: BorderRadius.circular(16),

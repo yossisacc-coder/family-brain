@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../data/providers.dart';
+import '../widgets/app_notice.dart';
+import '../widgets/task_trash.dart';
 import 'app_back_button_binder.dart';
+import 'root_keys.dart';
 import '../../features/brain/brain_ask_screen.dart';
 import '../../features/brain/brain_confirm_screen.dart';
 import '../../features/auth/otp_screen.dart';
@@ -23,14 +26,11 @@ import '../../features/tasks/task_form_screen.dart';
 import '../../features/tasks/tasks_screen.dart';
 import '../../features/tasks/trash_screen.dart';
 
-final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
-final rootScaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
-
 final routerProvider = Provider<GoRouter>((ref) {
   final refresh = _RouterRefresh(ref);
   ref.onDispose(refresh.dispose);
 
-  return GoRouter(
+  final router = GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/welcome',
     refreshListenable: refresh,
@@ -177,6 +177,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+  router.routerDelegate.addListener(() {
+    AppNotice.onLocation(
+      router.routerDelegate.currentConfiguration.uri.toString(),
+    );
+  });
+  AppNotice.onDismissedForNavigation = TaskTrash.dismiss;
+  return router;
 });
 
 class _RouterRefresh extends ChangeNotifier {

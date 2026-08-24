@@ -234,5 +234,13 @@
   "askFamilyBrain": "שאלו את Family Brain",
   "askFamilyBrainHint": "שאלו על משימות, רשימות או מה שקורה.",
   "askExample": "אילו משימות להיום?",
-  "askSubmit": "שאלה"
+  "askSubmit": "שאלה",
+  "photoAttached": "תמונה מצורפת",
+  "removePhoto": "הסרת תמונה",
+  "listening": "מקשיב…",
+  "voiceUnavailable": "קלט קולי אינו זמין במכשיר זה.",
+  "voiceDenied": "הרשאת המיקרופון נדחתה.",
+  "voiceFailed": "לא הצלחנו להבין את הדיבור. נסו שוב.",
+  "imageFailed": "לא ניתן לפתוח את בוחר התמונות.",
+  "imageTooLarge": "התמונה גדולה מדי. בחרו תמונה קטנה יותר."
 }

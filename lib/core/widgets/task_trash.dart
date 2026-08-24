@@ -8,6 +8,8 @@ import 'package:go_router/go_router.dart';
 import '../../data/providers.dart';
 import '../../domain/models/task_item.dart';
 import '../../domain/repositories/task_repository.dart';
+import '../routing/root_keys.dart';
+import 'app_notice.dart';
 
 class TrashUndoRequest {
   const TrashUndoRequest({required this.task, required this.repo, this.onUndo});
@@ -141,6 +143,7 @@ class TaskTrash {
     } finally {
       request.onUndo?.call();
       _undoCompleted = true;
+      rootScaffoldMessengerKey.currentState?.hideCurrentSnackBar();
       // Do not collapse the banner while the same pointer is still down.
       if (_gesturePointer == null) {
         _scheduleDismiss(ref);
@@ -159,24 +162,24 @@ class TaskTrash {
     final repo = ref.read(taskRepositoryProvider);
     await repo.moveToTrash(task);
     if (!context.mounted) return;
-    showUndo(ref: ref, task: task, repo: repo, onUndo: onUndo);
-    if (popAfter && context.mounted) {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(
-          SnackBar(
-            duration: undoDuration,
-            content: Text(l10n.taskMovedToTrash),
-            action: SnackBarAction(
-              label: l10n.undo,
-              onPressed: () => undo(ref),
-            ),
-          ),
-        );
+    if (popAfter) {
       if (context.canPop()) {
         context.pop();
       }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showUndo(ref: ref, task: task, repo: repo, onUndo: onUndo);
+        AppNotice.show(
+          null,
+          l10n.taskMovedToTrash,
+          action: SnackBarAction(
+            label: l10n.undo,
+            onPressed: () => undo(ref),
+          ),
+        );
+      });
+      return;
     }
+    showUndo(ref: ref, task: task, repo: repo, onUndo: onUndo);
   }
 
   static Future<void> confirmAndMove({

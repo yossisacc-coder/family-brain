@@ -732,4 +732,28 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get askSubmit => 'שאלה';
+
+  @override
+  String get photoAttached => 'תמונה מצורפת';
+
+  @override
+  String get removePhoto => 'הסרת תמונה';
+
+  @override
+  String get listening => 'מקשיב…';
+
+  @override
+  String get voiceUnavailable => 'קלט קולי אינו זמין במכשיר זה.';
+
+  @override
+  String get voiceDenied => 'הרשאת המיקרופון נדחתה.';
+
+  @override
+  String get voiceFailed => 'לא הצלחנו להבין את הדיבור. נסו שוב.';
+
+  @override
+  String get imageFailed => 'לא ניתן לפתוח את בוחר התמונות.';
+
+  @override
+  String get imageTooLarge => 'התמונה גדולה מדי. בחרו תמונה קטנה יותר.';
 }

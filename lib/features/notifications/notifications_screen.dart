@@ -3,6 +3,7 @@ import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/widgets/app_notice.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
@@ -69,9 +70,7 @@ class NotificationsScreen extends ConsumerWidget {
                 onDismissed: (_) async {
                   await repo.deleteNotification(item.id);
                   if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.notificationDeleted)),
-                  );
+                  AppNotice.show(context, l10n.notificationDeleted);
                 },
                 child: NotificationItem(
                   notification: item,
@@ -80,9 +79,7 @@ class NotificationsScreen extends ConsumerWidget {
                   onDelete: () async {
                     await repo.deleteNotification(item.id);
                     if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.notificationDeleted)),
-                    );
+                    AppNotice.show(context, l10n.notificationDeleted);
                   },
                   onTap: () async {
                     await repo.markRead(item.id);
@@ -125,8 +122,6 @@ class NotificationsScreen extends ConsumerWidget {
     if (confirmed != true || !context.mounted) return;
     await ref.read(notificationRepositoryProvider).clearNotifications(userId);
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.notificationsCleared)),
-    );
+    AppNotice.show(context, l10n.notificationsCleared);
   }
 }

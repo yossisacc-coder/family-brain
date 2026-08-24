@@ -74,6 +74,13 @@ void main() {
       expect(result.draft!.title.toLowerCase(), contains('homework'));
     });
 
+    test('keeps an attached photo on the draft for confirmation', () {
+      final parsed = FamilyBrainParser.parse('Finish the homework', now: now);
+      final draft = parsed.draft!.copyWith(imagePath: '/tmp/photo.jpg');
+      expect(draft.imagePath, '/tmp/photo.jpg');
+      expect(draft.notes, contains('/tmp/photo.jpg'));
+    });
+
     test('edit then save persists through the existing task repository', () async {
       final parsed = FamilyBrainParser.parse(
         'Tomorrow at 5 PM take David to the doctor.',

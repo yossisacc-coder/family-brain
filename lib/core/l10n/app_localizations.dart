@@ -1477,6 +1477,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ask'**
   String get askSubmit;
+
+  /// No description provided for @photoAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'Attached photo'**
+  String get photoAttached;
+
+  /// No description provided for @removePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get removePhoto;
+
+  /// No description provided for @listening.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening…'**
+  String get listening;
+
+  /// No description provided for @voiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input is not available on this device.'**
+  String get voiceUnavailable;
+
+  /// No description provided for @voiceDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone permission was denied.'**
+  String get voiceDenied;
+
+  /// No description provided for @voiceFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not understand the speech. Try again.'**
+  String get voiceFailed;
+
+  /// No description provided for @imageFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the photo picker.'**
+  String get imageFailed;
+
+  /// No description provided for @imageTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'That photo is too large. Choose a smaller one.'**
+  String get imageTooLarge;
 }
 
 class _AppLocalizationsDelegate

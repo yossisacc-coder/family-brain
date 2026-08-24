@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/theme/task_semantics.dart';
+import '../../core/widgets/app_notice.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../data/providers.dart';
 import '../../domain/models/task_item.dart';
@@ -216,13 +217,14 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
         }
       }
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.taskSaved)),
-      );
       if (existing == null) {
         context.go('/app/home');
+        AppNotice.showAfterNavigation(l10n.taskSaved);
       } else if (context.canPop()) {
         context.pop();
+        AppNotice.showAfterNavigation(l10n.taskSaved);
+      } else {
+        AppNotice.show(context, l10n.taskSaved);
       }
     } finally {
       if (mounted) setState(() => _loading = false);

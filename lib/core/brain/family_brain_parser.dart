@@ -13,6 +13,7 @@ class BrainDraft {
     this.assigneeName,
     this.listItems = const [],
     this.lowConfidence = false,
+    this.imagePath,
   });
 
   final InformationKind kind;
@@ -25,10 +26,13 @@ class BrainDraft {
   final String? assigneeName;
   final List<String> listItems;
   final bool lowConfidence;
+  final String? imagePath;
 
   String get notes {
-    if (listItems.isEmpty) return originalText;
-    return listItems.join('\n');
+    final base = listItems.isEmpty ? originalText : listItems.join('\n');
+    if (imagePath == null || imagePath!.isEmpty) return base;
+    if (base.trim().isEmpty) return imagePath!;
+    return '$base\n$imagePath';
   }
 
   BrainDraft copyWith({
@@ -44,6 +48,8 @@ class BrainDraft {
     bool clearAssignee = false,
     List<String>? listItems,
     bool? lowConfidence,
+    String? imagePath,
+    bool clearImage = false,
   }) {
     return BrainDraft(
       kind: kind ?? this.kind,
@@ -56,6 +62,7 @@ class BrainDraft {
       assigneeName: clearAssignee ? null : (assigneeName ?? this.assigneeName),
       listItems: listItems ?? this.listItems,
       lowConfidence: lowConfidence ?? this.lowConfidence,
+      imagePath: clearImage ? null : (imagePath ?? this.imagePath),
     );
   }
 
