@@ -9,6 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  tearDown(TaskTrash.dismiss);
+
   TaskItem sampleTask() {
     return TaskItem(
       id: 'task-1',
@@ -49,11 +51,6 @@ void main() {
         ),
       ),
     );
-
-    final bar = TaskTrash.undoSnackBar(l10n: l10n, onUndo: () {});
-    expect(bar.persist, isFalse);
-    expect(bar.action, isNull);
-    expect(bar.duration, TaskTrash.undoDuration);
 
     await tester.tap(find.text('Trash'));
     await tester.pumpAndSettle();
@@ -162,6 +159,64 @@ void main() {
       isFalse,
     );
     expect(await repo.watchTrashedTasks('family-1').first, isEmpty);
+    expect(find.text('Task moved to Trash'), findsNothing);
+  });
+
+  testWidgets('Undo overlay stays tappable above nav and Add task',
+      (tester) async {
+    late AppLocalizations l10n;
+    var undone = false;
+    var openedNewTask = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: Scaffold(
+            body: Builder(
+              builder: (context) {
+                l10n = AppLocalizations.of(context);
+                return FilledButton(
+                  onPressed: () {
+                    TaskTrash.showUndo(
+                      context: context,
+                      l10n: l10n,
+                      onUndo: () => undone = true,
+                    );
+                  },
+                  child: const Text('Trash'),
+                );
+              },
+            ),
+          ),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () => openedNewTask = true,
+            label: const Text('Add task'),
+          ),
+          bottomNavigationBar: NavigationBar(
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.home_outlined),
+                label: 'Home',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.check_circle_outline),
+                label: 'Tasks',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Trash'));
+    await tester.pump();
+    expect(find.text('Task moved to Trash'), findsOneWidget);
+
+    await tester.tap(find.byKey(TaskTrash.undoButtonKey));
+    await tester.pump();
+    expect(undone, isTrue);
+    expect(openedNewTask, isFalse);
     expect(find.text('Task moved to Trash'), findsNothing);
   });
 }

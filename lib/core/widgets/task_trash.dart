@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../routing/app_router.dart';
+import '../theme/app_colors.dart';
 import '../../data/providers.dart';
 import '../../domain/models/task_item.dart';
 
@@ -11,6 +14,9 @@ import '../../domain/models/task_item.dart';
 class TaskTrash {
   static const undoDuration = Duration(seconds: 3);
   static const undoButtonKey = Key('task-trash-undo');
+
+  static OverlayEntry? _entry;
+  static Timer? _timer;
 
   static Future<bool> confirm(
     BuildContext context,
@@ -36,61 +42,71 @@ class TaskTrash {
     return confirmed == true;
   }
 
-  static SnackBar undoSnackBar({
-    required AppLocalizations l10n,
-    required VoidCallback onUndo,
-  }) {
-    // Keep Undo inside [content] instead of [SnackBar.action]. In this Flutter
-    // version an action makes persist default to true, and nested shell/FAB
-    // layouts often steal taps from SnackBarAction.
-    return SnackBar(
-      content: Row(
-        children: [
-          Expanded(child: Text(l10n.taskMovedToTrash)),
-          TextButton(
-            key: undoButtonKey,
-            onPressed: onUndo,
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.white,
-              minimumSize: const Size(64, 40),
-              tapTargetSize: MaterialTapTargetSize.padded,
-            ),
-            child: Text(l10n.undo),
-          ),
-        ],
-      ),
-      duration: undoDuration,
-      persist: false,
-      behavior: SnackBarBehavior.floating,
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-    );
+  static void dismiss() {
+    _timer?.cancel();
+    _timer = null;
+    _entry?.remove();
+    _entry = null;
   }
 
-  static ScaffoldMessengerState? _messenger(BuildContext? context) {
-    return rootScaffoldMessengerKey.currentState ??
-        (context != null && context.mounted
-            ? ScaffoldMessenger.maybeOf(context)
-            : null);
-  }
-
+  /// Snackbar-like Undo toast on the root overlay so nested scaffolds, the
+  /// bottom nav, and the Add task button cannot cover or steal it.
   static void showUndo({
     BuildContext? context,
     required AppLocalizations l10n,
     required VoidCallback onUndo,
   }) {
-    final messenger = _messenger(context);
-    if (messenger == null) return;
-    messenger
-      ..clearSnackBars()
-      ..showSnackBar(
-        undoSnackBar(
-          l10n: l10n,
-          onUndo: () {
-            messenger.hideCurrentSnackBar();
-            onUndo();
-          },
-        ),
-      );
+    dismiss();
+    final overlay = rootNavigatorKey.currentState?.overlay ??
+        (context != null && context.mounted
+            ? Overlay.maybeOf(context, rootOverlay: true)
+            : null);
+    if (overlay == null) return;
+
+    late final OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (ctx) {
+        final bottomInset = MediaQuery.paddingOf(ctx).bottom;
+        return Positioned(
+          left: 16,
+          right: 16,
+          bottom: bottomInset + 88,
+          child: Material(
+            color: const Color(0xFF323232),
+            elevation: 8,
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 6, 4, 6),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.taskMovedToTrash,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  TextButton(
+                    key: undoButtonKey,
+                    onPressed: () {
+                      dismiss();
+                      onUndo();
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.primarySoft,
+                      minimumSize: const Size(72, 44),
+                    ),
+                    child: Text(l10n.undo),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+    _entry = entry;
+    overlay.insert(entry);
+    _timer = Timer(undoDuration, dismiss);
   }
 
   static Future<void> move({
@@ -105,24 +121,17 @@ class TaskTrash {
     await repo.moveToTrash(task);
     if (!context.mounted) return;
 
-    void restore() {
-      onUndo?.call();
-      repo.restoreTask(task);
-    }
-
+    showUndo(
+      context: context,
+      l10n: l10n,
+      onUndo: () {
+        onUndo?.call();
+        repo.restoreTask(task);
+      },
+    );
     if (returnToTasks) {
       context.go('/app/tasks');
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showUndo(
-          context: rootNavigatorKey.currentContext,
-          l10n: l10n,
-          onUndo: restore,
-        );
-      });
-      return;
     }
-
-    showUndo(context: context, l10n: l10n, onUndo: restore);
   }
 
   static Future<void> confirmAndMove({
