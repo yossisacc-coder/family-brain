@@ -92,6 +92,12 @@ class AppTheme {
           ),
         ),
       ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: AppColors.text,
+        contentTextStyle: textTheme.bodyMedium?.copyWith(color: Colors.white),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppColors.nav,
         indicatorColor: AppColors.primarySoft,

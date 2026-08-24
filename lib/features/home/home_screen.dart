@@ -156,7 +156,7 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 16),
                   Text(
                     l10n.jumpTo,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -164,31 +164,37 @@ class HomeScreen extends ConsumerWidget {
                         ),
                   ),
                   const SizedBox(height: 8),
-                  _JumpTile(
-                    icon: Icons.calendar_today_outlined,
-                    label: l10n.calendar,
-                    onTap: () => context.push('/tasks/calendar'),
-                  ),
-                  _JumpTile(
-                    icon: Icons.person_outline,
-                    label: l10n.mySpace,
-                    onTap: () => context.push('/space/personal'),
-                  ),
-                  _JumpTile(
-                    icon: Icons.groups_outlined,
-                    label: l10n.familySpace,
-                    onTap: () => context.push('/space/family'),
-                  ),
-                  _JumpTile(
-                    icon: Icons.notifications_outlined,
-                    label: l10n.notifications,
-                    badge: unread,
-                    onTap: () => context.push('/notifications'),
-                  ),
-                  _JumpTile(
-                    icon: Icons.settings_outlined,
-                    label: l10n.goToSettings,
-                    onTap: () => context.go('/app/settings'),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _JumpChip(
+                        icon: Icons.calendar_today_outlined,
+                        label: l10n.calendar,
+                        onTap: () => context.push('/tasks/calendar'),
+                      ),
+                      _JumpChip(
+                        icon: Icons.person_outline,
+                        label: l10n.mySpace,
+                        onTap: () => context.push('/space/personal'),
+                      ),
+                      _JumpChip(
+                        icon: Icons.groups_outlined,
+                        label: l10n.familySpace,
+                        onTap: () => context.push('/space/family'),
+                      ),
+                      _JumpChip(
+                        icon: Icons.notifications_outlined,
+                        label: l10n.notifications,
+                        badge: unread,
+                        onTap: () => context.push('/notifications'),
+                      ),
+                      _JumpChip(
+                        icon: Icons.settings_outlined,
+                        label: l10n.goToSettings,
+                        onTap: () => context.go('/app/settings'),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -256,8 +262,8 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-class _JumpTile extends StatelessWidget {
-  const _JumpTile({
+class _JumpChip extends StatelessWidget {
+  const _JumpChip({
     required this.icon,
     required this.label,
     required this.onTap,
@@ -271,35 +277,28 @@ class _JumpTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: ListTile(
-        onTap: onTap,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        tileColor: AppColors.card,
-        leading: Icon(icon, color: AppColors.primary),
-        title: Text(label),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (badge > 0)
-              CircleAvatar(
-                radius: 10,
-                backgroundColor: AppColors.info,
-                child: Text(
-                  '$badge',
-                  style: const TextStyle(color: Colors.white, fontSize: 11),
-                ),
+    return ActionChip(
+      avatar: Icon(icon, size: 18, color: AppColors.primary),
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label),
+          if (badge > 0) ...[
+            const SizedBox(width: 6),
+            CircleAvatar(
+              radius: 8,
+              backgroundColor: AppColors.info,
+              child: Text(
+                '$badge',
+                style: const TextStyle(color: Colors.white, fontSize: 10),
               ),
-            const SizedBox(width: 8),
-            const Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 16,
-              color: AppColors.textMuted,
             ),
           ],
-        ),
+        ],
       ),
+      onPressed: onTap,
+      backgroundColor: AppColors.card,
+      side: const BorderSide(color: AppColors.border),
     );
   }
 }
