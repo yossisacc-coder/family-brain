@@ -99,6 +99,9 @@ class TaskTrash {
       await request.repo.restoreTask(request.task);
     } finally {
       request.onUndo?.call();
+      // Keep the banner until this pointer gesture ends so chips cannot
+      // steal the tap and filter the list to Completed.
+      await Future<void>.delayed(const Duration(milliseconds: 50));
       dismiss(ref);
     }
   }
@@ -156,7 +159,7 @@ class TrashUndoBar extends ConsumerWidget {
       child: GestureDetector(
         key: TaskTrash.undoButtonKey,
         behavior: HitTestBehavior.opaque,
-        onTapDown: (_) => TaskTrash.undo(ref),
+        onTap: () => TaskTrash.undo(ref),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(

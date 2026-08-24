@@ -115,7 +115,8 @@ void main() {
     await tester.tap(find.text('Trash'));
     await tester.pump();
     await tester.tap(find.byKey(TaskTrash.undoButtonKey));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 80));
     expect(undone, isTrue);
     expect(find.text('Task moved to Trash'), findsNothing);
     expect(find.text('New task'), findsNothing);
@@ -161,7 +162,8 @@ void main() {
     expect(find.text('Task moved to Trash'), findsOneWidget);
 
     await tester.tap(find.byKey(TaskTrash.undoButtonKey));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 80));
 
     expect(
       (await repo.watchFamilyTasks('family-1').first).single.isTrashed,

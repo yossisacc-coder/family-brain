@@ -54,7 +54,9 @@ class LocalTaskRepository implements TaskRepository {
     map['updatedAt'] = DateTime.now().toIso8601String();
     _store.tasks[task.id] = map;
     await _store.commit();
-    return TaskItem.fromMap(map);
+    final restored = _store.tasks[task.id];
+    if (restored == null) return task.copyWith(clearDeleted: true);
+    return TaskItem.fromMap(restored);
   }
 
   @override

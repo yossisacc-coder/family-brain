@@ -128,17 +128,17 @@ class TaskItem {
 
   factory TaskItem.fromMap(Map<String, dynamic> map) {
     return TaskItem(
-      id: map['id'] as String,
-      familyId: map['familyId'] as String,
-      creatorId: map['creatorId'] as String,
+      id: map['id']?.toString() ?? '',
+      familyId: map['familyId']?.toString() ?? '',
+      creatorId: map['creatorId']?.toString() ?? '',
       title: map['title'] as String? ?? '',
       assigneeId: map['assigneeId'] as String?,
       type: TaskType.values.firstWhere(
         (value) => value.name == map['type'],
         orElse: () => TaskType.family,
       ),
-      dueDate: DateTime.tryParse(map['dueDate'] as String? ?? ''),
-      hasDueTime: map['hasDueTime'] as bool? ?? false,
+      dueDate: _parseDate(map['dueDate']),
+      hasDueTime: map['hasDueTime'] == true,
       priority: TaskPriority.values.firstWhere(
         (value) => value.name == map['priority'],
         orElse: () => TaskPriority.normal,
@@ -148,12 +148,18 @@ class TaskItem {
         (value) => value.name == map['status'],
         orElse: () => TaskStatus.pending,
       ),
-      createdAt: DateTime.tryParse(map['createdAt'] as String? ?? '') ??
-          DateTime.now(),
-      updatedAt: DateTime.tryParse(map['updatedAt'] as String? ?? '') ??
-          DateTime.now(),
-      reminderAt: DateTime.tryParse(map['reminderAt'] as String? ?? ''),
-      deletedAt: DateTime.tryParse(map['deletedAt'] as String? ?? ''),
+      createdAt: _parseDate(map['createdAt']) ?? DateTime.now(),
+      updatedAt: _parseDate(map['updatedAt']) ?? DateTime.now(),
+      reminderAt: _parseDate(map['reminderAt']),
+      deletedAt: _parseDate(map['deletedAt']),
     );
+  }
+
+  static DateTime? _parseDate(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    final text = value.toString();
+    if (text.isEmpty || text == 'null') return null;
+    return DateTime.tryParse(text);
   }
 }
