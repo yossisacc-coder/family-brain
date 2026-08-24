@@ -10,7 +10,7 @@
 import http from 'node:http';
 
 const PORT = Number(process.env.PORT || 8787);
-const MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
 
 const SYSTEM = `You are Family Brain. Turn messy family messages into structured items.
 Return ONLY JSON: {"clarification": null or string, "items": [...]}.
