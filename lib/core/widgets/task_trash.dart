@@ -23,7 +23,7 @@ final trashUndoRequestProvider = StateProvider<TrashUndoRequest?>(
 
 /// Shared trash/undo behavior for task list and details.
 class TaskTrash {
-  static const undoDuration = Duration(seconds: 3);
+  static const undoDuration = Duration(seconds: 8);
   static const slotHold = Duration(milliseconds: 50);
   static const undoButtonKey = Key('task-trash-undo');
 

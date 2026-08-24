@@ -52,7 +52,7 @@ void main() {
     );
   }
 
-  testWidgets('trash undo snackbar auto-dismisses after about 3 seconds', (
+  testWidgets('trash undo snackbar auto-dismisses after the undo window', (
     tester,
   ) async {
     final repo = LocalTaskRepository(LocalJsonStore(persist: false));
