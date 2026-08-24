@@ -675,4 +675,61 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get phoneNotShared => 'מספר הטלפון אינו משותף';
+
+  @override
+  String get confirm => 'אישור';
+
+  @override
+  String get brainUnderstood => 'Family Brain הבין';
+
+  @override
+  String get brainUnclear => 'Family Brain לא בטוח. בדקו לפני השמירה.';
+
+  @override
+  String get emptyBrainInput => 'כתבו משהו ל־Family Brain קודם.';
+
+  @override
+  String get brainSaved => 'נשמר ב־Family Brain';
+
+  @override
+  String get brainType => 'סוג';
+
+  @override
+  String get brainDate => 'תאריך';
+
+  @override
+  String get brainTime => 'שעה';
+
+  @override
+  String get brainPerson => 'אדם';
+
+  @override
+  String get kindTask => 'משימה';
+
+  @override
+  String get kindEvent => 'אירוע';
+
+  @override
+  String get kindReminder => 'תזכורת';
+
+  @override
+  String get kindList => 'רשימה';
+
+  @override
+  String get listItems => 'פריטים';
+
+  @override
+  String get listItemsHint => 'פריט אחד בכל שורה';
+
+  @override
+  String get askFamilyBrain => 'שאלו את Family Brain';
+
+  @override
+  String get askFamilyBrainHint => 'שאלו על משימות, רשימות או מה שקורה.';
+
+  @override
+  String get askExample => 'אילו משימות להיום?';
+
+  @override
+  String get askSubmit => 'שאלה';
 }

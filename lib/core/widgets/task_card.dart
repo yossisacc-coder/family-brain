@@ -96,6 +96,16 @@ class TaskCard extends StatelessWidget {
                             icon: Icons.event_outlined,
                             color: task.isOverdue() ? AppColors.urgent : AppColors.textMuted,
                           ),
+                        if (task.kind != InformationKind.task)
+                          _MetaChip(
+                            label: _kindLabel(l10n, task.kind),
+                            icon: switch (task.kind) {
+                              InformationKind.event => Icons.event_outlined,
+                              InformationKind.reminder => Icons.alarm_outlined,
+                              InformationKind.list => Icons.list_alt_rounded,
+                              InformationKind.task => Icons.task_alt_rounded,
+                            },
+                          ),
                         if (assignee != null)
                           _MetaChip(
                             label: assignee.name,
@@ -152,6 +162,15 @@ class TaskCard extends StatelessWidget {
     if (due == today) return l10n.today;
     if (due == today.add(const Duration(days: 1))) return l10n.dueTomorrow;
     return '${due.day}/${due.month}';
+  }
+
+  String _kindLabel(AppLocalizations l10n, InformationKind kind) {
+    return switch (kind) {
+      InformationKind.task => l10n.kindTask,
+      InformationKind.event => l10n.kindEvent,
+      InformationKind.reminder => l10n.kindReminder,
+      InformationKind.list => l10n.kindList,
+    };
   }
 }
 

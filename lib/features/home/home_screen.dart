@@ -3,6 +3,7 @@ import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/brain/family_brain_parser.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radii.dart';
 import '../../core/theme/app_spacing.dart';
@@ -171,7 +172,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   const SizedBox(height: AppSpacing.section),
                   _ComposerCard(
                     controller: _composer,
-                    onSubmit: () => _submitComposer(context, l10n),
+                    onSubmit: () => _submitComposer(context, l10n, members),
+                    onAskAi: () => context.push('/brain/ask'),
                     onComingSoon: () => _comingSoon(context, l10n),
                   ),
                   const SizedBox(height: AppSpacing.section),
@@ -253,10 +255,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ..showSnackBar(SnackBar(content: Text(l10n.comingSoon)));
   }
 
-  void _submitComposer(BuildContext context, AppLocalizations l10n) {
+  void _submitComposer(
+    BuildContext context,
+    AppLocalizations l10n,
+    List<AppUser> members,
+  ) {
     final text = _composer.text.trim();
-    context.push('/tasks/new', extra: {'title': text});
+    if (text.isEmpty) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(l10n.emptyBrainInput)));
+      return;
+    }
+    final result = FamilyBrainParser.parse(
+      text,
+      now: DateTime.now(),
+      members: members,
+    );
+    if (!result.isOk || result.draft == null) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(l10n.brainUnclear)));
+      return;
+    }
     _composer.clear();
+    context.push('/brain/confirm', extra: result.draft);
   }
 
   String _greeting(AppLocalizations l10n, String name) {
@@ -272,11 +295,13 @@ class _ComposerCard extends StatelessWidget {
     required this.controller,
     required this.onSubmit,
     required this.onComingSoon,
+    required this.onAskAi,
   });
 
   final TextEditingController controller;
   final VoidCallback onSubmit;
   final VoidCallback onComingSoon;
+  final VoidCallback onAskAi;
 
   @override
   Widget build(BuildContext context) {
@@ -334,7 +359,7 @@ class _ComposerCard extends StatelessWidget {
               ),
               IconButton(
                 tooltip: l10n.askAi,
-                onPressed: onComingSoon,
+                onPressed: onAskAi,
                 icon: const Icon(Icons.auto_awesome_outlined),
               ),
               const Spacer(),

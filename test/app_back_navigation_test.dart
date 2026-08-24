@@ -71,6 +71,14 @@ void main() {
         AppBackNavigation.fallbackLocation('/family/members/demo-user-maya'),
         '/app/family',
       );
+      expect(
+        AppBackNavigation.fallbackLocation('/brain/confirm'),
+        '/app/home',
+      );
+      expect(
+        AppBackNavigation.fallbackLocation('/brain/ask'),
+        '/app/home',
+      );
     });
   });
 

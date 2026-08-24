@@ -48,7 +48,9 @@ class AppBackNavigation {
     }
     if (path == '/tasks/calendar' ||
         path == '/space/personal' ||
-        path == '/space/family') {
+        path == '/space/family' ||
+        path == '/brain/confirm' ||
+        path == '/brain/ask') {
       return '/app/home';
     }
     if (path == '/tasks/trash') {

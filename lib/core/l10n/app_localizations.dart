@@ -1363,6 +1363,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Phone number is not shared'**
   String get phoneNotShared;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// No description provided for @brainUnderstood.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Brain understood'**
+  String get brainUnderstood;
+
+  /// No description provided for @brainUnclear.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Brain is not sure. Review this before saving.'**
+  String get brainUnclear;
+
+  /// No description provided for @emptyBrainInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Type something for Family Brain first.'**
+  String get emptyBrainInput;
+
+  /// No description provided for @brainSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to Family Brain'**
+  String get brainSaved;
+
+  /// No description provided for @brainType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get brainType;
+
+  /// No description provided for @brainDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get brainDate;
+
+  /// No description provided for @brainTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get brainTime;
+
+  /// No description provided for @brainPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Person'**
+  String get brainPerson;
+
+  /// No description provided for @kindTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Task'**
+  String get kindTask;
+
+  /// No description provided for @kindEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Event'**
+  String get kindEvent;
+
+  /// No description provided for @kindReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder'**
+  String get kindReminder;
+
+  /// No description provided for @kindList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get kindList;
+
+  /// No description provided for @listItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get listItems;
+
+  /// No description provided for @listItemsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'One item per line'**
+  String get listItemsHint;
+
+  /// No description provided for @askFamilyBrain.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Family Brain'**
+  String get askFamilyBrain;
+
+  /// No description provided for @askFamilyBrainHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about tasks, lists, or what is happening.'**
+  String get askFamilyBrainHint;
+
+  /// No description provided for @askExample.
+  ///
+  /// In en, this message translates to:
+  /// **'What tasks are due today?'**
+  String get askExample;
+
+  /// No description provided for @askSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask'**
+  String get askSubmit;
 }
 
 class _AppLocalizationsDelegate

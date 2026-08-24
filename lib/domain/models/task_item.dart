@@ -4,6 +4,10 @@ enum TaskPriority { normal, high, urgent }
 
 enum TaskStatus { pending, inProgress, completed }
 
+/// Structured information Family Brain can save. Stored on [TaskItem]
+/// so existing task/calendar/today surfaces keep working.
+enum InformationKind { task, event, reminder, list }
+
 class TaskItem {
   const TaskItem({
     required this.id,
@@ -15,6 +19,7 @@ class TaskItem {
     required this.status,
     required this.createdAt,
     required this.updatedAt,
+    this.kind = InformationKind.task,
     this.assigneeId,
     this.dueDate,
     this.hasDueTime = false,
@@ -27,6 +32,7 @@ class TaskItem {
   final String familyId;
   final String creatorId;
   final String title;
+  final InformationKind kind;
   final String? assigneeId;
   final TaskType type;
   final DateTime? dueDate;
@@ -72,6 +78,7 @@ class TaskItem {
 
   TaskItem copyWith({
     String? title,
+    InformationKind? kind,
     String? assigneeId,
     bool clearAssignee = false,
     TaskType? type,
@@ -92,6 +99,7 @@ class TaskItem {
       familyId: familyId,
       creatorId: creatorId,
       title: title ?? this.title,
+      kind: kind ?? this.kind,
       assigneeId: clearAssignee ? null : (assigneeId ?? this.assigneeId),
       type: type ?? this.type,
       dueDate: clearDueDate ? null : (dueDate ?? this.dueDate),
@@ -112,6 +120,7 @@ class TaskItem {
       'familyId': familyId,
       'creatorId': creatorId,
       'title': title,
+      'kind': kind.name,
       'assigneeId': assigneeId,
       'type': type.name,
       'dueDate': dueDate?.toIso8601String(),
@@ -132,6 +141,10 @@ class TaskItem {
       familyId: map['familyId']?.toString() ?? '',
       creatorId: map['creatorId']?.toString() ?? '',
       title: map['title'] as String? ?? '',
+      kind: InformationKind.values.firstWhere(
+        (value) => value.name == map['kind'],
+        orElse: () => InformationKind.task,
+      ),
       assigneeId: map['assigneeId'] as String?,
       type: TaskType.values.firstWhere(
         (value) => value.name == map['type'],
