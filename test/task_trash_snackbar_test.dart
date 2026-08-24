@@ -244,7 +244,7 @@ void main() {
       );
       expect(find.text('Task moved to Trash'), findsOneWidget);
 
-      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pump(const Duration(milliseconds: 500));
       expect(find.text('Task moved to Trash'), findsOneWidget);
       await gesture.up();
       await tester.pump();

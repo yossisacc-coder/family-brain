@@ -24,13 +24,16 @@ final trashUndoRequestProvider = StateProvider<TrashUndoRequest?>(
 /// Shared trash/undo behavior for task list and details.
 class TaskTrash {
   static const undoDuration = Duration(seconds: 3);
-  static const slotHold = Duration(milliseconds: 400);
+  static const slotHold = Duration(milliseconds: 50);
   static const undoButtonKey = Key('task-trash-undo');
 
   static Timer? _timer;
+  static Timer? _releaseTimer;
   static StateController<TrashUndoRequest?>? _controller;
   static TrashUndoRequest? _pending;
   static bool _busy = false;
+  static int? _gesturePointer;
+  static bool _undoCompleted = false;
 
   static Future<bool> confirm(
     BuildContext context,
@@ -59,8 +62,12 @@ class TaskTrash {
   static void dismiss([WidgetRef? ref]) {
     _timer?.cancel();
     _timer = null;
+    _releaseTimer?.cancel();
+    _releaseTimer = null;
     _pending = null;
     _busy = false;
+    _gesturePointer = null;
+    _undoCompleted = false;
     final controller =
         ref?.read(trashUndoRequestProvider.notifier) ?? _controller;
     if (controller != null && controller.mounted) {
@@ -76,7 +83,10 @@ class TaskTrash {
     VoidCallback? onUndo,
   }) {
     _timer?.cancel();
+    _releaseTimer?.cancel();
     _busy = false;
+    _gesturePointer = null;
+    _undoCompleted = false;
     final request = TrashUndoRequest(task: task, repo: repo, onUndo: onUndo);
     _pending = request;
     final controller = ref.read(trashUndoRequestProvider.notifier);
@@ -89,6 +99,23 @@ class TaskTrash {
         controller.state = null;
       }
     });
+  }
+
+  static void beginUndoGesture(int pointer) {
+    _gesturePointer = pointer;
+  }
+
+  static void endUndoGesture(int pointer, [WidgetRef? ref]) {
+    if (_gesturePointer != null && _gesturePointer != pointer) return;
+    _gesturePointer = null;
+    if (_undoCompleted) {
+      _scheduleDismiss(ref);
+    }
+  }
+
+  static void _scheduleDismiss([WidgetRef? ref]) {
+    _releaseTimer?.cancel();
+    _releaseTimer = Timer(slotHold, () => dismiss(ref));
   }
 
   static Future<void> undo([WidgetRef? ref]) async {
@@ -104,10 +131,11 @@ class TaskTrash {
       // Restore is best-effort; still unhide the list row.
     } finally {
       request.onUndo?.call();
-      // Keep the AppBar slot occupied until this pointer gesture ends so
-      // filter chips cannot slide up under the same tap.
-      await Future<void>.delayed(slotHold);
-      dismiss(ref);
+      _undoCompleted = true;
+      // Do not collapse the banner while the same pointer is still down.
+      if (_gesturePointer == null) {
+        _scheduleDismiss(ref);
+      }
     }
   }
 
@@ -157,32 +185,44 @@ class TrashUndoBar extends ConsumerWidget {
     final request = ref.watch(trashUndoRequestProvider);
     if (request == null) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context);
-    return Material(
-      color: const Color(0xFF323232),
-      elevation: 6,
-      borderRadius: BorderRadius.circular(12),
-      child: Listener(
-        key: TaskTrash.undoButtonKey,
-        behavior: HitTestBehavior.opaque,
-        onPointerDown: (_) => TaskTrash.undo(ref),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.taskMovedToTrash,
-                  style: const TextStyle(color: Colors.white),
+    return Listener(
+      onPointerDown: (event) {
+        TaskTrash.beginUndoGesture(event.pointer);
+        TaskTrash.undo(ref);
+      },
+      onPointerUp: (event) => TaskTrash.endUndoGesture(event.pointer, ref),
+      onPointerCancel: (event) => TaskTrash.endUndoGesture(event.pointer, ref),
+      child: Material(
+        color: const Color(0xFF323232),
+        elevation: 6,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          key: TaskTrash.undoButtonKey,
+          onTap: () => TaskTrash.undo(ref),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.taskMovedToTrash,
+                    style: const TextStyle(color: Colors.white),
+                  ),
                 ),
-              ),
-              Text(
-                l10n.undo,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
+                Semantics(
+                  button: true,
+                  label: l10n.undo,
+                  child: Text(
+                    l10n.undo,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
