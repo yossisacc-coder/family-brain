@@ -10,27 +10,27 @@ import '../../domain/models/task_item.dart';
 import '../../domain/repositories/task_repository.dart';
 
 class TrashUndoRequest {
-  const TrashUndoRequest({
-    required this.task,
-    required this.repo,
-    this.onUndo,
-  });
+  const TrashUndoRequest({required this.task, required this.repo, this.onUndo});
 
   final TaskItem task;
   final TaskRepository repo;
   final VoidCallback? onUndo;
 }
 
-final trashUndoRequestProvider = StateProvider<TrashUndoRequest?>((ref) => null);
+final trashUndoRequestProvider = StateProvider<TrashUndoRequest?>(
+  (ref) => null,
+);
 
 /// Shared trash/undo behavior for task list and details.
 class TaskTrash {
   static const undoDuration = Duration(seconds: 3);
+  static const slotHold = Duration(milliseconds: 400);
   static const undoButtonKey = Key('task-trash-undo');
 
   static Timer? _timer;
   static StateController<TrashUndoRequest?>? _controller;
   static TrashUndoRequest? _pending;
+  static bool _busy = false;
 
   static Future<bool> confirm(
     BuildContext context,
@@ -60,6 +60,7 @@ class TaskTrash {
     _timer?.cancel();
     _timer = null;
     _pending = null;
+    _busy = false;
     final controller =
         ref?.read(trashUndoRequestProvider.notifier) ?? _controller;
     if (controller != null && controller.mounted) {
@@ -75,6 +76,7 @@ class TaskTrash {
     VoidCallback? onUndo,
   }) {
     _timer?.cancel();
+    _busy = false;
     final request = TrashUndoRequest(task: task, repo: repo, onUndo: onUndo);
     _pending = request;
     final controller = ref.read(trashUndoRequestProvider.notifier);
@@ -90,18 +92,21 @@ class TaskTrash {
   }
 
   static Future<void> undo([WidgetRef? ref]) async {
-    final request = _pending;
-    if (request == null) return;
+    final request = _pending ?? ref?.read(trashUndoRequestProvider);
+    if (request == null || _busy) return;
+    _busy = true;
     _pending = null;
     _timer?.cancel();
     _timer = null;
     try {
-      await request.repo.restoreTask(request.task);
+      await request.repo.restoreTask(request.task.copyWith(clearDeleted: true));
+    } catch (_) {
+      // Restore is best-effort; still unhide the list row.
     } finally {
       request.onUndo?.call();
-      // Keep the banner until this pointer gesture ends so chips cannot
-      // steal the tap and filter the list to Completed.
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      // Keep the AppBar slot occupied until this pointer gesture ends so
+      // filter chips cannot slide up under the same tap.
+      await Future<void>.delayed(slotHold);
       dismiss(ref);
     }
   }
@@ -156,10 +161,10 @@ class TrashUndoBar extends ConsumerWidget {
       color: const Color(0xFF323232),
       elevation: 6,
       borderRadius: BorderRadius.circular(12),
-      child: GestureDetector(
+      child: Listener(
         key: TaskTrash.undoButtonKey,
         behavior: HitTestBehavior.opaque,
-        onTap: () => TaskTrash.undo(ref),
+        onPointerDown: (_) => TaskTrash.undo(ref),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
