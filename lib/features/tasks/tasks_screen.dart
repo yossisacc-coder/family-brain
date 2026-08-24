@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,6 +28,40 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   TaskType? _type;
   final _hiddenIds = <String>{};
   bool _holdUndoSlot = false;
+  Timer? _holdTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_onPointer);
+  }
+
+  @override
+  void dispose() {
+    _holdTimer?.cancel();
+    GestureBinding.instance.pointerRouter.removeGlobalRoute(_onPointer);
+    super.dispose();
+  }
+
+  void _onPointer(PointerEvent event) {
+    if (event is PointerUpEvent || event is PointerCancelEvent) {
+      _releaseChipHold();
+    }
+  }
+
+  void _armChipHold() {
+    _holdTimer?.cancel();
+    if (!mounted) return;
+    setState(() => _holdUndoSlot = true);
+    _holdTimer = Timer(const Duration(seconds: 5), _releaseChipHold);
+  }
+
+  void _releaseChipHold() {
+    _holdTimer?.cancel();
+    _holdTimer = null;
+    if (!_holdUndoSlot || !mounted) return;
+    setState(() => _holdUndoSlot = false);
+  }
 
   void _hideForUndo(String taskId) {
     setState(() => _hiddenIds.add(taskId));
@@ -34,14 +71,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     if (!mounted) return;
     setState(() {
       _hiddenIds.remove(taskId);
-      _holdUndoSlot = true;
       _status = null;
       _type = null;
       _memberId = null;
     });
-    Future<void>.delayed(TaskTrash.slotHold, () {
-      if (mounted) setState(() => _holdUndoSlot = false);
-    });
+    _armChipHold();
   }
 
   Future<void> _deleteFromList(TaskItem task, AppLocalizations l10n) async {
@@ -66,38 +100,48 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     final pendingUndo = ref.watch(trashUndoRequestProvider) != null;
     final occupyUndoSlot = pendingUndo || _holdUndoSlot;
 
+    ref.listen<TrashUndoRequest?>(trashUndoRequestProvider, (previous, next) {
+      if (previous != null && next == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _armChipHold();
+        });
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.tasks),
-        actions: [
-          if (pendingUndo)
-            TextButton(
-              key: const Key('task-trash-undo-appbar'),
-              onPressed: () => TaskTrash.undo(ref),
-              child: Text(
-                l10n.undo,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                  fontWeight: FontWeight.w800,
+        actions: pendingUndo
+            ? [
+                TextButton(
+                  key: const Key('task-trash-undo-appbar'),
+                  onPressed: () => TaskTrash.undo(ref),
+                  child: Text(
+                    l10n.undo,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          IconButton(
-            tooltip: l10n.calendar,
-            onPressed: () => context.push('/tasks/calendar'),
-            icon: const Icon(Icons.calendar_today_outlined),
-          ),
-          IconButton(
-            tooltip: l10n.trash,
-            onPressed: () => context.push('/tasks/trash'),
-            icon: const Icon(Icons.delete_outline),
-          ),
-          IconButton(
-            tooltip: l10n.addTask,
-            onPressed: () => context.push('/tasks/new'),
-            icon: const Icon(Icons.add_rounded),
-          ),
-        ],
+              ]
+            : [
+                IconButton(
+                  tooltip: l10n.calendar,
+                  onPressed: () => context.push('/tasks/calendar'),
+                  icon: const Icon(Icons.calendar_today_outlined),
+                ),
+                IconButton(
+                  tooltip: l10n.trash,
+                  onPressed: () => context.push('/tasks/trash'),
+                  icon: const Icon(Icons.delete_outline),
+                ),
+                IconButton(
+                  tooltip: l10n.addTask,
+                  onPressed: () => context.push('/tasks/new'),
+                  icon: const Icon(Icons.add_rounded),
+                ),
+              ],
       ),
       body: Column(
         children: [
