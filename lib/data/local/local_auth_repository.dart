@@ -128,6 +128,8 @@ class LocalAuthRepository implements AuthRepository {
       assigneeId: alex.id,
       type: TaskType.family,
       dueDate: DateTime(now.year, now.month, now.day).add(const Duration(days: 1)),
+      hasDueTime: false,
+      reminderAt: DateTime(now.year, now.month, now.day, 18).add(const Duration(days: 1)),
       priority: TaskPriority.urgent,
       notes: 'Demo task so Home and Tasks have something to open.',
       status: TaskStatus.pending,
@@ -146,6 +148,19 @@ class LocalAuthRepository implements AuthRepository {
       createdAt: now.subtract(const Duration(days: 1)),
       updatedAt: now.subtract(const Duration(hours: 5)),
     );
+    final mayaPersonal = TaskItem(
+      id: 'demo-task-maya-personal',
+      familyId: family.id,
+      creatorId: maya.id,
+      title: 'Write in journal',
+      assigneeId: maya.id,
+      type: TaskType.personal,
+      priority: TaskPriority.high,
+      notes: 'Private to Maya — not shown in Family Space.',
+      status: TaskStatus.pending,
+      createdAt: now.subtract(const Duration(hours: 6)),
+      updatedAt: now.subtract(const Duration(hours: 6)),
+    );
     final assigned = AppNotification(
       id: 'demo-notif-assigned',
       userId: alex.id,
@@ -163,6 +178,7 @@ class LocalAuthRepository implements AuthRepository {
     _store.families[family.id] = family.toMap();
     _store.tasks[milk.id] = milk.toMap();
     _store.tasks[grandma.id] = grandma.toMap();
+    _store.tasks[mayaPersonal.id] = mayaPersonal.toMap();
     _store.notifications[assigned.id] = assigned.toMap();
   }
 

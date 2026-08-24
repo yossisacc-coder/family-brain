@@ -42,12 +42,15 @@ class HomeScreen extends ConsumerWidget {
             retryLabel: l10n.retry,
             onRetry: () => ref.invalidate(familyTasksProvider),
           ),
-          data: (tasks) {
+          data: (all) {
             final family = familyAsync.valueOrNull;
             final members = membersAsync.valueOrNull ?? const [];
+            final tasks =
+                all.where((task) => task.isVisibleTo(user.id)).toList();
             final open = tasks.where((task) => task.isOpen).toList();
             final urgent = tasks.where((task) => task.isUrgent).toList();
-            final mine = open.where((task) => task.assigneeId == user.id).toList();
+            final mine =
+                open.where((task) => task.assigneeId == user.id).toList();
             final done = tasks
                 .where((task) => task.status == TaskStatus.completed)
                 .take(3)
@@ -55,7 +58,9 @@ class HomeScreen extends ConsumerWidget {
             final preview = [
               ...urgent,
               ...mine.where((task) => !urgent.contains(task)),
-              ...open.where((task) => !urgent.contains(task) && !mine.contains(task)),
+              ...open.where(
+                (task) => !urgent.contains(task) && !mine.contains(task),
+              ),
             ].take(4).toList();
 
             return SafeArea(
@@ -99,7 +104,7 @@ class HomeScreen extends ConsumerWidget {
                         value: mine.length,
                         color: AppColors.success,
                         background: AppColors.successSoft,
-                        onTap: () => context.go('/app/tasks'),
+                        onTap: () => context.push('/space/personal'),
                       ),
                     ],
                   ),
@@ -109,7 +114,7 @@ class HomeScreen extends ConsumerWidget {
                       StatCard(
                         label: l10n.recentlyCompleted,
                         value: done.length,
-                        color: AppColors.text,
+                        color: AppColors.completed,
                         background: AppColors.card,
                         onTap: () => context.go('/app/tasks'),
                       ),
@@ -152,15 +157,49 @@ class HomeScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 22),
+                  Text(
+                    l10n.jumpTo,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  _JumpTile(
+                    icon: Icons.calendar_today_outlined,
+                    label: l10n.calendar,
+                    onTap: () => context.push('/tasks/calendar'),
+                  ),
+                  _JumpTile(
+                    icon: Icons.person_outline,
+                    label: l10n.mySpace,
+                    onTap: () => context.push('/space/personal'),
+                  ),
+                  _JumpTile(
+                    icon: Icons.groups_outlined,
+                    label: l10n.familySpace,
+                    onTap: () => context.push('/space/family'),
+                  ),
+                  _JumpTile(
+                    icon: Icons.notifications_outlined,
+                    label: l10n.notifications,
+                    badge: unread,
+                    onTap: () => context.push('/notifications'),
+                  ),
+                  _JumpTile(
+                    icon: Icons.settings_outlined,
+                    label: l10n.goToSettings,
+                    onTap: () => context.go('/app/settings'),
+                  ),
+                  const SizedBox(height: 16),
                   Row(
                     children: [
                       Expanded(
                         child: Text(
                           l10n.upcomingTasks,
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                  ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w800),
                         ),
                       ),
                       TextButton(
@@ -214,5 +253,53 @@ class HomeScreen extends ConsumerWidget {
     if (hour < 12) return l10n.greetingMorning(name);
     if (hour < 17) return l10n.greetingAfternoon(name);
     return l10n.greetingEvening(name);
+  }
+}
+
+class _JumpTile extends StatelessWidget {
+  const _JumpTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.badge = 0,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final int badge;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: ListTile(
+        onTap: onTap,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        tileColor: AppColors.card,
+        leading: Icon(icon, color: AppColors.primary),
+        title: Text(label),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (badge > 0)
+              CircleAvatar(
+                radius: 10,
+                backgroundColor: AppColors.info,
+                child: Text(
+                  '$badge',
+                  style: const TextStyle(color: Colors.white, fontSize: 11),
+                ),
+              ),
+            const SizedBox(width: 8),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 16,
+              color: AppColors.textMuted,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

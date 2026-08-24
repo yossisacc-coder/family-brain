@@ -39,6 +39,18 @@ class LocalNotificationRepository implements NotificationRepository {
     await _store.commit();
   }
 
+  @override
+  Future<void> deleteNotification(String notificationId) async {
+    _store.notifications.remove(notificationId);
+    await _store.commit();
+  }
+
+  @override
+  Future<void> clearNotifications(String userId) async {
+    _store.notifications.removeWhere((_, data) => data['userId'] == userId);
+    await _store.commit();
+  }
+
   List<AppNotification> _list(String userId) {
     return _store.notifications.values
         .map(AppNotification.fromMap)

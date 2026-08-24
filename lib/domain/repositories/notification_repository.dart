@@ -8,4 +8,8 @@ abstract class NotificationRepository {
   Future<void> markRead(String notificationId);
 
   Future<void> markAllRead(String userId);
+
+  Future<void> deleteNotification(String notificationId);
+
+  Future<void> clearNotifications(String userId);
 }

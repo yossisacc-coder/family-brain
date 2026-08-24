@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/task_semantics.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
 import '../../core/widgets/primary_button.dart';
@@ -19,132 +21,181 @@ class TaskDetailsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final tasksAsync = ref.watch(familyTasksProvider);
+    final trashAsync = ref.watch(trashedTasksProvider);
     final members = ref.watch(familyMembersProvider).valueOrNull ?? const [];
 
-    return tasksAsync.when(
-      loading: () => Scaffold(body: LoadingView(label: l10n.loading)),
-      error: (_, _) => Scaffold(
-        body: ErrorView(
-          message: l10n.errorUnavailable,
-          retryLabel: l10n.retry,
-          onRetry: () => ref.invalidate(familyTasksProvider),
-        ),
-      ),
-      data: (tasks) {
-        final task = tasks.where((item) => item.id == taskId).firstOrNull;
-        if (task == null) {
-          return Scaffold(
-            appBar: AppBar(title: Text(l10n.taskDetails)),
-            body: Center(child: Text(l10n.errorGeneric)),
-          );
-        }
-        final assignee =
-            members.where((member) => member.id == task.assigneeId).firstOrNull;
-
+    final task = [
+      ...?tasksAsync.valueOrNull,
+      ...?trashAsync.valueOrNull,
+    ].where((item) => item.id == taskId).firstOrNull;
+    if (task == null) {
+      if (tasksAsync.isLoading || trashAsync.isLoading) {
+        return Scaffold(body: LoadingView(label: l10n.loading));
+      }
+      if (tasksAsync.hasError || trashAsync.hasError) {
         return Scaffold(
-          appBar: AppBar(
-            title: Text(l10n.taskDetails),
-            actions: [
-              IconButton(
-                onPressed: () => context.push('/tasks/${task.id}/edit'),
-                icon: const Icon(Icons.edit_outlined),
-              ),
-            ],
-          ),
-          body: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-            children: [
-              Text(
-                task.title,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-              ),
-              const SizedBox(height: 16),
-              _row(context, l10n.changeStatus, _status(l10n, task.status)),
-              _row(
-                context,
-                l10n.assignee,
-                assignee?.name ?? l10n.unassigned,
-              ),
-              _row(
-                context,
-                l10n.dueDate,
-                task.dueDate == null
-                    ? l10n.noDueDate
-                    : '${task.dueDate!.day}/${task.dueDate!.month}/${task.dueDate!.year}',
-              ),
-              _row(
-                context,
-                l10n.priority,
-                task.priority == TaskPriority.urgent ? l10n.urgent : l10n.normal,
-              ),
-              _row(
-                context,
-                l10n.taskType,
-                task.type == TaskType.personal ? l10n.personal : l10n.familyType,
-              ),
-              if (task.notes != null && task.notes!.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(l10n.notes, style: Theme.of(context).textTheme.titleSmall),
-                const SizedBox(height: 6),
-                Text(task.notes!),
-              ],
-              const SizedBox(height: 24),
-              Text(l10n.changeStatus, style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                children: TaskStatus.values.map((status) {
-                  return ChoiceChip(
-                    label: Text(_status(l10n, status)),
-                    selected: task.status == status,
-                    onSelected: (_) => _updateStatus(
-                      ref,
-                      task,
-                      status,
-                      l10n,
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 20),
-              if (task.status != TaskStatus.completed)
-                PrimaryButton(
-                  label: l10n.markCompleted,
-                  icon: Icons.check_rounded,
-                  onPressed: () => _updateStatus(
-                    ref,
-                    task,
-                    TaskStatus.completed,
-                    l10n,
-                  ),
-                ),
-              const SizedBox(height: 10),
-              OutlinedButton(
-                onPressed: () => context.push('/tasks/${task.id}/edit'),
-                child: Text(l10n.edit),
-              ),
-            ],
+          body: ErrorView(
+            message: l10n.errorUnavailable,
+            retryLabel: l10n.retry,
+            onRetry: () {
+              ref.invalidate(familyTasksProvider);
+              ref.invalidate(trashedTasksProvider);
+            },
           ),
         );
-      },
+      }
+      return Scaffold(
+        appBar: AppBar(title: Text(l10n.taskDetails)),
+        body: Center(child: Text(l10n.errorGeneric)),
+      );
+    }
+    final assignee =
+        members.where((member) => member.id == task.assigneeId).firstOrNull;
+    final creator =
+        members.where((member) => member.id == task.creatorId).firstOrNull;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.taskDetails),
+        actions: [
+          if (!task.isTrashed)
+            IconButton(
+              tooltip: l10n.edit,
+              onPressed: () => context.push('/tasks/${task.id}/edit'),
+              icon: const Icon(Icons.edit_outlined),
+            ),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+        children: [
+          Text(
+            task.title,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+          if (task.notes != null && task.notes!.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              task.notes!,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    height: 1.4,
+                  ),
+            ),
+          ],
+          const SizedBox(height: 18),
+          _labeledValue(
+            context,
+            l10n.changeStatus,
+            TaskSemantics.statusLabel(l10n, task.status),
+            icon: TaskSemantics.statusIcon(task.status),
+            color: TaskSemantics.statusColor(task.status),
+          ),
+          _labeledValue(
+            context,
+            l10n.priority,
+            TaskSemantics.priorityLabel(l10n, task.priority),
+            icon: TaskSemantics.priorityIcon(task.priority),
+            color: TaskSemantics.priorityColor(task.priority),
+          ),
+          _labeledValue(
+            context,
+            l10n.dueDate,
+            task.dueDate == null
+                ? l10n.noDueDate
+                : (task.hasDueTime
+                        ? DateFormat.yMMMd().add_jm()
+                        : DateFormat.yMMMd())
+                    .format(task.dueDate!.toLocal()),
+            icon: Icons.event_outlined,
+          ),
+          _labeledValue(
+            context,
+            l10n.assignee,
+            assignee?.name ?? l10n.unassigned,
+            icon: Icons.person_outline,
+          ),
+          _labeledValue(
+            context,
+            l10n.reminder,
+            task.reminderAt == null
+                ? l10n.noReminder
+                : DateFormat.yMMMd().add_jm().format(task.reminderAt!),
+            icon: Icons.alarm_outlined,
+          ),
+          _labeledValue(
+            context,
+            l10n.taskType,
+            task.type == TaskType.personal ? l10n.personal : l10n.familyType,
+            icon: task.type == TaskType.personal
+                ? Icons.person_outline
+                : Icons.groups_outlined,
+          ),
+          _labeledValue(
+            context,
+            l10n.createdBy,
+            '${creator?.name ?? l10n.unassigned} · ${DateFormat.yMMMd().format(task.createdAt)}',
+          ),
+          const SizedBox(height: 24),
+          if (task.isTrashed) ...[
+            PrimaryButton(
+              label: l10n.restoreTask,
+              icon: Icons.restore_rounded,
+              onPressed: () => _restore(context, ref, task, l10n),
+            ),
+            const SizedBox(height: 10),
+            TextButton.icon(
+              onPressed: () => _permanentlyDelete(context, ref, task, l10n),
+              icon: const Icon(Icons.delete_forever_outlined),
+              label: Text(l10n.permanentlyDelete),
+            ),
+          ] else ...[
+            if (task.status != TaskStatus.completed)
+              PrimaryButton(
+                label: l10n.markCompleted,
+                icon: Icons.check_rounded,
+                onPressed: () => _complete(context, ref, task, l10n),
+              )
+            else
+              PrimaryButton(
+                label: l10n.reopenTask,
+                icon: Icons.replay_rounded,
+                onPressed: () => _reopen(context, ref, task, l10n),
+              ),
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: () => context.push('/tasks/${task.id}/edit'),
+              icon: const Icon(Icons.edit_outlined),
+              label: Text(l10n.edit),
+            ),
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: () => _confirmDelete(context, ref, task, l10n),
+              icon: const Icon(Icons.delete_outline),
+              label: Text(l10n.deleteTask),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
-  String _status(AppLocalizations l10n, TaskStatus status) {
-    return switch (status) {
-      TaskStatus.pending => l10n.pending,
-      TaskStatus.inProgress => l10n.inProgress,
-      TaskStatus.completed => l10n.completed,
-    };
-  }
-
-  Widget _row(BuildContext context, String label, String value) {
+  Widget _labeledValue(
+    BuildContext context,
+    String label,
+    String value, {
+    IconData? icon,
+    Color? color,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
+          if (icon != null) ...[
+            Icon(icon, size: 18, color: color ?? AppColors.textMuted),
+            const SizedBox(width: 8),
+          ],
           Expanded(
             child: Text(
               label,
@@ -153,29 +204,33 @@ class TaskDetailsScreen extends ConsumerWidget {
                   ),
             ),
           ),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                  ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _updateStatus(
+  Future<void> _complete(
+    BuildContext context,
     WidgetRef ref,
     TaskItem task,
-    TaskStatus status,
     AppLocalizations l10n,
   ) async {
     final user = ref.read(currentUserProvider).valueOrNull;
     final family = ref.read(currentFamilyProvider).valueOrNull;
     final updated = await ref.read(taskRepositoryProvider).updateTask(
-          task.copyWith(status: status, updatedAt: DateTime.now()),
+          task.copyWith(status: TaskStatus.completed, updatedAt: DateTime.now()),
         );
-    if (status == TaskStatus.completed && user != null && family != null) {
+    if (user != null && family != null) {
       await ref.read(notificationServiceProvider).notifyTaskCompleted(
             task: updated,
             actor: user,
@@ -184,5 +239,113 @@ class TaskDetailsScreen extends ConsumerWidget {
             message: updated.title,
           );
     }
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.taskCompleted)),
+    );
+    context.pop();
+  }
+
+  Future<void> _reopen(
+    BuildContext context,
+    WidgetRef ref,
+    TaskItem task,
+    AppLocalizations l10n,
+  ) async {
+    await ref.read(taskRepositoryProvider).updateTask(
+          task.copyWith(
+            status: TaskStatus.pending,
+            updatedAt: DateTime.now(),
+          ),
+        );
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.taskReopened)),
+    );
+  }
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    TaskItem task,
+    AppLocalizations l10n,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.deleteTaskTitle),
+        content: Text(l10n.deleteTaskMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.moveToTrash),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    final repo = ref.read(taskRepositoryProvider);
+    await repo.moveToTrash(task);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(l10n.taskMovedToTrash),
+        action: SnackBarAction(
+          label: l10n.undo,
+          onPressed: () => repo.restoreTask(task),
+        ),
+      ),
+    );
+    context.pop();
+  }
+
+  Future<void> _restore(
+    BuildContext context,
+    WidgetRef ref,
+    TaskItem task,
+    AppLocalizations l10n,
+  ) async {
+    await ref.read(taskRepositoryProvider).restoreTask(task);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.taskRestored)),
+    );
+    context.pop();
+  }
+
+  Future<void> _permanentlyDelete(
+    BuildContext context,
+    WidgetRef ref,
+    TaskItem task,
+    AppLocalizations l10n,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.permanentlyDeleteTitle),
+        content: Text(l10n.permanentlyDeleteMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.permanentlyDelete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    await ref.read(taskRepositoryProvider).permanentlyDelete(task.id);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.taskDeletedForever)),
+    );
+    context.pop();
   }
 }

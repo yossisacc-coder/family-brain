@@ -569,7 +569,7 @@ abstract class AppLocalizations {
   /// No description provided for @pending.
   ///
   /// In en, this message translates to:
-  /// **'Pending'**
+  /// **'Not started'**
   String get pending;
 
   /// No description provided for @inProgress.
@@ -583,6 +583,336 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Completed'**
   String get completed;
+
+  /// No description provided for @high.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get high;
+
+  /// No description provided for @dueTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Due time'**
+  String get dueTime;
+
+  /// No description provided for @reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder'**
+  String get reminder;
+
+  /// No description provided for @optionalReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional reminder'**
+  String get optionalReminder;
+
+  /// No description provided for @noReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'No reminder'**
+  String get noReminder;
+
+  /// No description provided for @createdBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get createdBy;
+
+  /// No description provided for @taskCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Task completed'**
+  String get taskCompleted;
+
+  /// No description provided for @taskReopened.
+  ///
+  /// In en, this message translates to:
+  /// **'Task reopened'**
+  String get taskReopened;
+
+  /// No description provided for @reopenTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen task'**
+  String get reopenTask;
+
+  /// No description provided for @deleteTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteTask;
+
+  /// No description provided for @deleteTaskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this task?'**
+  String get deleteTaskTitle;
+
+  /// No description provided for @deleteTaskMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The task will be moved to Trash. You can restore it later.'**
+  String get deleteTaskMessage;
+
+  /// No description provided for @moveToTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to Trash'**
+  String get moveToTrash;
+
+  /// No description provided for @taskMovedToTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'Task moved to Trash'**
+  String get taskMovedToTrash;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @trash.
+  ///
+  /// In en, this message translates to:
+  /// **'Trash'**
+  String get trash;
+
+  /// No description provided for @emptyTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty Trash'**
+  String get emptyTrash;
+
+  /// No description provided for @emptyTrashTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty Trash?'**
+  String get emptyTrashTitle;
+
+  /// No description provided for @emptyTrashMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This permanently deletes every task in Trash. This cannot be undone.'**
+  String get emptyTrashMessage;
+
+  /// No description provided for @permanentlyDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete forever'**
+  String get permanentlyDelete;
+
+  /// No description provided for @permanentlyDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete forever?'**
+  String get permanentlyDeleteTitle;
+
+  /// No description provided for @permanentlyDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This task will be removed permanently. This cannot be undone.'**
+  String get permanentlyDeleteMessage;
+
+  /// No description provided for @restoreTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get restoreTask;
+
+  /// No description provided for @taskRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Task restored'**
+  String get taskRestored;
+
+  /// No description provided for @taskDeletedForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Task deleted forever'**
+  String get taskDeletedForever;
+
+  /// No description provided for @trashEmptied.
+  ///
+  /// In en, this message translates to:
+  /// **'Trash emptied'**
+  String get trashEmptied;
+
+  /// No description provided for @noTrashYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Trash is empty'**
+  String get noTrashYet;
+
+  /// No description provided for @noTrashMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted tasks will appear here until you restore or permanently delete them.'**
+  String get noTrashMessage;
+
+  /// No description provided for @calendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get calendar;
+
+  /// No description provided for @mySpace.
+  ///
+  /// In en, this message translates to:
+  /// **'My Space'**
+  String get mySpace;
+
+  /// No description provided for @familySpace.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Space'**
+  String get familySpace;
+
+  /// No description provided for @noCalendarTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'No dated tasks'**
+  String get noCalendarTasks;
+
+  /// No description provided for @noCalendarMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks with a due date will appear on the calendar.'**
+  String get noCalendarMessage;
+
+  /// No description provided for @goToSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get goToSettings;
+
+  /// No description provided for @account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get account;
+
+  /// No description provided for @familySettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get familySettings;
+
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// No description provided for @inviteMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite a family member'**
+  String get inviteMember;
+
+  /// No description provided for @inviteMemberMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Share this invite code so someone can join your family workspace.'**
+  String get inviteMemberMessage;
+
+  /// No description provided for @memberDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Member details'**
+  String get memberDetails;
+
+  /// No description provided for @sharedFamilyInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared family information'**
+  String get sharedFamilyInfo;
+
+  /// No description provided for @privateSpaceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal tasks stay in My Space and are not shown as shared family work.'**
+  String get privateSpaceHint;
+
+  /// No description provided for @openFamilyTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Open family tasks'**
+  String get openFamilyTasks;
+
+  /// No description provided for @deleteNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete notification'**
+  String get deleteNotification;
+
+  /// No description provided for @clearNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear notifications'**
+  String get clearNotifications;
+
+  /// No description provided for @clearNotificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all notifications?'**
+  String get clearNotificationsTitle;
+
+  /// No description provided for @clearNotificationsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes notification messages only. Tasks and family data stay intact.'**
+  String get clearNotificationsMessage;
+
+  /// No description provided for @notificationDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification deleted'**
+  String get notificationDeleted;
+
+  /// No description provided for @notificationsCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications cleared'**
+  String get notificationsCleared;
+
+  /// No description provided for @unread.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread'**
+  String get unread;
+
+  /// No description provided for @pickTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a time'**
+  String get pickTime;
+
+  /// No description provided for @titleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a task title to continue.'**
+  String get titleRequired;
+
+  /// No description provided for @familyOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Family overview'**
+  String get familyOverview;
+
+  /// No description provided for @about.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get about;
+
+  /// No description provided for @reminderSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder set'**
+  String get reminderSet;
 
   /// No description provided for @filterStatus.
   ///
@@ -859,6 +1189,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This is your current family workspace.'**
   String get leaveFamily;
+
+  /// No description provided for @jumpTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to'**
+  String get jumpTo;
+
+  /// No description provided for @appearanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Brain uses a calm light theme on phones and in the browser.'**
+  String get appearanceHint;
+
+  /// No description provided for @notificationsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are informational events. Reminders stay on tasks and are not removed when you delete a notification.'**
+  String get notificationsHint;
+
+  /// No description provided for @noMySpaceTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'No personal tasks yet'**
+  String get noMySpaceTasks;
+
+  /// No description provided for @noMySpaceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal tasks stay in My Space and are not shown as shared family work.'**
+  String get noMySpaceMessage;
+
+  /// No description provided for @noFamilySpaceTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'No shared family tasks yet'**
+  String get noFamilySpaceTasks;
+
+  /// No description provided for @noFamilySpaceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks marked as Family appear here for everyone.'**
+  String get noFamilySpaceMessage;
+
+  /// No description provided for @memberAssignedTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned family tasks'**
+  String get memberAssignedTasks;
+
+  /// No description provided for @markAsRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as read'**
+  String get markAsRead;
+
+  /// No description provided for @memberCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} members'**
+  String memberCount(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -4,6 +4,7 @@ import 'package:family_brain/core/l10n/app_localizations.dart';
 import '../../domain/models/app_user.dart';
 import '../../domain/models/task_item.dart';
 import '../theme/app_colors.dart';
+import '../theme/task_semantics.dart';
 
 class TaskCard extends StatelessWidget {
   const TaskCard({
@@ -24,6 +25,7 @@ class TaskCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final assignee = members.where((m) => m.id == task.assigneeId).firstOrNull;
     final dueLabel = _dueLabel(l10n, task);
+    final accent = TaskSemantics.accentFor(task);
 
     return Material(
       color: AppColors.card,
@@ -36,7 +38,9 @@ class TaskCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: task.isUrgent ? AppColors.urgent.withValues(alpha: 0.35) : AppColors.border,
+              color: task.isUrgent
+                  ? AppColors.urgent.withValues(alpha: 0.35)
+                  : AppColors.border,
             ),
           ),
           child: Row(
@@ -45,11 +49,7 @@ class TaskCard extends StatelessWidget {
                 width: 10,
                 height: 46,
                 decoration: BoxDecoration(
-                  color: task.isUrgent
-                      ? AppColors.urgent
-                      : task.status == TaskStatus.completed
-                          ? AppColors.success
-                          : AppColors.primary,
+                  color: accent,
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
@@ -64,6 +64,9 @@ class TaskCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
+                            color: task.status == TaskStatus.completed
+                                ? AppColors.completed
+                                : null,
                             decoration: task.status == TaskStatus.completed
                                 ? TextDecoration.lineThrough
                                 : null,
@@ -79,16 +82,47 @@ class TaskCard extends StatelessWidget {
                           task.type == TaskType.personal
                               ? l10n.personal
                               : l10n.familyType,
+                          icon: task.type == TaskType.personal
+                              ? Icons.person_outline
+                              : Icons.groups_outlined,
                         ),
-                        _chip(context, _statusLabel(l10n, task.status)),
-                        if (assignee != null) _chip(context, assignee.name),
-                        if (dueLabel != null) _chip(context, dueLabel),
+                        _chip(
+                          context,
+                          TaskSemantics.statusLabel(l10n, task.status),
+                          icon: TaskSemantics.statusIcon(task.status),
+                          color: TaskSemantics.statusColor(task.status),
+                        ),
+                        _chip(
+                          context,
+                          TaskSemantics.priorityLabel(l10n, task.priority),
+                          icon: TaskSemantics.priorityIcon(task.priority),
+                          color: TaskSemantics.priorityColor(task.priority),
+                        ),
+                        if (assignee != null)
+                          _chip(context, assignee.name, icon: Icons.person_outline),
+                        if (dueLabel != null)
+                          _chip(
+                            context,
+                            dueLabel,
+                            icon: Icons.event_outlined,
+                            color: task.isOverdue() ? AppColors.high : null,
+                          ),
+                        if (task.hasReminder)
+                          _chip(
+                            context,
+                            l10n.reminder,
+                            icon: Icons.alarm_outlined,
+                          ),
                       ],
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 16,
+                color: AppColors.textMuted,
+              ),
             ],
           ),
         ),
@@ -96,29 +130,35 @@ class TaskCard extends StatelessWidget {
     );
   }
 
-  Widget _chip(BuildContext context, String label) {
+  Widget _chip(
+    BuildContext context,
+    String label, {
+    IconData? icon,
+    Color? color,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: (color ?? AppColors.textMuted).withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AppColors.textMuted,
-              fontWeight: FontWeight.w600,
-            ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 14, color: color ?? AppColors.textMuted),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: color ?? AppColors.textMuted,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ],
       ),
     );
-  }
-
-  String _statusLabel(AppLocalizations l10n, TaskStatus status) {
-    return switch (status) {
-      TaskStatus.pending => l10n.pending,
-      TaskStatus.inProgress => l10n.inProgress,
-      TaskStatus.completed => l10n.completed,
-    };
   }
 
   String? _dueLabel(AppLocalizations l10n, TaskItem task) {

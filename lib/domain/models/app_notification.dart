@@ -1,4 +1,10 @@
-enum NotificationType { taskAssigned, taskCompleted, taskDueTomorrow }
+enum NotificationType {
+  taskAssigned,
+  taskCompleted,
+  taskDueTomorrow,
+  familyJoined,
+  sharedUpdated,
+}
 
 class AppNotification {
   const AppNotification({

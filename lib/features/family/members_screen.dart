@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide Family;
+import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/empty_state.dart';
@@ -9,6 +10,7 @@ import '../../core/widgets/error_view.dart';
 import '../../core/widgets/family_member_item.dart';
 import '../../core/widgets/loading_view.dart';
 import '../../data/providers.dart';
+import '../../domain/models/task_item.dart';
 
 class MembersScreen extends ConsumerWidget {
   const MembersScreen({super.key});
@@ -49,6 +51,13 @@ class MembersScreen extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                 children: [
                   Text(
+                    l10n.familyOverview,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: AppColors.textMuted,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
                     family.name,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w800,
@@ -58,6 +67,30 @@ class MembersScreen extends ConsumerWidget {
                   Text(
                     l10n.membersSubtitle,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textMuted,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.memberCount(members.length),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${l10n.openFamilyTasks}: ${tasks.where((task) => task.type == TaskType.family && task.isOpen).length}',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n.sharedFamilyInfo,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    l10n.privateSpaceHint,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.textMuted,
                         ),
                   ),
@@ -109,7 +142,32 @@ class MembersScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n.inviteMember,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.inviteMemberMessage,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textMuted,
+                        ),
+                  ),
+                  const SizedBox(height: 12),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.groups_outlined),
+                    title: Text(l10n.familySpace),
+                    trailing: const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 16,
+                    ),
+                    onTap: () => context.push('/space/family'),
+                  ),
+                  const SizedBox(height: 8),
                   if (members.isEmpty)
                     EmptyState(
                       title: l10n.emptyMembers,
@@ -127,6 +185,8 @@ class MembersScreen extends ConsumerWidget {
                           ),
                           isCurrentUser: member.id == user?.id,
                           youLabel: l10n.you,
+                          onTap: () =>
+                              context.push('/family/members/${member.id}'),
                         ),
                       ),
                     ),

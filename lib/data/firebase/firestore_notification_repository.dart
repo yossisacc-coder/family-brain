@@ -43,4 +43,19 @@ class FirestoreNotificationRepository implements NotificationRepository {
     }
     await batch.commit();
   }
+
+  @override
+  Future<void> deleteNotification(String notificationId) {
+    return _col.doc(notificationId).delete();
+  }
+
+  @override
+  Future<void> clearNotifications(String userId) async {
+    final snap = await _col.where('userId', isEqualTo: userId).get();
+    final batch = _db.batch();
+    for (final doc in snap.docs) {
+      batch.delete(doc.reference);
+    }
+    await batch.commit();
+  }
 }

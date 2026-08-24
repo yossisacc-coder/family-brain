@@ -26,6 +26,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final user = ref.watch(currentUserProvider).valueOrNull;
     final tasksAsync = ref.watch(familyTasksProvider);
     final members = ref.watch(familyMembersProvider).valueOrNull ?? const [];
 
@@ -34,6 +35,17 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         title: Text(l10n.tasks),
         actions: [
           IconButton(
+            tooltip: l10n.calendar,
+            onPressed: () => context.push('/tasks/calendar'),
+            icon: const Icon(Icons.calendar_today_outlined),
+          ),
+          IconButton(
+            tooltip: l10n.trash,
+            onPressed: () => context.push('/tasks/trash'),
+            icon: const Icon(Icons.delete_outline),
+          ),
+          IconButton(
+            tooltip: l10n.addTask,
             onPressed: () => context.push('/tasks/new'),
             icon: const Icon(Icons.add_rounded),
           ),
@@ -46,8 +58,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           retryLabel: l10n.retry,
           onRetry: () => ref.invalidate(familyTasksProvider),
         ),
-        data: (tasks) {
-          final filtered = tasks.where((task) {
+        data: (all) {
+          final visible = user == null
+              ? all.where((task) => task.type == TaskType.family)
+              : all.where((task) => task.isVisibleTo(user.id));
+          final filtered = visible.where((task) {
             if (_status != null && task.status != _status) return false;
             if (_memberId != null && task.assigneeId != _memberId) return false;
             if (_type != null && task.type != _type) return false;
@@ -63,7 +78,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   children: [
                     _chip(
                       label: l10n.all,
-                      selected: _status == null && _type == null && _memberId == null,
+                      selected:
+                          _status == null && _type == null && _memberId == null,
                       onTap: () => setState(() {
                         _status = null;
                         _type = null;
@@ -78,12 +94,14 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     _chip(
                       label: l10n.inProgress,
                       selected: _status == TaskStatus.inProgress,
-                      onTap: () => setState(() => _status = TaskStatus.inProgress),
+                      onTap: () =>
+                          setState(() => _status = TaskStatus.inProgress),
                     ),
                     _chip(
                       label: l10n.completed,
                       selected: _status == TaskStatus.completed,
-                      onTap: () => setState(() => _status = TaskStatus.completed),
+                      onTap: () =>
+                          setState(() => _status = TaskStatus.completed),
                     ),
                     _chip(
                       label: l10n.personalTasks,
@@ -114,7 +132,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                         onAction: () => context.push('/tasks/new'),
                       )
                     : ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 88),
                         itemCount: filtered.length,
                         separatorBuilder: (_, _) => const SizedBox(height: 10),
                         itemBuilder: (context, index) {

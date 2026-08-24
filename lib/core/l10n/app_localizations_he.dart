@@ -257,13 +257,184 @@ class AppLocalizationsHe extends AppLocalizations {
   String get changeStatus => 'סטטוס';
 
   @override
-  String get pending => 'ממתינה';
+  String get pending => 'לא התחילה';
 
   @override
   String get inProgress => 'בתהליך';
 
   @override
   String get completed => 'הושלמה';
+
+  @override
+  String get high => 'גבוהה';
+
+  @override
+  String get dueTime => 'שעת יעד';
+
+  @override
+  String get reminder => 'תזכורת';
+
+  @override
+  String get optionalReminder => 'תזכורת אופציונלית';
+
+  @override
+  String get noReminder => 'אין תזכורת';
+
+  @override
+  String get createdBy => 'נוצרה';
+
+  @override
+  String get taskCompleted => 'המשימה הושלמה';
+
+  @override
+  String get taskReopened => 'המשימה נפתחה מחדש';
+
+  @override
+  String get reopenTask => 'פתיחה מחדש';
+
+  @override
+  String get deleteTask => 'מחיקה';
+
+  @override
+  String get deleteTaskTitle => 'למחוק את המשימה?';
+
+  @override
+  String get deleteTaskMessage => 'המשימה תועבר לפח. אפשר לשחזר אותה אחר כך.';
+
+  @override
+  String get moveToTrash => 'העברה לפח';
+
+  @override
+  String get taskMovedToTrash => 'המשימה הועברה לפח';
+
+  @override
+  String get undo => 'ביטול';
+
+  @override
+  String get trash => 'פח';
+
+  @override
+  String get emptyTrash => 'ריקון הפח';
+
+  @override
+  String get emptyTrashTitle => 'לרוקן את הפח?';
+
+  @override
+  String get emptyTrashMessage =>
+      'פעולה זו תמחק לצמיתות את כל המשימות שבפח. אי אפשר לבטל.';
+
+  @override
+  String get permanentlyDelete => 'מחיקה לצמיתות';
+
+  @override
+  String get permanentlyDeleteTitle => 'למחוק לצמיתות?';
+
+  @override
+  String get permanentlyDeleteMessage =>
+      'המשימה תוסר לצמיתות. אי אפשר לבטל את הפעולה.';
+
+  @override
+  String get restoreTask => 'שחזור';
+
+  @override
+  String get taskRestored => 'המשימה שוחזרה';
+
+  @override
+  String get taskDeletedForever => 'המשימה נמחקה לצמיתות';
+
+  @override
+  String get trashEmptied => 'הפח רוקן';
+
+  @override
+  String get noTrashYet => 'הפח ריק';
+
+  @override
+  String get noTrashMessage =>
+      'משימות שנמחקו יופיעו כאן עד שתשחזרו או תמחקו אותן לצמיתות.';
+
+  @override
+  String get calendar => 'לוח שנה';
+
+  @override
+  String get mySpace => 'המרחב שלי';
+
+  @override
+  String get familySpace => 'המרחב המשפחתי';
+
+  @override
+  String get noCalendarTasks => 'אין משימות עם תאריך';
+
+  @override
+  String get noCalendarMessage => 'משימות עם תאריך יעד יופיעו בלוח השנה.';
+
+  @override
+  String get goToSettings => 'הגדרות';
+
+  @override
+  String get account => 'חשבון';
+
+  @override
+  String get familySettings => 'משפחה';
+
+  @override
+  String get appearance => 'מראה';
+
+  @override
+  String get inviteMember => 'הזמנת בן או בת משפחה';
+
+  @override
+  String get inviteMemberMessage =>
+      'שתפו את קוד ההזמנה כדי שאפשר יהיה להצטרף למרחב המשפחתי.';
+
+  @override
+  String get memberDetails => 'פרטי בן משפחה';
+
+  @override
+  String get sharedFamilyInfo => 'מידע משפחתי משותף';
+
+  @override
+  String get privateSpaceHint =>
+      'משימות אישיות נשארות במרחב שלי ואינן מוצגות כעבודה משפחתית משותפת.';
+
+  @override
+  String get openFamilyTasks => 'משימות משפחתיות פתוחות';
+
+  @override
+  String get deleteNotification => 'מחיקת התראה';
+
+  @override
+  String get clearNotifications => 'ניקוי התראות';
+
+  @override
+  String get clearNotificationsTitle => 'לנקות את כל ההתראות?';
+
+  @override
+  String get clearNotificationsMessage =>
+      'פעולה זו מסירה רק הודעות התראה. משימות ונתוני משפחה נשארים.';
+
+  @override
+  String get notificationDeleted => 'ההתראה נמחקה';
+
+  @override
+  String get notificationsCleared => 'ההתראות נוקו';
+
+  @override
+  String get unread => 'לא נקרא';
+
+  @override
+  String get pickTime => 'בחירת שעה';
+
+  @override
+  String get titleRequired => 'הזינו כותרת למשימה כדי להמשיך.';
+
+  @override
+  String get familyOverview => 'סקירת המשפחה';
+
+  @override
+  String get about => 'אודות';
+
+  @override
+  String get reminderSet => 'הוגדרה תזכורת';
 
   @override
   String get filterStatus => 'סטטוס';
@@ -410,4 +581,40 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get leaveFamily => 'זו סביבת העבודה המשפחתית הנוכחית שלכם.';
+
+  @override
+  String get jumpTo => 'מעבר אל';
+
+  @override
+  String get appearanceHint =>
+      'Family Brain משתמש בערכת נושא בהירה ורגועה בטלפונים ובווב.';
+
+  @override
+  String get notificationsHint =>
+      'התראות הן אירועים מידעיים. תזכורות שייכות למשימות ואינן נמחקות כשמוחקים התראה.';
+
+  @override
+  String get noMySpaceTasks => 'אין משימות אישיות';
+
+  @override
+  String get noMySpaceMessage =>
+      'משימות אישיות נשארות במרחב שלי ואינן מוצגות כעבודה משפחתית משותפת.';
+
+  @override
+  String get noFamilySpaceTasks => 'אין משימות משפחתיות משותפות';
+
+  @override
+  String get noFamilySpaceMessage =>
+      'משימות שמסומנות כמשפחתיות מופיעות כאן לכולם.';
+
+  @override
+  String get memberAssignedTasks => 'משימות משפחתיות משויכות';
+
+  @override
+  String get markAsRead => 'סימון כנקראה';
+
+  @override
+  String memberCount(int count) {
+    return '$count בני משפחה';
+  }
 }

@@ -101,6 +101,12 @@ final familyTasksProvider = StreamProvider<List<TaskItem>>((ref) {
   return ref.watch(taskRepositoryProvider).watchFamilyTasks(family.id);
 });
 
+final trashedTasksProvider = StreamProvider<List<TaskItem>>((ref) {
+  final family = ref.watch(currentFamilyProvider).valueOrNull;
+  if (family == null) return Stream.value(const []);
+  return ref.watch(taskRepositoryProvider).watchTrashedTasks(family.id);
+});
+
 final userNotificationsProvider = StreamProvider<List<AppNotification>>((ref) {
   final user = ref.watch(currentUserProvider).valueOrNull;
   if (user == null) return Stream.value(const []);

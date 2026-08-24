@@ -8,7 +8,7 @@ enum BackendMode { localDemo, firebase }
 
 class AppConfig {
   static const String appName = 'Family Brain';
-  static const String version = '1.0.1';
+  static const String version = '1.1.0';
 
   /// Family is the first workspace type on a platform that can grow later.
   static const String defaultWorkspaceType = 'family';

@@ -9,9 +9,17 @@ class LocalTaskRepository implements TaskRepository {
 
   @override
   Stream<List<TaskItem>> watchFamilyTasks(String familyId) async* {
-    yield _list(familyId);
+    yield _list(familyId, trashed: false);
     await for (final _ in _store.changes) {
-      yield _list(familyId);
+      yield _list(familyId, trashed: false);
+    }
+  }
+
+  @override
+  Stream<List<TaskItem>> watchTrashedTasks(String familyId) async* {
+    yield _list(familyId, trashed: true);
+    await for (final _ in _store.changes) {
+      yield _list(familyId, trashed: true);
     }
   }
 
@@ -29,11 +37,40 @@ class LocalTaskRepository implements TaskRepository {
     return task;
   }
 
-  List<TaskItem> _list(String familyId) {
+  @override
+  Future<TaskItem> moveToTrash(TaskItem task) {
+    return updateTask(
+      task.copyWith(deletedAt: DateTime.now(), updatedAt: DateTime.now()),
+    );
+  }
+
+  @override
+  Future<TaskItem> restoreTask(TaskItem task) {
+    return updateTask(
+      task.copyWith(clearDeleted: true, updatedAt: DateTime.now()),
+    );
+  }
+
+  @override
+  Future<void> permanentlyDelete(String taskId) async {
+    _store.tasks.remove(taskId);
+    await _store.commit();
+  }
+
+  @override
+  Future<void> emptyTrash(String familyId) async {
+    final ids = _list(familyId, trashed: true).map((task) => task.id).toList();
+    for (final id in ids) {
+      _store.tasks.remove(id);
+    }
+    await _store.commit();
+  }
+
+  List<TaskItem> _list(String familyId, {required bool trashed}) {
     return _store.tasks.values
         .map(TaskItem.fromMap)
-        .where((task) => task.familyId == familyId)
+        .where((task) => task.familyId == familyId && task.isTrashed == trashed)
         .toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
   }
 }

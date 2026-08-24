@@ -31,6 +31,16 @@ void main() {
     final openTasks = await tasks.watchFamilyTasks(user.familyId!).first;
     expect(openTasks, isNotEmpty);
     expect(openTasks.any((task) => task.isUrgent), isTrue);
+    expect(
+      openTasks.any((task) => task.id == 'demo-task-maya-personal'),
+      isTrue,
+    );
+    expect(
+      openTasks
+          .where((task) => task.isVisibleTo(user.id))
+          .any((task) => task.id == 'demo-task-maya-personal'),
+      isFalse,
+    );
 
     final inbox = await notifications.watchUserNotifications(user.id).first;
     expect(inbox, isNotEmpty);

@@ -51,6 +51,26 @@ void main() {
         AppBackNavigation.fallbackLocation('/tasks/demo-task-milk/edit'),
         '/tasks/demo-task-milk',
       );
+      expect(
+        AppBackNavigation.fallbackLocation('/tasks/calendar'),
+        '/app/home',
+      );
+      expect(
+        AppBackNavigation.fallbackLocation('/tasks/trash'),
+        '/app/tasks',
+      );
+      expect(
+        AppBackNavigation.fallbackLocation('/space/personal'),
+        '/app/home',
+      );
+      expect(
+        AppBackNavigation.fallbackLocation('/space/family'),
+        '/app/home',
+      );
+      expect(
+        AppBackNavigation.fallbackLocation('/family/members/demo-user-maya'),
+        '/app/family',
+      );
     });
   });
 

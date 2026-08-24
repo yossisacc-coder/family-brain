@@ -8,14 +8,18 @@ import '../../features/auth/otp_screen.dart';
 import '../../features/auth/phone_screen.dart';
 import '../../features/auth/welcome_screen.dart';
 import '../../features/family/family_setup_screen.dart';
+import '../../features/family/member_details_screen.dart';
 import '../../features/family/members_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/notifications/notifications_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/shell/app_shell.dart';
+import '../../features/tasks/calendar_screen.dart';
+import '../../features/tasks/space_screen.dart';
 import '../../features/tasks/task_details_screen.dart';
 import '../../features/tasks/task_form_screen.dart';
 import '../../features/tasks/tasks_screen.dart';
+import '../../features/tasks/trash_screen.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
@@ -87,6 +91,28 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/tasks/new',
         builder: (context, state) => const TaskFormScreen(),
+      ),
+      GoRoute(
+        path: '/tasks/calendar',
+        builder: (context, state) => const CalendarScreen(),
+      ),
+      GoRoute(
+        path: '/tasks/trash',
+        builder: (context, state) => const TrashScreen(),
+      ),
+      GoRoute(
+        path: '/space/personal',
+        builder: (context, state) => const SpaceScreen(personal: true),
+      ),
+      GoRoute(
+        path: '/space/family',
+        builder: (context, state) => const SpaceScreen(personal: false),
+      ),
+      GoRoute(
+        path: '/family/members/:id',
+        builder: (context, state) => MemberDetailsScreen(
+          memberId: state.pathParameters['id']!,
+        ),
       ),
       GoRoute(
         path: '/tasks/:id',

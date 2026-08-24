@@ -258,13 +258,186 @@ class AppLocalizationsEn extends AppLocalizations {
   String get changeStatus => 'Status';
 
   @override
-  String get pending => 'Pending';
+  String get pending => 'Not started';
 
   @override
   String get inProgress => 'In progress';
 
   @override
   String get completed => 'Completed';
+
+  @override
+  String get high => 'High';
+
+  @override
+  String get dueTime => 'Due time';
+
+  @override
+  String get reminder => 'Reminder';
+
+  @override
+  String get optionalReminder => 'Optional reminder';
+
+  @override
+  String get noReminder => 'No reminder';
+
+  @override
+  String get createdBy => 'Created';
+
+  @override
+  String get taskCompleted => 'Task completed';
+
+  @override
+  String get taskReopened => 'Task reopened';
+
+  @override
+  String get reopenTask => 'Reopen task';
+
+  @override
+  String get deleteTask => 'Delete';
+
+  @override
+  String get deleteTaskTitle => 'Delete this task?';
+
+  @override
+  String get deleteTaskMessage =>
+      'The task will be moved to Trash. You can restore it later.';
+
+  @override
+  String get moveToTrash => 'Move to Trash';
+
+  @override
+  String get taskMovedToTrash => 'Task moved to Trash';
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get trash => 'Trash';
+
+  @override
+  String get emptyTrash => 'Empty Trash';
+
+  @override
+  String get emptyTrashTitle => 'Empty Trash?';
+
+  @override
+  String get emptyTrashMessage =>
+      'This permanently deletes every task in Trash. This cannot be undone.';
+
+  @override
+  String get permanentlyDelete => 'Delete forever';
+
+  @override
+  String get permanentlyDeleteTitle => 'Delete forever?';
+
+  @override
+  String get permanentlyDeleteMessage =>
+      'This task will be removed permanently. This cannot be undone.';
+
+  @override
+  String get restoreTask => 'Restore';
+
+  @override
+  String get taskRestored => 'Task restored';
+
+  @override
+  String get taskDeletedForever => 'Task deleted forever';
+
+  @override
+  String get trashEmptied => 'Trash emptied';
+
+  @override
+  String get noTrashYet => 'Trash is empty';
+
+  @override
+  String get noTrashMessage =>
+      'Deleted tasks will appear here until you restore or permanently delete them.';
+
+  @override
+  String get calendar => 'Calendar';
+
+  @override
+  String get mySpace => 'My Space';
+
+  @override
+  String get familySpace => 'Family Space';
+
+  @override
+  String get noCalendarTasks => 'No dated tasks';
+
+  @override
+  String get noCalendarMessage =>
+      'Tasks with a due date will appear on the calendar.';
+
+  @override
+  String get goToSettings => 'Settings';
+
+  @override
+  String get account => 'Account';
+
+  @override
+  String get familySettings => 'Family';
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get inviteMember => 'Invite a family member';
+
+  @override
+  String get inviteMemberMessage =>
+      'Share this invite code so someone can join your family workspace.';
+
+  @override
+  String get memberDetails => 'Member details';
+
+  @override
+  String get sharedFamilyInfo => 'Shared family information';
+
+  @override
+  String get privateSpaceHint =>
+      'Personal tasks stay in My Space and are not shown as shared family work.';
+
+  @override
+  String get openFamilyTasks => 'Open family tasks';
+
+  @override
+  String get deleteNotification => 'Delete notification';
+
+  @override
+  String get clearNotifications => 'Clear notifications';
+
+  @override
+  String get clearNotificationsTitle => 'Clear all notifications?';
+
+  @override
+  String get clearNotificationsMessage =>
+      'This removes notification messages only. Tasks and family data stay intact.';
+
+  @override
+  String get notificationDeleted => 'Notification deleted';
+
+  @override
+  String get notificationsCleared => 'Notifications cleared';
+
+  @override
+  String get unread => 'Unread';
+
+  @override
+  String get pickTime => 'Pick a time';
+
+  @override
+  String get titleRequired => 'Enter a task title to continue.';
+
+  @override
+  String get familyOverview => 'Family overview';
+
+  @override
+  String get about => 'About';
+
+  @override
+  String get reminderSet => 'Reminder set';
 
   @override
   String get filterStatus => 'Status';
@@ -411,4 +584,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leaveFamily => 'This is your current family workspace.';
+
+  @override
+  String get jumpTo => 'Go to';
+
+  @override
+  String get appearanceHint =>
+      'Family Brain uses a calm light theme on phones and in the browser.';
+
+  @override
+  String get notificationsHint =>
+      'Notifications are informational events. Reminders stay on tasks and are not removed when you delete a notification.';
+
+  @override
+  String get noMySpaceTasks => 'No personal tasks yet';
+
+  @override
+  String get noMySpaceMessage =>
+      'Personal tasks stay in My Space and are not shown as shared family work.';
+
+  @override
+  String get noFamilySpaceTasks => 'No shared family tasks yet';
+
+  @override
+  String get noFamilySpaceMessage =>
+      'Tasks marked as Family appear here for everyone.';
+
+  @override
+  String get memberAssignedTasks => 'Assigned family tasks';
+
+  @override
+  String get markAsRead => 'Mark as read';
+
+  @override
+  String memberCount(int count) {
+    return '$count members';
+  }
 }

@@ -46,6 +46,17 @@ class AppBackNavigation {
     if (edit != null) {
       return '/tasks/${edit.group(1)}';
     }
+    if (path == '/tasks/calendar' ||
+        path == '/space/personal' ||
+        path == '/space/family') {
+      return '/app/home';
+    }
+    if (path == '/tasks/trash') {
+      return '/app/tasks';
+    }
+    if (RegExp(r'^/family/members/[^/]+$').hasMatch(path)) {
+      return '/app/family';
+    }
     if (path == '/tasks/new' || RegExp(r'^/tasks/[^/]+$').hasMatch(path)) {
       return '/app/tasks';
     }

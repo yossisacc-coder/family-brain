@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:family_brain/core/l10n/app_localizations.dart';
 
 import '../../domain/models/app_notification.dart';
 import '../theme/app_colors.dart';
@@ -8,15 +9,21 @@ class NotificationItem extends StatelessWidget {
     super.key,
     required this.notification,
     required this.onTap,
+    this.onDelete,
+    this.unreadLabel,
+    this.deleteLabel,
   });
 
   final AppNotification notification;
   final VoidCallback onTap;
+  final VoidCallback? onDelete;
+  final String? unreadLabel;
+  final String? deleteLabel;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: notification.read ? AppColors.card : AppColors.primarySoft,
+      color: notification.read ? AppColors.card : AppColors.infoSoft,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         onTap: onTap,
@@ -26,13 +33,34 @@ class NotificationItem extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                switch (notification.type) {
-                  NotificationType.taskAssigned => Icons.assignment_ind_outlined,
-                  NotificationType.taskCompleted => Icons.task_alt_rounded,
-                  NotificationType.taskDueTomorrow => Icons.event_available_outlined,
-                },
-                color: AppColors.primary,
+              Stack(
+                children: [
+                  Icon(
+                    switch (notification.type) {
+                      NotificationType.taskAssigned =>
+                        Icons.assignment_ind_outlined,
+                      NotificationType.taskCompleted => Icons.task_alt_rounded,
+                      NotificationType.taskDueTomorrow =>
+                        Icons.event_available_outlined,
+                      NotificationType.familyJoined =>
+                        Icons.group_add_outlined,
+                      NotificationType.sharedUpdated =>
+                        Icons.update_outlined,
+                    },
+                    color: notification.read
+                        ? AppColors.textMuted
+                        : AppColors.info,
+                  ),
+                  if (!notification.read)
+                    const Positioned(
+                      right: 0,
+                      top: 0,
+                      child: CircleAvatar(
+                        radius: 4,
+                        backgroundColor: AppColors.info,
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -42,7 +70,9 @@ class NotificationItem extends StatelessWidget {
                     Text(
                       notification.title,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
+                            fontWeight: notification.read
+                                ? FontWeight.w600
+                                : FontWeight.w800,
                           ),
                     ),
                     const SizedBox(height: 4),
@@ -52,9 +82,26 @@ class NotificationItem extends StatelessWidget {
                             color: AppColors.textMuted,
                           ),
                     ),
+                    if (!notification.read && unreadLabel != null) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        unreadLabel!,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: AppColors.info,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                    ],
                   ],
                 ),
               ),
+              if (onDelete != null)
+                IconButton(
+                  tooltip: deleteLabel ??
+                      AppLocalizations.of(context).deleteNotification,
+                  onPressed: onDelete,
+                  icon: const Icon(Icons.delete_outline),
+                ),
             ],
           ),
         ),

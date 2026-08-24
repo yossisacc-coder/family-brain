@@ -17,18 +17,22 @@ class NotificationsScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final async = ref.watch(userNotificationsProvider);
     final user = ref.watch(currentUserProvider).valueOrNull;
+    final repo = ref.read(notificationRepositoryProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.notifications),
         actions: [
           TextButton(
+            onPressed: user == null ? null : () => repo.markAllRead(user.id),
+            child: Text(l10n.markAllRead),
+          ),
+          IconButton(
+            tooltip: l10n.clearNotifications,
             onPressed: user == null
                 ? null
-                : () => ref
-                    .read(notificationRepositoryProvider)
-                    .markAllRead(user.id),
-            child: Text(l10n.markAllRead),
+                : () => _clearAll(context, ref, user.id, l10n),
+            icon: const Icon(Icons.delete_sweep_outlined),
           ),
         ],
       ),
@@ -53,21 +57,76 @@ class NotificationsScreen extends ConsumerWidget {
             separatorBuilder: (_, _) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
               final item = items[index];
-              return NotificationItem(
-                notification: item,
-                onTap: () async {
-                  await ref
-                      .read(notificationRepositoryProvider)
-                      .markRead(item.id);
-                  if (item.taskId != null && context.mounted) {
-                    context.push('/tasks/${item.taskId}');
-                  }
+              return Dismissible(
+                key: ValueKey(item.id),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  alignment: AlignmentDirectional.centerEnd,
+                  padding: const EdgeInsetsDirectional.only(end: 20),
+                  color: Theme.of(context).colorScheme.errorContainer,
+                  child: const Icon(Icons.delete_outline),
+                ),
+                onDismissed: (_) async {
+                  await repo.deleteNotification(item.id);
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.notificationDeleted)),
+                  );
                 },
+                child: NotificationItem(
+                  notification: item,
+                  unreadLabel: l10n.unread,
+                  deleteLabel: l10n.deleteNotification,
+                  onDelete: () async {
+                    await repo.deleteNotification(item.id);
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.notificationDeleted)),
+                    );
+                  },
+                  onTap: () async {
+                    await repo.markRead(item.id);
+                    if (item.taskId != null && context.mounted) {
+                      context.push('/tasks/${item.taskId}');
+                    }
+                  },
+                ),
               );
             },
           );
         },
       ),
+    );
+  }
+
+  Future<void> _clearAll(
+    BuildContext context,
+    WidgetRef ref,
+    String userId,
+    AppLocalizations l10n,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.clearNotificationsTitle),
+        content: Text(l10n.clearNotificationsMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.clearNotifications),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    await ref.read(notificationRepositoryProvider).clearNotifications(userId);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.notificationsCleared)),
     );
   }
 }
