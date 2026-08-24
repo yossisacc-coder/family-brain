@@ -31,7 +31,12 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
 
   void _showAfterUndo(String taskId) {
     if (!mounted) return;
-    setState(() => _hiddenIds.remove(taskId));
+    setState(() {
+      _hiddenIds.remove(taskId);
+      _status = null;
+      _type = null;
+      _memberId = null;
+    });
   }
 
   Future<void> _deleteFromList(TaskItem task, AppLocalizations l10n) async {
@@ -80,7 +85,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         children: [
           if (pendingUndo)
             const Padding(
-              padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+              padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
               child: TrashUndoBar(),
             ),
           Expanded(
@@ -172,39 +177,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                         separatorBuilder: (_, _) => const SizedBox(height: 10),
                         itemBuilder: (context, index) {
                           final task = filtered[index];
-                          return Dismissible(
-                            key: ValueKey(task.id),
-                            direction: DismissDirection.endToStart,
-                            confirmDismiss: (_) =>
-                                TaskTrash.confirm(context, l10n),
-                            background: Container(
-                              alignment: AlignmentDirectional.centerEnd,
-                              padding: const EdgeInsetsDirectional.only(end: 20),
-                              decoration: BoxDecoration(
-                                color: AppColors.urgentSoft,
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                              child: const Icon(
-                                Icons.delete_outline,
-                                color: AppColors.trash,
-                              ),
-                            ),
-                            onDismissed: (_) {
-                              _hideForUndo(task.id);
-                              TaskTrash.move(
-                                context: context,
-                                ref: ref,
-                                task: task,
-                                l10n: l10n,
-                                onUndo: () => _showAfterUndo(task.id),
-                              );
-                            },
-                            child: TaskCard(
-                              task: task,
-                              members: members,
-                              onTap: () => context.push('/tasks/${task.id}'),
-                              onDelete: () => _deleteFromList(task, l10n),
-                            ),
+                          return TaskCard(
+                            task: task,
+                            members: members,
+                            onTap: () => context.push('/tasks/${task.id}'),
+                            onDelete: () => _deleteFromList(task, l10n),
                           );
                         },
                       ),

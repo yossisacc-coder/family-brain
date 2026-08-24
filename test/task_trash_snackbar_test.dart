@@ -82,8 +82,10 @@ void main() {
   testWidgets('tapping Undo restores instead of opening a new task',
       (tester) async {
     var undone = false;
+    final repo = LocalTaskRepository(LocalJsonStore(persist: false));
     await tester.pumpWidget(
       harness(
+        overrides: [taskRepositoryProvider.overrideWithValue(repo)],
         fab: FloatingActionButton.extended(
           onPressed: () {},
           label: const Text('Add task'),
@@ -106,7 +108,7 @@ void main() {
     await tester.tap(find.text('Trash'));
     await tester.pump();
     await tester.tap(find.byKey(TaskTrash.undoButtonKey));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(undone, isTrue);
     expect(find.text('Task moved to Trash'), findsNothing);
     expect(find.text('New task'), findsNothing);

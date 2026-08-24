@@ -5,7 +5,6 @@ import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../theme/app_colors.dart';
 import '../../data/providers.dart';
 import '../../domain/models/task_item.dart';
 
@@ -78,6 +77,21 @@ class TaskTrash {
     });
   }
 
+  static Future<void> undo(WidgetRef ref) async {
+    final request = ref.read(trashUndoRequestProvider);
+    if (request == null) return;
+    _timer?.cancel();
+    _timer = null;
+    try {
+      await ref.read(taskRepositoryProvider).restoreTask(request.task);
+    } finally {
+      request.onUndo?.call();
+      ref.invalidate(familyTasksProvider);
+      ref.invalidate(trashedTasksProvider);
+      dismiss(ref);
+    }
+  }
+
   static Future<void> move({
     required BuildContext context,
     required WidgetRef ref,
@@ -138,16 +152,14 @@ class TrashUndoBar extends ConsumerWidget {
                 style: const TextStyle(color: Colors.white),
               ),
             ),
-            TextButton(
+            FilledButton(
               key: TaskTrash.undoButtonKey,
-              onPressed: () {
-                request.onUndo?.call();
-                ref.read(taskRepositoryProvider).restoreTask(request.task);
-                TaskTrash.dismiss(ref);
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.primarySoft,
-                minimumSize: const Size(72, 44),
+              onPressed: () => TaskTrash.undo(ref),
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: const Color(0xFF323232),
+                minimumSize: const Size(88, 40),
+                tapTargetSize: MaterialTapTargetSize.padded,
               ),
               child: Text(l10n.undo),
             ),
