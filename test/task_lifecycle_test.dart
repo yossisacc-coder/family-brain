@@ -4,6 +4,7 @@ import 'package:family_brain/data/local/local_task_repository.dart';
 import 'package:family_brain/domain/models/app_notification.dart';
 import 'package:family_brain/domain/models/task_item.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TaskItem sampleTask() {
@@ -49,6 +50,18 @@ void main() {
     expect(restored.isTrashed, isFalse);
     expect(store.tasks['task-1']?['deletedAt'], isNull);
     expect((await repo.watchFamilyTasks('family-1').first).single.id, 'task-1');
+  });
+
+  test('restore after persist round-trip still clears deletedAt', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = LocalJsonStore();
+    final repo = LocalTaskRepository(store);
+    final task = sampleTask();
+    await repo.createTask(task);
+    await repo.moveToTrash(task);
+    await repo.restoreTask(task);
+    expect(store.tasks['task-1']?['deletedAt'], isNull);
+    expect((await repo.watchFamilyTasks('family-1').first).single.isTrashed, isFalse);
   });
 
   test('completed tasks remain in the active list and can be reopened', () async {

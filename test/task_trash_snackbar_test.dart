@@ -57,12 +57,18 @@ void main() {
 
   testWidgets('trash undo snackbar auto-dismisses after about 3 seconds',
       (tester) async {
+    final repo = LocalTaskRepository(LocalJsonStore(persist: false));
     await tester.pumpWidget(
       harness(
+        overrides: [taskRepositoryProvider.overrideWithValue(repo)],
         body: (context, ref) {
           return FilledButton(
             onPressed: () {
-              TaskTrash.showUndo(ref: ref, task: sampleTask());
+              TaskTrash.showUndo(
+                ref: ref,
+                task: sampleTask(),
+                repo: repo,
+              );
             },
             child: const Text('Trash'),
           );
@@ -96,6 +102,7 @@ void main() {
               TaskTrash.showUndo(
                 ref: ref,
                 task: sampleTask(),
+                repo: repo,
                 onUndo: () => undone = true,
               );
             },

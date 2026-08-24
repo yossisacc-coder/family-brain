@@ -7,11 +7,17 @@ import 'package:go_router/go_router.dart';
 
 import '../../data/providers.dart';
 import '../../domain/models/task_item.dart';
+import '../../domain/repositories/task_repository.dart';
 
 class TrashUndoRequest {
-  const TrashUndoRequest({required this.task, this.onUndo});
+  const TrashUndoRequest({
+    required this.task,
+    required this.repo,
+    this.onUndo,
+  });
 
   final TaskItem task;
+  final TaskRepository repo;
   final VoidCallback? onUndo;
 }
 
@@ -23,6 +29,8 @@ class TaskTrash {
   static const undoButtonKey = Key('task-trash-undo');
 
   static Timer? _timer;
+  static StateController<TrashUndoRequest?>? _controller;
+  static TrashUndoRequest? _pending;
 
   static Future<bool> confirm(
     BuildContext context,
@@ -48,11 +56,10 @@ class TaskTrash {
     return confirmed == true;
   }
 
-  static StateController<TrashUndoRequest?>? _controller;
-
   static void dismiss([WidgetRef? ref]) {
     _timer?.cancel();
     _timer = null;
+    _pending = null;
     final controller =
         ref?.read(trashUndoRequestProvider.notifier) ?? _controller;
     if (controller != null && controller.mounted) {
@@ -64,26 +71,32 @@ class TaskTrash {
   static void showUndo({
     required WidgetRef ref,
     required TaskItem task,
+    required TaskRepository repo,
     VoidCallback? onUndo,
   }) {
     _timer?.cancel();
+    final request = TrashUndoRequest(task: task, repo: repo, onUndo: onUndo);
+    _pending = request;
     final controller = ref.read(trashUndoRequestProvider.notifier);
     _controller = controller;
-    controller.state = TrashUndoRequest(task: task, onUndo: onUndo);
+    controller.state = request;
     _timer = Timer(undoDuration, () {
+      if (!identical(_pending, request)) return;
+      _pending = null;
       if (identical(_controller, controller) && controller.mounted) {
         controller.state = null;
       }
     });
   }
 
-  static Future<void> undo(WidgetRef ref) async {
-    final request = ref.read(trashUndoRequestProvider);
+  static Future<void> undo([WidgetRef? ref]) async {
+    final request = _pending;
     if (request == null) return;
+    _pending = null;
     _timer?.cancel();
     _timer = null;
     try {
-      await ref.read(taskRepositoryProvider).restoreTask(request.task);
+      await request.repo.restoreTask(request.task);
     } finally {
       request.onUndo?.call();
       dismiss(ref);
@@ -101,7 +114,7 @@ class TaskTrash {
     final repo = ref.read(taskRepositoryProvider);
     await repo.moveToTrash(task);
     if (!context.mounted) return;
-    showUndo(ref: ref, task: task, onUndo: onUndo);
+    showUndo(ref: ref, task: task, repo: repo, onUndo: onUndo);
     if (returnToTasks) {
       context.go('/app/tasks');
     }
@@ -140,10 +153,10 @@ class TrashUndoBar extends ConsumerWidget {
       color: const Color(0xFF323232),
       elevation: 6,
       borderRadius: BorderRadius.circular(12),
-      child: InkWell(
+      child: GestureDetector(
         key: TaskTrash.undoButtonKey,
-        onTap: () => TaskTrash.undo(ref),
-        borderRadius: BorderRadius.circular(12),
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) => TaskTrash.undo(ref),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
