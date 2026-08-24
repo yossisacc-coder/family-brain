@@ -36,13 +36,18 @@ class AppCard extends StatelessWidget {
         color: Colors.transparent,
         borderRadius: AppRadii.card,
         clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: padding ?? const EdgeInsets.all(AppSpacing.card),
-            child: child,
-          ),
-        ),
+        child: onTap == null
+            ? Padding(
+                padding: padding ?? const EdgeInsets.all(AppSpacing.card),
+                child: child,
+              )
+            : InkWell(
+                onTap: onTap,
+                child: Padding(
+                  padding: padding ?? const EdgeInsets.all(AppSpacing.card),
+                  child: child,
+                ),
+              ),
       ),
     );
   }

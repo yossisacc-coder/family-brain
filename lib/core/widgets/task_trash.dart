@@ -23,7 +23,7 @@ final trashUndoRequestProvider = StateProvider<TrashUndoRequest?>(
 
 /// Shared trash/undo behavior for task list and details.
 class TaskTrash {
-  static const undoDuration = Duration(seconds: 30);
+  static const undoDuration = Duration(seconds: 2);
   static const slotHold = Duration(milliseconds: 50);
   static const undoButtonKey = Key('task-trash-undo');
 
@@ -153,15 +153,29 @@ class TaskTrash {
     required WidgetRef ref,
     required TaskItem task,
     required AppLocalizations l10n,
-    bool returnToTasks = false,
+    bool popAfter = false,
     VoidCallback? onUndo,
   }) async {
     final repo = ref.read(taskRepositoryProvider);
     await repo.moveToTrash(task);
     if (!context.mounted) return;
     showUndo(ref: ref, task: task, repo: repo, onUndo: onUndo);
-    if (returnToTasks) {
-      context.go('/app/tasks');
+    if (popAfter && context.mounted) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          SnackBar(
+            duration: undoDuration,
+            content: Text(l10n.taskMovedToTrash),
+            action: SnackBarAction(
+              label: l10n.undo,
+              onPressed: () => undo(ref),
+            ),
+          ),
+        );
+      if (context.canPop()) {
+        context.pop();
+      }
     }
   }
 
@@ -170,7 +184,7 @@ class TaskTrash {
     required WidgetRef ref,
     required TaskItem task,
     required AppLocalizations l10n,
-    bool returnToTasks = false,
+    bool popAfter = false,
     VoidCallback? onUndo,
   }) async {
     if (!await confirm(context, l10n) || !context.mounted) return;
@@ -179,7 +193,7 @@ class TaskTrash {
       ref: ref,
       task: task,
       l10n: l10n,
-      returnToTasks: returnToTasks,
+      popAfter: popAfter,
       onUndo: onUndo,
     );
   }

@@ -219,7 +219,11 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.taskSaved)),
       );
-      context.pop();
+      if (existing == null) {
+        context.go('/app/home');
+      } else if (context.canPop()) {
+        context.pop();
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }

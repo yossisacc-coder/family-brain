@@ -6,7 +6,6 @@ import '../../data/providers.dart';
 import 'app_back_button_binder.dart';
 import '../../features/brain/brain_ask_screen.dart';
 import '../../features/brain/brain_confirm_screen.dart';
-import '../../core/brain/family_brain_parser.dart';
 import '../../features/auth/otp_screen.dart';
 import '../../features/auth/phone_screen.dart';
 import '../../features/auth/welcome_screen.dart';
@@ -94,13 +93,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/brain/confirm',
-        builder: (context, state) {
-          final draft = state.extra;
-          if (draft is! BrainDraft) {
-            return const SizedBox.shrink();
-          }
-          return BrainConfirmScreen(draft: draft);
-        },
+        builder: (context, state) => const BrainConfirmScreen(),
       ),
       GoRoute(
         path: '/brain/ask',

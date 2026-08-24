@@ -276,7 +276,7 @@ class TaskDetailsScreen extends ConsumerWidget {
       ref: ref,
       task: task,
       l10n: l10n,
-      returnToTasks: true,
+      popAfter: true,
     );
   }
 

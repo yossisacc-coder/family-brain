@@ -16,16 +16,14 @@ import '../../domain/models/app_user.dart';
 import '../../domain/models/task_item.dart';
 
 class BrainConfirmScreen extends ConsumerStatefulWidget {
-  const BrainConfirmScreen({super.key, required this.draft});
-
-  final BrainDraft draft;
+  const BrainConfirmScreen({super.key});
 
   @override
   ConsumerState<BrainConfirmScreen> createState() => _BrainConfirmScreenState();
 }
 
 class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
-  late BrainDraft _draft;
+  BrainDraft? _draft;
   var _editing = false;
   var _saving = false;
   String? _error;
@@ -35,9 +33,9 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
   @override
   void initState() {
     super.initState();
-    _draft = widget.draft;
-    _title = TextEditingController(text: _draft.title);
-    _items = TextEditingController(text: _draft.listItems.join('\n'));
+    _draft = ref.read(pendingBrainDraftProvider);
+    _title = TextEditingController(text: _draft?.title ?? '');
+    _items = TextEditingController(text: _draft?.listItems.join('\n') ?? '');
   }
 
   @override
@@ -50,6 +48,32 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final draft = _draft;
+    if (draft == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text(l10n.brainUnderstood)),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.page),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  l10n.brainUnclear,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                PrimaryButton(
+                  label: l10n.home,
+                  onPressed: () => context.go('/app/home'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
     final members = ref.watch(familyMembersProvider).valueOrNull ?? const [];
 
     return Scaffold(
@@ -58,7 +82,7 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
           tooltip: l10n.cancel,
-          onPressed: () => context.pop(),
+          onPressed: _cancel,
         ),
       ),
       body: ListView(
@@ -69,7 +93,7 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
           32,
         ),
         children: [
-          if (_draft.lowConfidence) ...[
+          if (draft.lowConfidence) ...[
             Text(
               l10n.brainUnclear,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -79,7 +103,7 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
             const SizedBox(height: AppSpacing.md),
           ],
           AppCard(
-            child: _editing ? _editForm(l10n, members) : _summary(l10n),
+            child: _editing ? _editForm(l10n, members, draft) : _summary(l10n, draft),
           ),
           if (_error != null) ...[
             const SizedBox(height: AppSpacing.md),
@@ -105,7 +129,7 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
           ),
           const SizedBox(height: AppSpacing.sm),
           TextButton(
-            onPressed: _saving ? null : () => context.pop(),
+            onPressed: _saving ? null : _cancel,
             child: Text(l10n.cancel),
           ),
         ],
@@ -113,22 +137,22 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
     );
   }
 
-  Widget _summary(AppLocalizations l10n) {
+  Widget _summary(AppLocalizations l10n, BrainDraft draft) {
     final rows = <(String, String)>[
-      (l10n.brainType, _kindLabel(l10n, _draft.kind)),
-      (l10n.taskTitle, _draft.title),
+      (l10n.brainType, _kindLabel(l10n, draft.kind)),
+      (l10n.taskTitle, draft.title),
     ];
-    if (_draft.dueDate != null) {
-      rows.add((l10n.brainDate, DateFormat.yMMMd().format(_draft.dueDate!)));
-      if (_draft.hasDueTime) {
-        rows.add((l10n.brainTime, DateFormat.Hm().format(_draft.dueDate!)));
+    if (draft.dueDate != null) {
+      rows.add((l10n.brainDate, DateFormat.yMMMd().format(draft.dueDate!)));
+      if (draft.hasDueTime) {
+        rows.add((l10n.brainTime, DateFormat.Hm().format(draft.dueDate!)));
       }
     }
-    if (_draft.assigneeName != null) {
-      rows.add((l10n.brainPerson, _draft.assigneeName!));
+    if (draft.assigneeName != null) {
+      rows.add((l10n.brainPerson, draft.assigneeName!));
     }
-    if (_draft.listItems.isNotEmpty) {
-      rows.add((l10n.listItems, _draft.listItems.join(', ')));
+    if (draft.listItems.isNotEmpty) {
+      rows.add((l10n.listItems, draft.listItems.join(', ')));
     }
 
     return Column(
@@ -149,13 +173,17 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
     );
   }
 
-  Widget _editForm(AppLocalizations l10n, List<AppUser> members) {
+  Widget _editForm(
+    AppLocalizations l10n,
+    List<AppUser> members,
+    BrainDraft draft,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         DropdownButtonFormField<InformationKind>(
           // ignore: deprecated_member_use
-          value: _draft.kind,
+          value: draft.kind,
           decoration: InputDecoration(labelText: l10n.brainType),
           items: [
             for (final kind in InformationKind.values)
@@ -165,7 +193,9 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
               ),
           ],
           onChanged: (value) {
-            if (value != null) setState(() => _draft = _draft.copyWith(kind: value));
+            if (value != null) {
+              setState(() => _draft = draft.copyWith(kind: value));
+            }
           },
         ),
         const SizedBox(height: AppSpacing.md),
@@ -173,7 +203,7 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
           controller: _title,
           decoration: InputDecoration(labelText: l10n.taskTitle),
         ),
-        if (_draft.kind == InformationKind.list) ...[
+        if (draft.kind == InformationKind.list) ...[
           const SizedBox(height: AppSpacing.md),
           TextField(
             controller: _items,
@@ -189,7 +219,7 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
           const SizedBox(height: AppSpacing.md),
           DropdownButtonFormField<String?>(
             // ignore: deprecated_member_use
-            value: _draft.assigneeId,
+            value: draft.assigneeId,
             decoration: InputDecoration(labelText: l10n.brainPerson),
             items: [
               DropdownMenuItem(value: null, child: Text(l10n.unassigned)),
@@ -199,7 +229,7 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
             onChanged: (value) {
               final member = members.where((m) => m.id == value).firstOrNull;
               setState(() {
-                _draft = _draft.copyWith(
+                _draft = draft.copyWith(
                   assigneeId: value,
                   assigneeName: member?.name,
                   clearAssignee: value == null,
@@ -212,13 +242,24 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
     );
   }
 
+  void _cancel() {
+    ref.read(pendingBrainDraftProvider.notifier).state = null;
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/app/home');
+    }
+  }
+
   void _applyEdits(List<AppUser> members) {
+    final draft = _draft;
+    if (draft == null) return;
     final items = _items.text
         .split(RegExp(r'[\n,]'))
         .map((item) => item.trim())
         .where((item) => item.isNotEmpty)
         .toList();
-    _draft = _draft.copyWith(
+    _draft = draft.copyWith(
       title: _title.text.trim(),
       listItems: items,
     );
@@ -231,7 +272,8 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
       return;
     }
     _applyEdits(ref.read(familyMembersProvider).valueOrNull ?? const []);
-    if (_draft.title.trim().isEmpty) {
+    final draft = _draft;
+    if (draft == null || draft.title.trim().isEmpty) {
       setState(() => _error = l10n.requiredField);
       return;
     }
@@ -240,17 +282,18 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
       _error = null;
     });
     try {
-      final task = _draft.toTaskItem(
+      final task = draft.toTaskItem(
         id: const Uuid().v4(),
         familyId: user.familyId!,
         creatorId: user.id,
       );
       await ref.read(taskRepositoryProvider).createTask(task);
       if (!mounted) return;
+      ref.read(pendingBrainDraftProvider.notifier).state = null;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.brainSaved)),
       );
-      context.pop();
+      context.go('/app/home');
     } catch (_) {
       if (!mounted) return;
       setState(() {

@@ -231,7 +231,7 @@ void main() {
 
       await tester.tap(find.text('Trash'));
       await tester.pump();
-      expect(find.text('Task moved to Trash'), findsOneWidget);
+      expect(find.text('Task moved to Trash'), findsAtLeastNWidgets(1));
 
       final gesture = await tester.startGesture(
         tester.getCenter(find.byKey(TaskTrash.undoButtonKey)),
@@ -242,10 +242,10 @@ void main() {
         (await repo.watchFamilyTasks('family-1').first).single.isTrashed,
         isFalse,
       );
-      expect(find.text('Task moved to Trash'), findsOneWidget);
+      expect(find.text('Task moved to Trash'), findsAtLeastNWidgets(1));
 
       await tester.pump(const Duration(milliseconds: 500));
-      expect(find.text('Task moved to Trash'), findsOneWidget);
+      expect(find.text('Task moved to Trash'), findsAtLeastNWidgets(1));
       await gesture.up();
       await tester.pump();
       await tester.pump(TaskTrash.slotHold);

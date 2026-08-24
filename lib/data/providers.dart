@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide Family;
 
+import '../core/brain/family_brain_parser.dart';
 import '../core/config/app_config.dart';
 import '../domain/models/app_notification.dart';
 import '../domain/models/app_user.dart';
@@ -119,3 +120,7 @@ final unreadCountProvider = Provider<int>((ref) {
   final notifications = ref.watch(userNotificationsProvider).valueOrNull ?? [];
   return notifications.where((item) => !item.read).length;
 });
+
+/// Survives GoRouter rebuilds that drop `state.extra` (which caused a black
+/// confirm screen when the route rebuilt with no draft).
+final pendingBrainDraftProvider = StateProvider<BrainDraft?>((ref) => null);

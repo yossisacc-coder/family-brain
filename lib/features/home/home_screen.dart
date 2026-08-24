@@ -29,6 +29,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _composer = TextEditingController();
+  var _sending = false;
 
   @override
   void dispose() {
@@ -172,6 +173,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   const SizedBox(height: AppSpacing.section),
                   _ComposerCard(
                     controller: _composer,
+                    sending: _sending,
                     onSubmit: () => _submitComposer(context, l10n, members),
                     onAskAi: () => context.push('/brain/ask'),
                     onComingSoon: () => _comingSoon(context, l10n),
@@ -223,6 +225,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final matches = open.where((task) {
+      final created = DateTime(
+        task.createdAt.year,
+        task.createdAt.month,
+        task.createdAt.day,
+      );
+      if (created == today) return true;
       if (task.dueDate != null) {
         final due = DateTime(
           task.dueDate!.year,
@@ -260,6 +268,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     AppLocalizations l10n,
     List<AppUser> members,
   ) {
+    if (_sending) return;
     final text = _composer.text.trim();
     if (text.isEmpty) {
       ScaffoldMessenger.of(context)
@@ -267,19 +276,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ..showSnackBar(SnackBar(content: Text(l10n.emptyBrainInput)));
       return;
     }
-    final result = FamilyBrainParser.parse(
-      text,
-      now: DateTime.now(),
-      members: members,
-    );
-    if (!result.isOk || result.draft == null) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() => _sending = true);
+    try {
+      final result = FamilyBrainParser.parse(
+        text,
+        now: DateTime.now(),
+        members: members,
+      );
+      if (!result.isOk || result.draft == null) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(l10n.brainUnclear)));
+        return;
+      }
+      _composer.clear();
+      ref.read(pendingBrainDraftProvider.notifier).state = result.draft;
+      context.push('/brain/confirm');
+    } catch (_) {
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(l10n.brainUnclear)));
-      return;
+        ..showSnackBar(SnackBar(content: Text(l10n.errorUnavailable)));
+    } finally {
+      if (mounted) setState(() => _sending = false);
     }
-    _composer.clear();
-    context.push('/brain/confirm', extra: result.draft);
   }
 
   String _greeting(AppLocalizations l10n, String name) {
@@ -296,12 +316,14 @@ class _ComposerCard extends StatelessWidget {
     required this.onSubmit,
     required this.onComingSoon,
     required this.onAskAi,
+    this.sending = false,
   });
 
   final TextEditingController controller;
   final VoidCallback onSubmit;
   final VoidCallback onComingSoon;
   final VoidCallback onAskAi;
+  final bool sending;
 
   @override
   Widget build(BuildContext context) {
@@ -337,7 +359,7 @@ class _ComposerCard extends StatelessWidget {
             minLines: 1,
             maxLines: 3,
             textInputAction: TextInputAction.send,
-            onSubmitted: (_) => onSubmit(),
+            onSubmitted: sending ? null : (_) => onSubmit(),
             decoration: InputDecoration(
               hintText: l10n.tellFamilyBrain,
               filled: true,
@@ -365,8 +387,14 @@ class _ComposerCard extends StatelessWidget {
               const Spacer(),
               IconButton.filled(
                 tooltip: l10n.sendToFamilyBrain,
-                onPressed: onSubmit,
-                icon: const Icon(Icons.send_rounded),
+                onPressed: sending ? null : onSubmit,
+                icon: sending
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.send_rounded),
               ),
             ],
           ),

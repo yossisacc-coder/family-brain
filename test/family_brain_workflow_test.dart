@@ -1,10 +1,15 @@
 import 'package:family_brain/core/brain/family_brain_ask.dart';
 import 'package:family_brain/core/brain/family_brain_parser.dart';
+import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:family_brain/core/routing/app_back_navigation.dart';
 import 'package:family_brain/data/local/local_json_store.dart';
 import 'package:family_brain/data/local/local_task_repository.dart';
+import 'package:family_brain/data/providers.dart';
 import 'package:family_brain/domain/models/app_user.dart';
 import 'package:family_brain/domain/models/task_item.dart';
+import 'package:family_brain/features/brain/brain_confirm_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -169,5 +174,44 @@ void main() {
   test('back from Brain screens returns to Home', () {
     expect(AppBackNavigation.fallbackLocation('/brain/confirm'), '/app/home');
     expect(AppBackNavigation.fallbackLocation('/brain/ask'), '/app/home');
+  });
+
+  testWidgets('confirm screen stays visible when the draft extra is missing', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: BrainConfirmScreen(),
+        ),
+      ),
+    );
+    expect(find.byType(Scaffold), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('confirm screen reads the pending draft from provider', (
+    tester,
+  ) async {
+    final draft = FamilyBrainParser.parse(
+      'Finish the homework',
+      now: now,
+    ).draft!;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          pendingBrainDraftProvider.overrideWithValue(draft),
+        ],
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: BrainConfirmScreen(),
+        ),
+      ),
+    );
+    expect(find.text('Finish the homework'), findsWidgets);
+    expect(find.text('Confirm'), findsOneWidget);
   });
 }
