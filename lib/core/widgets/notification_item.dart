@@ -28,8 +28,12 @@ class NotificationItem extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(18),
-        child: Padding(
+        child: Container(
           padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: AppColors.border),
+          ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -71,8 +75,8 @@ class NotificationItem extends StatelessWidget {
                       notification.title,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: notification.read
-                                ? FontWeight.w600
-                                : FontWeight.w800,
+                                ? FontWeight.w500
+                                : FontWeight.w700,
                           ),
                     ),
                     const SizedBox(height: 4),

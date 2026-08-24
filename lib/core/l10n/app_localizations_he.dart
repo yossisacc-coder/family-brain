@@ -587,7 +587,7 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get appearanceHint =>
-      'Family Brain משתמש בערכת נושא בהירה ורגועה בטלפונים ובווב.';
+      'Family Brain משתמש בערכת נושא לבנה ונקייה עם הדגשות סגולות בטלפונים ובווב.';
 
   @override
   String get notificationsHint =>
@@ -619,7 +619,25 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
-  String get addToFamilyBrain => 'הוספת מידע';
+  String get sendToFamilyBrain => 'שליחה ל־Family Brain';
+
+  @override
+  String get quickAccess => 'גישה מהירה';
+
+  @override
+  String get events => 'אירועים';
+
+  @override
+  String get reminders => 'תזכורות';
+
+  @override
+  String get membersLabel => 'בני משפחה';
+
+  @override
+  String get viewFamily => 'למשפחה';
+
+  @override
+  String get addToFamilyBrain => 'שליחה ל־Family Brain';
 
   @override
   String get addToFamilyBrainHint =>

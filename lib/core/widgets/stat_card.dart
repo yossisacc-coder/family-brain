@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_radii.dart';
+import '../theme/app_spacing.dart';
 
 class StatCard extends StatelessWidget {
   const StatCard({
@@ -10,6 +12,7 @@ class StatCard extends StatelessWidget {
     required this.color,
     required this.background,
     required this.onTap,
+    this.icon,
   });
 
   final String label;
@@ -17,36 +20,39 @@ class StatCard extends StatelessWidget {
   final Color color;
   final Color background;
   final VoidCallback onTap;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Material(
         color: background,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: AppRadii.card,
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(18),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (icon != null)
+                  Icon(icon, size: 18, color: color),
+                if (icon != null) const SizedBox(height: AppSpacing.sm),
                 Text(
                   '$value',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
                         color: color,
+                        fontSize: 22,
                       ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
                         color: AppColors.textMuted,
-                        fontWeight: FontWeight.w600,
                       ),
                 ),
               ],

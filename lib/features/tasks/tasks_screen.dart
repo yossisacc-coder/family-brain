@@ -118,9 +118,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   onPressed: () => TaskTrash.undo(ref),
                   child: Text(
                     l10n.undo,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                      fontWeight: FontWeight.w800,
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
@@ -181,7 +181,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       if (!occupyUndoSlot)
                         SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
                           child: Row(
                             children: [
                               _chip(
@@ -251,9 +251,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                             : ListView.separated(
                                 key: const PageStorageKey('tasks-list'),
                                 padding: const EdgeInsets.fromLTRB(
-                                  16,
+                                  20,
                                   4,
-                                  16,
+                                  20,
                                   88,
                                 ),
                                 itemCount: filtered.length,

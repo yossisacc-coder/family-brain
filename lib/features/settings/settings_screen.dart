@@ -23,7 +23,7 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settings)),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
         children: [
           if (!publicMode && user != null)
             ListTile(
@@ -39,9 +39,7 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           Text(
             l10n.language,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 10),
           SegmentedButton<String>(
@@ -60,9 +58,7 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 20),
             Text(
               l10n.account,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             ListTile(
@@ -79,9 +75,7 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 24),
             Text(
               l10n.familySettings,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             ListTile(
@@ -98,9 +92,7 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           Text(
             l10n.appearance,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 6),
           Text(
@@ -127,7 +119,7 @@ class SettingsScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.urgentSoft,
+                color: AppColors.actionSoft,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
@@ -135,9 +127,7 @@ class SettingsScreen extends ConsumerWidget {
                 children: [
                   Text(
                     l10n.demoModeLabel,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+                    style: Theme.of(context).textTheme.titleSmall,
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -154,9 +144,7 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 28),
           Text(
             l10n.about,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
           Text(

@@ -209,7 +209,7 @@
   "familyTasks": "Family",
   "leaveFamily": "This is your current family workspace.",
   "jumpTo": "Go to",
-  "appearanceHint": "Family Brain uses a calm light theme on phones and in the browser.",
+  "appearanceHint": "Family Brain uses a clean white theme with purple brand accents on phones and in the browser.",
   "notificationsHint": "Notifications are informational events. Reminders stay on tasks and are not removed when you delete a notification.",
   "noMySpaceTasks": "No personal tasks yet",
   "noMySpaceMessage": "Personal tasks stay in My Space and are not shown as shared family work.",
@@ -223,7 +223,13 @@
       "count": { "type": "int" }
     }
   },
-  "addToFamilyBrain": "Add information",
+  "sendToFamilyBrain": "Send to Family Brain",
+  "quickAccess": "Quick access",
+  "events": "Events",
+  "reminders": "Reminders",
+  "membersLabel": "Members",
+  "viewFamily": "View family",
+  "addToFamilyBrain": "Send to Family Brain",
   "addToFamilyBrainHint": "Family Brain can turn this into tasks, events, reminders, and lists.",
   "tellFamilyBrain": "Tell Family Brain…",
   "attachInformation": "Attach",

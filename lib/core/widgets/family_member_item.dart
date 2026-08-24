@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../domain/models/app_user.dart';
 import '../../domain/models/task_item.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_radii.dart';
+import '../theme/app_spacing.dart';
 
 class FamilyMemberItem extends StatelessWidget {
   const FamilyMemberItem({
@@ -27,14 +29,14 @@ class FamilyMemberItem extends StatelessWidget {
     final initial = member.name.isEmpty ? '?' : member.name.characters.first;
     return Material(
       color: AppColors.card,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: AppRadii.card,
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
         child: Container(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(AppSpacing.card),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: AppRadii.card,
             border: Border.all(color: AppColors.border),
           ),
           child: Row(
@@ -44,16 +46,14 @@ class FamilyMemberItem extends StatelessWidget {
                 foregroundColor: AppColors.primaryDark,
                 child: Text(initial.toUpperCase()),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       isCurrentUser ? '${member.name} ($youLabel)' : member.name,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                      style: Theme.of(context).textTheme.titleSmall,
                     ),
                     if (showPhone) ...[
                       const SizedBox(height: 2),
@@ -70,17 +70,18 @@ class FamilyMemberItem extends StatelessWidget {
               Text(
                 '$openTaskCount',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
                       color: AppColors.primary,
                     ),
               ),
               if (onTap != null) ...[
                 const SizedBox(width: 8),
-                const Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 16,
-                  color: AppColors.textMuted,
-                ),
+              Icon(
+                Directionality.of(context) == TextDirection.rtl
+                    ? Icons.chevron_left_rounded
+                    : Icons.chevron_right_rounded,
+                size: 20,
+                color: AppColors.textMuted,
+              ),
               ],
             ],
           ),

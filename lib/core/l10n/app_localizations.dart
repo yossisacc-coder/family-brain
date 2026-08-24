@@ -1199,7 +1199,7 @@ abstract class AppLocalizations {
   /// No description provided for @appearanceHint.
   ///
   /// In en, this message translates to:
-  /// **'Family Brain uses a calm light theme on phones and in the browser.'**
+  /// **'Family Brain uses a clean white theme with purple brand accents on phones and in the browser.'**
   String get appearanceHint;
 
   /// No description provided for @notificationsHint.
@@ -1250,10 +1250,46 @@ abstract class AppLocalizations {
   /// **'{count} members'**
   String memberCount(int count);
 
+  /// No description provided for @sendToFamilyBrain.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to Family Brain'**
+  String get sendToFamilyBrain;
+
+  /// No description provided for @quickAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick access'**
+  String get quickAccess;
+
+  /// No description provided for @events.
+  ///
+  /// In en, this message translates to:
+  /// **'Events'**
+  String get events;
+
+  /// No description provided for @reminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get reminders;
+
+  /// No description provided for @membersLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get membersLabel;
+
+  /// No description provided for @viewFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'View family'**
+  String get viewFamily;
+
   /// No description provided for @addToFamilyBrain.
   ///
   /// In en, this message translates to:
-  /// **'Add information'**
+  /// **'Send to Family Brain'**
   String get addToFamilyBrain;
 
   /// No description provided for @addToFamilyBrainHint.

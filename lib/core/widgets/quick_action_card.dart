@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_radii.dart';
+import '../theme/app_spacing.dart';
 
 class QuickActionCard extends StatelessWidget {
   const QuickActionCard({
@@ -18,26 +20,25 @@ class QuickActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fg = emphasized ? Colors.white : AppColors.primary;
     return Material(
-      color: emphasized ? AppColors.primary : AppColors.card,
-      borderRadius: BorderRadius.circular(18),
+      color: emphasized ? AppColors.primary : AppColors.surface,
+      borderRadius: AppRadii.card,
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+          constraints: const BoxConstraints(minHeight: AppSpacing.touch),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: AppRadii.card,
             border: Border.all(
               color: emphasized ? AppColors.primary : AppColors.border,
             ),
           ),
           child: Column(
             children: [
-              Icon(
-                icon,
-                color: emphasized ? Colors.white : AppColors.primary,
-              ),
+              Icon(icon, color: fg, size: 22),
               const SizedBox(height: 8),
               Text(
                 label,
@@ -46,7 +47,6 @@ class QuickActionCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: emphasized ? Colors.white : AppColors.text,
-                      fontWeight: FontWeight.w700,
                     ),
               ),
             ],

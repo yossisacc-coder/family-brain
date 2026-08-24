@@ -72,7 +72,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                             icon: Icons.event_outlined,
                           )
                         : ListView.separated(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
                             itemCount: forDay.length,
                             separatorBuilder: (_, _) =>
                                 const SizedBox(height: 10),

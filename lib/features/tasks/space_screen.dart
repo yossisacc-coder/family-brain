@@ -29,8 +29,6 @@ class SpaceScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/tasks/new'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
         icon: const Icon(Icons.add_rounded),
         label: Text(l10n.addTask),
       ),
@@ -65,7 +63,7 @@ class SpaceScreen extends ConsumerWidget {
             children: [
               if (personal)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
                   child: Text(
                     l10n.privateSpaceHint,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -75,7 +73,7 @@ class SpaceScreen extends ConsumerWidget {
                 ),
               Expanded(
                 child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 88),
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 88),
                   itemCount: tasks.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {

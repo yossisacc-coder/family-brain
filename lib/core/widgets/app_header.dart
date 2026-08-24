@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:family_brain/core/l10n/app_localizations.dart';
+
 import '../theme/app_colors.dart';
+import '../theme/app_spacing.dart';
+import 'app_section_header.dart';
 
 class AppHeader extends StatelessWidget {
   const AppHeader({
@@ -9,6 +13,7 @@ class AppHeader extends StatelessWidget {
     required this.subtitle,
     required this.onNotifications,
     this.unreadCount = 0,
+    this.onSettings,
     this.trailing,
   });
 
@@ -16,80 +21,111 @@ class AppHeader extends StatelessWidget {
   final String subtitle;
   final VoidCallback onNotifications;
   final int unreadCount;
+  final VoidCallback? onSettings;
   final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
-          width: 46,
-          height: 46,
-          decoration: BoxDecoration(
-            color: AppColors.primarySoft,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: const Icon(Icons.home_rounded, color: AppColors.primary),
-        ),
-        const SizedBox(width: 12),
+        const AppBrandMark(),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                title,
+                subtitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: AppColors.primary,
                     ),
               ),
               const SizedBox(height: 2),
               Text(
-                subtitle,
+                title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textMuted,
-                    ),
+                style: Theme.of(context).textTheme.titleLarge,
               ),
             ],
           ),
         ),
         trailing ??
-            Stack(
-              clipBehavior: Clip.none,
+            Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(
+                _HeaderIcon(
+                  tooltip: AppLocalizations.of(context).notifications,
                   onPressed: onNotifications,
-                  icon: const Icon(Icons.notifications_none_rounded),
+                  icon: Icons.notifications_none_rounded,
+                  badge: unreadCount,
                 ),
-                if (unreadCount > 0)
-                  Positioned(
-                    right: 6,
-                    top: 6,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 5,
-                        vertical: 1,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.urgent,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        unreadCount > 9 ? '9+' : '$unreadCount',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
+                if (onSettings != null)
+                  _HeaderIcon(
+                    tooltip: AppLocalizations.of(context).settings,
+                    onPressed: onSettings!,
+                    icon: Icons.settings_outlined,
                   ),
               ],
             ),
       ],
+    );
+  }
+}
+
+class _HeaderIcon extends StatelessWidget {
+  const _HeaderIcon({
+    required this.onPressed,
+    required this.icon,
+    required this.tooltip,
+    this.badge = 0,
+  });
+
+  final VoidCallback onPressed;
+  final IconData icon;
+  final String tooltip;
+  final int badge;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: AppSpacing.touch,
+      height: AppSpacing.touch,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          IconButton(
+            tooltip: tooltip,
+            onPressed: onPressed,
+            icon: Icon(icon, color: AppColors.text),
+          ),
+          if (badge > 0)
+            Positioned.directional(
+              textDirection: Directionality.of(context),
+              end: 6,
+              top: 6,
+              child: Container(
+                constraints: const BoxConstraints(minWidth: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                decoration: BoxDecoration(
+                  color: AppColors.urgent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  badge > 9 ? '9+' : '$badge',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

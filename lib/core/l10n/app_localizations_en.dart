@@ -590,7 +590,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appearanceHint =>
-      'Family Brain uses a calm light theme on phones and in the browser.';
+      'Family Brain uses a clean white theme with purple brand accents on phones and in the browser.';
 
   @override
   String get notificationsHint =>
@@ -622,7 +622,25 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get addToFamilyBrain => 'Add information';
+  String get sendToFamilyBrain => 'Send to Family Brain';
+
+  @override
+  String get quickAccess => 'Quick access';
+
+  @override
+  String get events => 'Events';
+
+  @override
+  String get reminders => 'Reminders';
+
+  @override
+  String get membersLabel => 'Members';
+
+  @override
+  String get viewFamily => 'View family';
+
+  @override
+  String get addToFamilyBrain => 'Send to Family Brain';
 
   @override
   String get addToFamilyBrainHint =>

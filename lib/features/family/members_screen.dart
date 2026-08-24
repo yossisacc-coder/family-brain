@@ -48,7 +48,7 @@ class MembersScreen extends ConsumerWidget {
             ),
             data: (members) {
               return ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                 children: [
                   Text(
                     l10n.familyOverview,
@@ -59,9 +59,7 @@ class MembersScreen extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(
                     family.name,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 6),
                   Text(

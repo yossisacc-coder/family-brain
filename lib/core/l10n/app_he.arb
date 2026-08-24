@@ -183,7 +183,7 @@
   "familyTasks": "משפחתיות",
   "leaveFamily": "זו סביבת העבודה המשפחתית הנוכחית שלכם.",
   "jumpTo": "מעבר אל",
-  "appearanceHint": "Family Brain משתמש בערכת נושא בהירה ורגועה בטלפונים ובווב.",
+  "appearanceHint": "Family Brain משתמש בערכת נושא לבנה ונקייה עם הדגשות סגולות בטלפונים ובווב.",
   "notificationsHint": "התראות הן אירועים מידעיים. תזכורות שייכות למשימות ואינן נמחקות כשמוחקים התראה.",
   "noMySpaceTasks": "אין משימות אישיות",
   "noMySpaceMessage": "משימות אישיות נשארות במרחב שלי ואינן מוצגות כעבודה משפחתית משותפת.",
@@ -197,7 +197,13 @@
       "count": { "type": "int" }
     }
   },
-  "addToFamilyBrain": "הוספת מידע",
+  "sendToFamilyBrain": "שליחה ל־Family Brain",
+  "quickAccess": "גישה מהירה",
+  "events": "אירועים",
+  "reminders": "תזכורות",
+  "membersLabel": "בני משפחה",
+  "viewFamily": "למשפחה",
+  "addToFamilyBrain": "שליחה ל־Family Brain",
   "addToFamilyBrainHint": "Family Brain יכול להפוך את זה למשימות, אירועים, תזכורות ורשימות.",
   "tellFamilyBrain": "ספרו ל־Family Brain…",
   "attachInformation": "צירוף",

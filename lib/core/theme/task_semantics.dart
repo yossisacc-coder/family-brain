@@ -39,7 +39,7 @@ class TaskSemantics {
 
   static Color statusColor(TaskStatus status) {
     return switch (status) {
-      TaskStatus.pending => AppColors.info,
+      TaskStatus.pending => AppColors.textMuted,
       TaskStatus.inProgress => AppColors.success,
       TaskStatus.completed => AppColors.completed,
     };
@@ -47,7 +47,7 @@ class TaskSemantics {
 
   static Color priorityColor(TaskPriority priority) {
     return switch (priority) {
-      TaskPriority.normal => AppColors.info,
+      TaskPriority.normal => AppColors.textMuted,
       TaskPriority.high => AppColors.high,
       TaskPriority.urgent => AppColors.urgent,
     };
@@ -59,6 +59,6 @@ class TaskSemantics {
     if (task.status == TaskStatus.inProgress) return AppColors.success;
     if (task.isUrgent) return AppColors.urgent;
     if (task.isHigh || task.isOverdue()) return AppColors.high;
-    return AppColors.info;
+    return AppColors.primary;
   }
 }

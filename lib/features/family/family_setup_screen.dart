@@ -97,9 +97,7 @@ class _FamilySetupScreenState extends ConsumerState<FamilySetupScreen> {
           const SizedBox(height: 20),
           Text(
             l10n.createFamilyTitle,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 10),
           TextField(
@@ -118,9 +116,7 @@ class _FamilySetupScreenState extends ConsumerState<FamilySetupScreen> {
           const SizedBox(height: 28),
           Text(
             l10n.joinFamilyTitle,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 10),
           TextField(

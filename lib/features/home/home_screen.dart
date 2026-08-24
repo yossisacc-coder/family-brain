@@ -4,14 +4,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radii.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_header.dart';
+import '../../core/widgets/app_section_header.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
+import '../../core/widgets/quick_action_card.dart';
 import '../../core/widgets/stat_card.dart';
 import '../../core/widgets/task_card.dart';
 import '../../data/providers.dart';
 import '../../domain/models/app_user.dart';
+import '../../domain/models/task_item.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -60,149 +66,132 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             final tasks =
                 all.where((task) => task.isVisibleTo(user.id)).toList();
             final open = tasks.where((task) => task.isOpen).toList();
-            final urgent = tasks.where((task) => task.isUrgent).toList();
-            final mine =
-                open.where((task) => task.assigneeId == user.id).toList();
-            final preview = [
-              ...urgent,
-              ...mine.where((task) => !urgent.contains(task)),
-              ...open.where(
-                (task) => !urgent.contains(task) && !mine.contains(task),
-              ),
-            ].take(3).toList();
+            final reminders =
+                open.where((task) => task.hasReminder).toList();
+            final events = open.where((task) => task.dueDate != null).toList();
+            final today = _todayItems(open);
 
             return SafeArea(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.page,
+                  AppSpacing.md,
+                  AppSpacing.page,
+                  AppSpacing.xxl,
+                ),
                 children: [
                   AppHeader(
                     title: _greeting(l10n, user.name),
-                    subtitle: family?.name ?? l10n.currentFamily,
+                    subtitle: l10n.appTitle,
                     unreadCount: unread,
                     onNotifications: () => context.push('/notifications'),
+                    onSettings: () => context.go('/app/settings'),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.needsAttention,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.section),
                   Row(
                     children: [
                       StatCard(
-                        label: l10n.openTasks,
-                        value: open.length,
-                        color: AppColors.primaryDark,
+                        label: l10n.membersLabel,
+                        value: members.length,
+                        icon: Icons.groups_outlined,
+                        color: AppColors.primary,
                         background: AppColors.primarySoft,
-                        onTap: () => context.go('/app/tasks'),
+                        onTap: () => context.go('/app/family'),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       StatCard(
-                        label: l10n.urgentTasks,
-                        value: urgent.length,
-                        color: AppColors.urgent,
-                        background: AppColors.urgentSoft,
+                        label: l10n.tasks,
+                        value: open.length,
+                        icon: Icons.check_circle_outline,
+                        color: AppColors.action,
+                        background: AppColors.actionSoft,
                         onTap: () => context.go('/app/tasks'),
-                      ),
-                      const SizedBox(width: 8),
-                      StatCard(
-                        label: l10n.myTasks,
-                        value: mine.length,
-                        color: AppColors.success,
-                        background: AppColors.successSoft,
-                        onTap: () => context.push('/space/personal'),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    children: [
+                      StatCard(
+                        label: l10n.reminders,
+                        value: reminders.length,
+                        icon: Icons.alarm_outlined,
+                        color: AppColors.success,
+                        background: AppColors.successSoft,
+                        onTap: () => context.push('/tasks/calendar'),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      StatCard(
+                        label: l10n.events,
+                        value: events.length,
+                        icon: Icons.event_outlined,
+                        color: AppColors.primaryDark,
+                        background: AppColors.surface,
+                        onTap: () => context.push('/tasks/calendar'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.section),
+                  AppSectionHeader(title: l10n.quickAccess),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: QuickActionCard(
+                          icon: Icons.calendar_today_outlined,
+                          label: l10n.calendar,
+                          onTap: () => context.push('/tasks/calendar'),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: QuickActionCard(
+                          icon: Icons.checklist_rounded,
+                          label: l10n.tasks,
+                          onTap: () => context.go('/app/tasks'),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: QuickActionCard(
+                          icon: Icons.person_outline,
+                          label: l10n.mySpace,
+                          onTap: () => context.push('/space/personal'),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: QuickActionCard(
+                          icon: Icons.groups_outlined,
+                          label: l10n.familySpace,
+                          onTap: () => context.push('/space/family'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.section),
                   _ComposerCard(
                     controller: _composer,
                     onSubmit: () => _submitComposer(context, l10n),
                     onComingSoon: () => _comingSoon(context, l10n),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.jumpTo,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+                  const SizedBox(height: AppSpacing.section),
+                  AppSectionHeader(
+                    title: l10n.todayActivity,
+                    actionLabel: l10n.seeAllTasks,
+                    onAction: () => context.go('/app/tasks'),
                   ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _JumpChip(
-                        icon: Icons.checklist_rounded,
-                        label: l10n.viewTasks,
-                        onTap: () => context.go('/app/tasks'),
-                      ),
-                      _JumpChip(
-                        icon: Icons.calendar_today_outlined,
-                        label: l10n.calendar,
-                        onTap: () => context.push('/tasks/calendar'),
-                      ),
-                      _JumpChip(
-                        icon: Icons.person_outline,
-                        label: l10n.mySpace,
-                        onTap: () => context.push('/space/personal'),
-                      ),
-                      _JumpChip(
-                        icon: Icons.groups_outlined,
-                        label: l10n.familySpace,
-                        onTap: () => context.push('/space/family'),
-                      ),
-                      _JumpChip(
-                        icon: Icons.notifications_outlined,
-                        label: l10n.notifications,
-                        badge: unread,
-                        onTap: () => context.push('/notifications'),
-                      ),
-                      _JumpChip(
-                        icon: Icons.settings_outlined,
-                        label: l10n.goToSettings,
-                        onTap: () => context.go('/app/settings'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  _FamilyMembersRow(
-                    members: members,
-                    currentUserId: user.id,
-                    onAdd: () => context.go('/app/family'),
-                  ),
-                  const SizedBox(height: 18),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          l10n.todayActivity,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w800),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () => context.go('/app/tasks'),
-                        child: Text(l10n.seeAllTasks),
-                      ),
-                    ],
-                  ),
-                  if (preview.isEmpty)
+                  if (today.isEmpty)
                     EmptyState(
-                      title: l10n.noTasksYet,
+                      title: l10n.noUpcoming,
                       message: l10n.emptyTasksMessage,
                       actionLabel: l10n.addFirstTask,
                       onAction: () => context.push('/tasks/new'),
-                      icon: Icons.spa_outlined,
+                      icon: Icons.wb_sunny_outlined,
                     )
                   else
-                    ...preview.map(
+                    ...today.map(
                       (task) => Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                         child: TaskCard(
                           task: task,
                           members: members,
@@ -211,6 +200,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                       ),
                     ),
+                  const SizedBox(height: AppSpacing.md),
+                  _FamilyMembersRow(
+                    members: members,
+                    currentUserId: user.id,
+                    familyName: family?.name ?? l10n.currentFamily,
+                    onViewFamily: () => context.go('/app/family'),
+                    onAdd: () => context.go('/app/family'),
+                  ),
                 ],
               ),
             );
@@ -218,6 +215,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         );
       },
     );
+  }
+
+  List<TaskItem> _todayItems(List<TaskItem> open) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final matches = open.where((task) {
+      if (task.dueDate != null) {
+        final due = DateTime(
+          task.dueDate!.year,
+          task.dueDate!.month,
+          task.dueDate!.day,
+        );
+        if (due == today || task.isOverdue(now)) return true;
+      }
+      if (task.reminderAt != null) {
+        final reminder = DateTime(
+          task.reminderAt!.year,
+          task.reminderAt!.month,
+          task.reminderAt!.day,
+        );
+        if (reminder == today) return true;
+      }
+      return task.isUrgent;
+    }).toList();
+    matches.sort((a, b) {
+      final aTime = a.dueDate ?? a.reminderAt ?? a.createdAt;
+      final bTime = b.dueDate ?? b.reminderAt ?? b.createdAt;
+      return aTime.compareTo(bTime);
+    });
+    return matches.take(4).toList();
   }
 
   void _comingSoon(BuildContext context, AppLocalizations l10n) {
@@ -254,69 +281,71 @@ class _ComposerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Material(
+    return AppCard(
       color: AppColors.primarySoft,
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.addToFamilyBrain,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              l10n.addToFamilyBrainHint,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textMuted,
-                    height: 1.35,
-                  ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              minLines: 1,
-              maxLines: 3,
-              textInputAction: TextInputAction.send,
-              onSubmitted: (_) => onSubmit(),
-              decoration: InputDecoration(
-                hintText: l10n.tellFamilyBrain,
-                filled: true,
-                fillColor: AppColors.card,
+      borderColor: AppColors.primary.withValues(alpha: 0.18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.auto_awesome_rounded, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.sendToFamilyBrain,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
               ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.addToFamilyBrainHint,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textMuted,
+                ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          TextField(
+            controller: controller,
+            minLines: 1,
+            maxLines: 3,
+            textInputAction: TextInputAction.send,
+            onSubmitted: (_) => onSubmit(),
+            decoration: InputDecoration(
+              hintText: l10n.tellFamilyBrain,
+              filled: true,
+              fillColor: AppColors.card,
             ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                IconButton(
-                  tooltip: l10n.attachInformation,
-                  onPressed: onComingSoon,
-                  icon: const Icon(Icons.attach_file_outlined),
-                ),
-                IconButton(
-                  tooltip: l10n.voiceInput,
-                  onPressed: onComingSoon,
-                  icon: const Icon(Icons.mic_none_rounded),
-                ),
-                IconButton(
-                  tooltip: l10n.askAi,
-                  onPressed: onComingSoon,
-                  icon: const Icon(Icons.auto_awesome_outlined),
-                ),
-                const Spacer(),
-                IconButton.filled(
-                  tooltip: l10n.addToFamilyBrain,
-                  onPressed: onSubmit,
-                  icon: const Icon(Icons.send_rounded),
-                ),
-              ],
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            children: [
+              IconButton(
+                tooltip: l10n.attachInformation,
+                onPressed: onComingSoon,
+                icon: const Icon(Icons.attach_file_outlined),
+              ),
+              IconButton(
+                tooltip: l10n.voiceInput,
+                onPressed: onComingSoon,
+                icon: const Icon(Icons.mic_none_rounded),
+              ),
+              IconButton(
+                tooltip: l10n.askAi,
+                onPressed: onComingSoon,
+                icon: const Icon(Icons.auto_awesome_outlined),
+              ),
+              const Spacer(),
+              IconButton.filled(
+                tooltip: l10n.sendToFamilyBrain,
+                onPressed: onSubmit,
+                icon: const Icon(Icons.send_rounded),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -326,52 +355,87 @@ class _FamilyMembersRow extends StatelessWidget {
   const _FamilyMembersRow({
     required this.members,
     required this.currentUserId,
+    required this.familyName,
+    required this.onViewFamily,
     required this.onAdd,
   });
 
   final List<AppUser> members;
   final String currentUserId;
+  final String familyName;
+  final VoidCallback onViewFamily;
   final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.familyMembers,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
+    return AppCard(
+      onTap: onViewFamily,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.family,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    Text(
+                      familyName,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.textMuted,
+                          ),
+                    ),
+                  ],
+                ),
               ),
-        ),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 86,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: members.length + 1,
-            separatorBuilder: (_, _) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              if (index == members.length) {
-                return _MemberAvatar(
-                  label: l10n.addFamilyMember,
-                  onTap: onAdd,
-                  isAdd: true,
-                );
-              }
-              final member = members[index];
-              return _MemberAvatar(
-                label: member.id == currentUserId
-                    ? l10n.you
-                    : member.name.split(' ').first,
-                initial: member.name,
-                onTap: () => context.push('/family/members/${member.id}'),
-              );
-            },
+              Text(
+                l10n.viewFamily,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: AppColors.action,
+                    ),
+              ),
+              Icon(
+                Directionality.of(context) == TextDirection.rtl
+                    ? Icons.chevron_left_rounded
+                    : Icons.chevron_right_rounded,
+                size: 18,
+                color: AppColors.action,
+              ),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: AppSpacing.md),
+          SizedBox(
+            height: 78,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: members.length + 1,
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                if (index == members.length) {
+                  return _MemberAvatar(
+                    label: l10n.addFamilyMember,
+                    onTap: onAdd,
+                    isAdd: true,
+                  );
+                }
+                final member = members[index];
+                return _MemberAvatar(
+                  label: member.id == currentUserId
+                      ? l10n.you
+                      : member.name.split(' ').first,
+                  initial: member.name,
+                  onTap: () => context.push('/family/members/${member.id}'),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -396,13 +460,13 @@ class _MemberAvatar extends StatelessWidget {
         : initial!.characters.first.toUpperCase();
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: AppRadii.icon,
       child: SizedBox(
-        width: 72,
+        width: 68,
         child: Column(
           children: [
             CircleAvatar(
-              radius: 24,
+              radius: 22,
               backgroundColor:
                   isAdd ? AppColors.card : AppColors.primarySoft,
               foregroundColor: AppColors.primaryDark,
@@ -416,54 +480,11 @@ class _MemberAvatar extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(context).textTheme.labelSmall,
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class _JumpChip extends StatelessWidget {
-  const _JumpChip({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.badge = 0,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final int badge;
-
-  @override
-  Widget build(BuildContext context) {
-    return ActionChip(
-      avatar: Icon(icon, size: 18, color: AppColors.primary),
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(label),
-          if (badge > 0) ...[
-            const SizedBox(width: 6),
-            CircleAvatar(
-              radius: 8,
-              backgroundColor: AppColors.info,
-              child: Text(
-                '$badge',
-                style: const TextStyle(color: Colors.white, fontSize: 10),
-              ),
-            ),
-          ],
-        ],
-      ),
-      onPressed: onTap,
-      backgroundColor: AppColors.card,
-      side: const BorderSide(color: AppColors.border),
     );
   }
 }
