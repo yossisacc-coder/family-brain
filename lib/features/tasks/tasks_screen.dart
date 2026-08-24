@@ -125,8 +125,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   final filtered = visible.where((task) {
                     if (_hiddenIds.contains(task.id)) return false;
                     if (_status != null && task.status != _status) return false;
-                    if (_memberId != null && task.assigneeId != _memberId)
+                    if (_memberId != null && task.assigneeId != _memberId) {
                       return false;
+                    }
                     if (_type != null && task.type != _type) return false;
                     return true;
                   }).toList();
