@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/theme/app_colors.dart';
+
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
+  static const tasksTabIndex = 1;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final onTasks = navigationShell.currentIndex == tasksTabIndex;
     return PopScope(
       canPop: navigationShell.currentIndex == 0,
       onPopInvokedWithResult: (didPop, _) {
@@ -20,6 +25,15 @@ class AppShell extends StatelessWidget {
       },
       child: Scaffold(
         body: navigationShell,
+        floatingActionButton: onTasks
+            ? FloatingActionButton.extended(
+                onPressed: () => context.push('/tasks/new'),
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                icon: const Icon(Icons.add_rounded),
+                label: Text(l10n.addTask),
+              )
+            : null,
         bottomNavigationBar: NavigationBar(
           selectedIndex: navigationShell.currentIndex,
           onDestinationSelected: (index) {

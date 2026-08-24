@@ -51,10 +51,19 @@ class FirestoreTaskRepository implements TaskRepository {
   }
 
   @override
-  Future<TaskItem> restoreTask(TaskItem task) {
-    return updateTask(
-      task.copyWith(clearDeleted: true, updatedAt: DateTime.now()),
+  Future<TaskItem> restoreTask(TaskItem task) async {
+    final snap = await _col.doc(task.id).get();
+    final current =
+        snap.data() == null ? task : TaskItem.fromMap(snap.data()!);
+    final restored = current.copyWith(
+      clearDeleted: true,
+      updatedAt: DateTime.now(),
     );
+    await _col.doc(task.id).set({
+      ...restored.toMap(),
+      'deletedAt': FieldValue.delete(),
+    });
+    return restored;
   }
 
   @override

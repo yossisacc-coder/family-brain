@@ -27,6 +27,7 @@ class FamilyBrainApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       locale: locale,
       theme: AppTheme.light(locale),
+      scaffoldMessengerKey: rootScaffoldMessengerKey,
       routerConfig: router,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

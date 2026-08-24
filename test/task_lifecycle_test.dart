@@ -38,6 +38,19 @@ void main() {
     expect(await repo.watchTrashedTasks('family-1').first, isEmpty);
   });
 
+  test('undo restore reads the stored trashed document', () async {
+    final store = LocalJsonStore(persist: false);
+    final repo = LocalTaskRepository(store);
+    final task = sampleTask();
+    await repo.createTask(task);
+    await repo.moveToTrash(task);
+
+    final restored = await repo.restoreTask(task);
+    expect(restored.isTrashed, isFalse);
+    expect(store.tasks['task-1']?['deletedAt'], isNull);
+    expect((await repo.watchFamilyTasks('family-1').first).single.id, 'task-1');
+  });
+
   test('completed tasks remain in the active list and can be reopened', () async {
     final store = LocalJsonStore(persist: false);
     final repo = LocalTaskRepository(store);

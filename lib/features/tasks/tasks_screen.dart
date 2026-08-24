@@ -203,13 +203,6 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/tasks/new'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add_rounded),
-        label: Text(l10n.addTask),
-      ),
     );
   }
 
