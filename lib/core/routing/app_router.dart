@@ -90,7 +90,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/tasks/new',
-        builder: (context, state) => const TaskFormScreen(),
+        builder: (context, state) {
+          final extra = state.extra as Map?;
+          return TaskFormScreen(
+            initialTitle: extra?['title'] as String?,
+          );
+        },
       ),
       GoRoute(
         path: '/tasks/calendar',

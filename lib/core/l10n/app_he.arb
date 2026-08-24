@@ -196,5 +196,18 @@
     "placeholders": {
       "count": { "type": "int" }
     }
-  }
+  },
+  "addToFamilyBrain": "הוספת מידע",
+  "addToFamilyBrainHint": "Family Brain יכול להפוך את זה למשימות, אירועים, תזכורות ורשימות.",
+  "tellFamilyBrain": "ספרו ל־Family Brain…",
+  "attachInformation": "צירוף",
+  "voiceInput": "דיבור",
+  "askAi": "שאלו את AI",
+  "comingSoon": "יהיה זמין בעדכון הבא.",
+  "messageMember": "הודעה",
+  "callMember": "שיחה",
+  "sharedWithMember": "מידע משותף",
+  "addFamilyMember": "הוספה",
+  "todayActivity": "היום",
+  "phoneNotShared": "מספר הטלפון אינו משותף"
 }

@@ -8,17 +8,29 @@ import '../../core/widgets/app_header.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
-import '../../core/widgets/quick_action_card.dart';
 import '../../core/widgets/stat_card.dart';
 import '../../core/widgets/task_card.dart';
 import '../../data/providers.dart';
-import '../../domain/models/task_item.dart';
+import '../../domain/models/app_user.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final _composer = TextEditingController();
+
+  @override
+  void dispose() {
+    _composer.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final userAsync = ref.watch(currentUserProvider);
     final familyAsync = ref.watch(currentFamilyProvider);
@@ -51,17 +63,13 @@ class HomeScreen extends ConsumerWidget {
             final urgent = tasks.where((task) => task.isUrgent).toList();
             final mine =
                 open.where((task) => task.assigneeId == user.id).toList();
-            final done = tasks
-                .where((task) => task.status == TaskStatus.completed)
-                .take(3)
-                .toList();
             final preview = [
               ...urgent,
               ...mine.where((task) => !urgent.contains(task)),
               ...open.where(
                 (task) => !urgent.contains(task) && !mine.contains(task),
               ),
-            ].take(4).toList();
+            ].take(3).toList();
 
             return SafeArea(
               child: ListView(
@@ -73,14 +81,14 @@ class HomeScreen extends ConsumerWidget {
                     unreadCount: unread,
                     onNotifications: () => context.push('/notifications'),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 16),
                   Text(
                     l10n.needsAttention,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
                         ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       StatCard(
@@ -108,53 +116,11 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      StatCard(
-                        label: l10n.recentlyCompleted,
-                        value: done.length,
-                        color: AppColors.completed,
-                        background: AppColors.card,
-                        onTap: () => context.go('/app/tasks'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 22),
-                  Text(
-                    l10n.quickActions,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: QuickActionCard(
-                          label: l10n.addTask,
-                          icon: Icons.add_rounded,
-                          emphasized: true,
-                          onTap: () => context.push('/tasks/new'),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: QuickActionCard(
-                          label: l10n.viewTasks,
-                          icon: Icons.checklist_rounded,
-                          onTap: () => context.go('/app/tasks'),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: QuickActionCard(
-                          label: l10n.familyMembers,
-                          icon: Icons.groups_rounded,
-                          onTap: () => context.go('/app/family'),
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 16),
+                  _ComposerCard(
+                    controller: _composer,
+                    onSubmit: () => _submitComposer(context, l10n),
+                    onComingSoon: () => _comingSoon(context, l10n),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -168,6 +134,11 @@ class HomeScreen extends ConsumerWidget {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
+                      _JumpChip(
+                        icon: Icons.checklist_rounded,
+                        label: l10n.viewTasks,
+                        onTap: () => context.go('/app/tasks'),
+                      ),
                       _JumpChip(
                         icon: Icons.calendar_today_outlined,
                         label: l10n.calendar,
@@ -197,11 +168,17 @@ class HomeScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
+                  _FamilyMembersRow(
+                    members: members,
+                    currentUserId: user.id,
+                    onAdd: () => context.go('/app/family'),
+                  ),
+                  const SizedBox(height: 18),
                   Row(
                     children: [
                       Expanded(
                         child: Text(
-                          l10n.upcomingTasks,
+                          l10n.todayActivity,
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
@@ -234,17 +211,6 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-                  if (preview.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        l10n.noUpcoming,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textMuted,
-                            ),
-                      ),
-                    ),
                 ],
               ),
             );
@@ -254,11 +220,210 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
+  void _comingSoon(BuildContext context, AppLocalizations l10n) {
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text(l10n.comingSoon)));
+  }
+
+  void _submitComposer(BuildContext context, AppLocalizations l10n) {
+    final text = _composer.text.trim();
+    context.push('/tasks/new', extra: {'title': text});
+    _composer.clear();
+  }
+
   String _greeting(AppLocalizations l10n, String name) {
     final hour = DateTime.now().hour;
     if (hour < 12) return l10n.greetingMorning(name);
     if (hour < 17) return l10n.greetingAfternoon(name);
     return l10n.greetingEvening(name);
+  }
+}
+
+class _ComposerCard extends StatelessWidget {
+  const _ComposerCard({
+    required this.controller,
+    required this.onSubmit,
+    required this.onComingSoon,
+  });
+
+  final TextEditingController controller;
+  final VoidCallback onSubmit;
+  final VoidCallback onComingSoon;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Material(
+      color: AppColors.primarySoft,
+      borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.addToFamilyBrain,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              l10n.addToFamilyBrainHint,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textMuted,
+                    height: 1.35,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              minLines: 1,
+              maxLines: 3,
+              textInputAction: TextInputAction.send,
+              onSubmitted: (_) => onSubmit(),
+              decoration: InputDecoration(
+                hintText: l10n.tellFamilyBrain,
+                filled: true,
+                fillColor: AppColors.card,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                IconButton(
+                  tooltip: l10n.attachInformation,
+                  onPressed: onComingSoon,
+                  icon: const Icon(Icons.attach_file_outlined),
+                ),
+                IconButton(
+                  tooltip: l10n.voiceInput,
+                  onPressed: onComingSoon,
+                  icon: const Icon(Icons.mic_none_rounded),
+                ),
+                IconButton(
+                  tooltip: l10n.askAi,
+                  onPressed: onComingSoon,
+                  icon: const Icon(Icons.auto_awesome_outlined),
+                ),
+                const Spacer(),
+                IconButton.filled(
+                  tooltip: l10n.addToFamilyBrain,
+                  onPressed: onSubmit,
+                  icon: const Icon(Icons.send_rounded),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FamilyMembersRow extends StatelessWidget {
+  const _FamilyMembersRow({
+    required this.members,
+    required this.currentUserId,
+    required this.onAdd,
+  });
+
+  final List<AppUser> members;
+  final String currentUserId;
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.familyMembers,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 86,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: members.length + 1,
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              if (index == members.length) {
+                return _MemberAvatar(
+                  label: l10n.addFamilyMember,
+                  onTap: onAdd,
+                  isAdd: true,
+                );
+              }
+              final member = members[index];
+              return _MemberAvatar(
+                label: member.id == currentUserId
+                    ? l10n.you
+                    : member.name.split(' ').first,
+                initial: member.name,
+                onTap: () => context.push('/family/members/${member.id}'),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MemberAvatar extends StatelessWidget {
+  const _MemberAvatar({
+    required this.label,
+    required this.onTap,
+    this.initial,
+    this.isAdd = false,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+  final String? initial;
+  final bool isAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    final letter = (initial == null || initial!.isEmpty)
+        ? '+'
+        : initial!.characters.first.toUpperCase();
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: SizedBox(
+        width: 72,
+        child: Column(
+          children: [
+            CircleAvatar(
+              radius: 24,
+              backgroundColor:
+                  isAdd ? AppColors.card : AppColors.primarySoft,
+              foregroundColor: AppColors.primaryDark,
+              child: isAdd
+                  ? const Icon(Icons.add_rounded, color: AppColors.primary)
+                  : Text(letter),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

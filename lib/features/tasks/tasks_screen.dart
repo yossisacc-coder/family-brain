@@ -8,6 +8,7 @@ import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
 import '../../core/widgets/task_card.dart';
+import '../../core/widgets/task_trash.dart';
 import '../../data/providers.dart';
 import '../../domain/models/task_item.dart';
 
@@ -22,6 +23,28 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   TaskStatus? _status;
   String? _memberId;
   TaskType? _type;
+  final _hiddenIds = <String>{};
+
+  void _hideForUndo(String taskId) {
+    setState(() => _hiddenIds.add(taskId));
+  }
+
+  void _showAfterUndo(String taskId) {
+    if (!mounted) return;
+    setState(() => _hiddenIds.remove(taskId));
+  }
+
+  Future<void> _deleteFromList(TaskItem task, AppLocalizations l10n) async {
+    if (!await TaskTrash.confirm(context, l10n) || !mounted) return;
+    _hideForUndo(task.id);
+    await TaskTrash.move(
+      context: context,
+      ref: ref,
+      task: task,
+      l10n: l10n,
+      onUndo: () => _showAfterUndo(task.id),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +86,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
               ? all.where((task) => task.type == TaskType.family)
               : all.where((task) => task.isVisibleTo(user.id));
           final filtered = visible.where((task) {
+            if (_hiddenIds.contains(task.id)) return false;
             if (_status != null && task.status != _status) return false;
             if (_memberId != null && task.assigneeId != _memberId) return false;
             if (_type != null && task.type != _type) return false;
@@ -132,15 +156,45 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                         onAction: () => context.push('/tasks/new'),
                       )
                     : ListView.separated(
+                        key: const PageStorageKey('tasks-list'),
                         padding: const EdgeInsets.fromLTRB(16, 4, 16, 88),
                         itemCount: filtered.length,
                         separatorBuilder: (_, _) => const SizedBox(height: 10),
                         itemBuilder: (context, index) {
                           final task = filtered[index];
-                          return TaskCard(
-                            task: task,
-                            members: members,
-                            onTap: () => context.push('/tasks/${task.id}'),
+                          return Dismissible(
+                            key: ValueKey(task.id),
+                            direction: DismissDirection.endToStart,
+                            confirmDismiss: (_) =>
+                                TaskTrash.confirm(context, l10n),
+                            background: Container(
+                              alignment: AlignmentDirectional.centerEnd,
+                              padding: const EdgeInsetsDirectional.only(end: 20),
+                              decoration: BoxDecoration(
+                                color: AppColors.urgentSoft,
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: const Icon(
+                                Icons.delete_outline,
+                                color: AppColors.trash,
+                              ),
+                            ),
+                            onDismissed: (_) {
+                              _hideForUndo(task.id);
+                              TaskTrash.move(
+                                context: context,
+                                ref: ref,
+                                task: task,
+                                l10n: l10n,
+                                onUndo: () => _showAfterUndo(task.id),
+                              );
+                            },
+                            child: TaskCard(
+                              task: task,
+                              members: members,
+                              onTap: () => context.push('/tasks/${task.id}'),
+                              onDelete: () => _deleteFromList(task, l10n),
+                            ),
                           );
                         },
                       ),

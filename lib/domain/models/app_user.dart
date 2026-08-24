@@ -7,6 +7,7 @@ class AppUser {
     required this.createdAt,
     this.familyId,
     this.fcmToken,
+    this.sharePhone = false,
   });
 
   final String id;
@@ -16,14 +17,20 @@ class AppUser {
   final DateTime createdAt;
   final String? familyId;
   final String? fcmToken;
+  final bool sharePhone;
 
   bool get hasFamily => familyId != null && familyId!.isNotEmpty;
+
+  /// Phone is only shown for calling/contact when the member chose to share it,
+  /// or when viewing your own profile.
+  bool phoneVisibleTo(String viewerId) => id == viewerId || sharePhone;
 
   AppUser copyWith({
     String? name,
     String? language,
     String? familyId,
     String? fcmToken,
+    bool? sharePhone,
     bool clearFamily = false,
   }) {
     return AppUser(
@@ -34,6 +41,7 @@ class AppUser {
       createdAt: createdAt,
       familyId: clearFamily ? null : (familyId ?? this.familyId),
       fcmToken: fcmToken ?? this.fcmToken,
+      sharePhone: sharePhone ?? this.sharePhone,
     );
   }
 
@@ -46,6 +54,7 @@ class AppUser {
       'createdAt': createdAt.toIso8601String(),
       'familyId': familyId,
       'fcmToken': fcmToken,
+      'sharePhone': sharePhone,
     };
   }
 
@@ -59,6 +68,7 @@ class AppUser {
           DateTime.now(),
       familyId: map['familyId'] as String?,
       fcmToken: map['fcmToken'] as String?,
+      sharePhone: map['sharePhone'] as bool? ?? false,
     );
   }
 }

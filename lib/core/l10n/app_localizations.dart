@@ -1249,6 +1249,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} members'**
   String memberCount(int count);
+
+  /// No description provided for @addToFamilyBrain.
+  ///
+  /// In en, this message translates to:
+  /// **'Add information'**
+  String get addToFamilyBrain;
+
+  /// No description provided for @addToFamilyBrainHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Brain can turn this into tasks, events, reminders, and lists.'**
+  String get addToFamilyBrainHint;
+
+  /// No description provided for @tellFamilyBrain.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell Family Brain…'**
+  String get tellFamilyBrain;
+
+  /// No description provided for @attachInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach'**
+  String get attachInformation;
+
+  /// No description provided for @voiceInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice'**
+  String get voiceInput;
+
+  /// No description provided for @askAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask AI'**
+  String get askAi;
+
+  /// No description provided for @comingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'This will be available in a later update.'**
+  String get comingSoon;
+
+  /// No description provided for @messageMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get messageMember;
+
+  /// No description provided for @callMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Call'**
+  String get callMember;
+
+  /// No description provided for @sharedWithMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared information'**
+  String get sharedWithMember;
+
+  /// No description provided for @addFamilyMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addFamilyMember;
+
+  /// No description provided for @todayActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get todayActivity;
+
+  /// No description provided for @phoneNotShared.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number is not shared'**
+  String get phoneNotShared;
 }
 
 class _AppLocalizationsDelegate

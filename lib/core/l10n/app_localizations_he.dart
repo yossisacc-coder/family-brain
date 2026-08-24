@@ -617,4 +617,44 @@ class AppLocalizationsHe extends AppLocalizations {
   String memberCount(int count) {
     return '$count בני משפחה';
   }
+
+  @override
+  String get addToFamilyBrain => 'הוספת מידע';
+
+  @override
+  String get addToFamilyBrainHint =>
+      'Family Brain יכול להפוך את זה למשימות, אירועים, תזכורות ורשימות.';
+
+  @override
+  String get tellFamilyBrain => 'ספרו ל־Family Brain…';
+
+  @override
+  String get attachInformation => 'צירוף';
+
+  @override
+  String get voiceInput => 'דיבור';
+
+  @override
+  String get askAi => 'שאלו את AI';
+
+  @override
+  String get comingSoon => 'יהיה זמין בעדכון הבא.';
+
+  @override
+  String get messageMember => 'הודעה';
+
+  @override
+  String get callMember => 'שיחה';
+
+  @override
+  String get sharedWithMember => 'מידע משותף';
+
+  @override
+  String get addFamilyMember => 'הוספה';
+
+  @override
+  String get todayActivity => 'היום';
+
+  @override
+  String get phoneNotShared => 'מספר הטלפון אינו משותף';
 }

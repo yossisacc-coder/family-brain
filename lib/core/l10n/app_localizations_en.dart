@@ -620,4 +620,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String memberCount(int count) {
     return '$count members';
   }
+
+  @override
+  String get addToFamilyBrain => 'Add information';
+
+  @override
+  String get addToFamilyBrainHint =>
+      'Family Brain can turn this into tasks, events, reminders, and lists.';
+
+  @override
+  String get tellFamilyBrain => 'Tell Family Brain…';
+
+  @override
+  String get attachInformation => 'Attach';
+
+  @override
+  String get voiceInput => 'Voice';
+
+  @override
+  String get askAi => 'Ask AI';
+
+  @override
+  String get comingSoon => 'This will be available in a later update.';
+
+  @override
+  String get messageMember => 'Message';
+
+  @override
+  String get callMember => 'Call';
+
+  @override
+  String get sharedWithMember => 'Shared information';
+
+  @override
+  String get addFamilyMember => 'Add';
+
+  @override
+  String get todayActivity => 'Today';
+
+  @override
+  String get phoneNotShared => 'Phone number is not shared';
 }

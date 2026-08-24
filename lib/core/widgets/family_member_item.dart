@@ -12,6 +12,7 @@ class FamilyMemberItem extends StatelessWidget {
     required this.isCurrentUser,
     required this.youLabel,
     this.onTap,
+    this.showPhone = false,
   });
 
   final AppUser member;
@@ -19,6 +20,7 @@ class FamilyMemberItem extends StatelessWidget {
   final bool isCurrentUser;
   final String youLabel;
   final VoidCallback? onTap;
+  final bool showPhone;
 
   @override
   Widget build(BuildContext context) {
@@ -53,13 +55,15 @@ class FamilyMemberItem extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                           ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      member.phone,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textMuted,
-                          ),
-                    ),
+                    if (showPhone) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        member.phone,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textMuted,
+                            ),
+                      ),
+                    ],
                   ],
                 ),
               ),

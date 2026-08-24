@@ -222,5 +222,18 @@
     "placeholders": {
       "count": { "type": "int" }
     }
-  }
+  },
+  "addToFamilyBrain": "Add information",
+  "addToFamilyBrainHint": "Family Brain can turn this into tasks, events, reminders, and lists.",
+  "tellFamilyBrain": "Tell Family Brain…",
+  "attachInformation": "Attach",
+  "voiceInput": "Voice",
+  "askAi": "Ask AI",
+  "comingSoon": "This will be available in a later update.",
+  "messageMember": "Message",
+  "callMember": "Call",
+  "sharedWithMember": "Shared information",
+  "addFamilyMember": "Add",
+  "todayActivity": "Today",
+  "phoneNotShared": "Phone number is not shared"
 }

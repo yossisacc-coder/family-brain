@@ -13,12 +13,14 @@ class TaskCard extends StatelessWidget {
     required this.onTap,
     this.members = const [],
     this.compact = false,
+    this.onDelete,
   });
 
   final TaskItem task;
   final VoidCallback onTap;
   final List<AppUser> members;
   final bool compact;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -118,6 +120,12 @@ class TaskCard extends StatelessWidget {
                   ],
                 ),
               ),
+              if (onDelete != null)
+                IconButton(
+                  tooltip: l10n.deleteTask,
+                  onPressed: onDelete,
+                  icon: const Icon(Icons.delete_outline),
+                ),
               const Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 16,

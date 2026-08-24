@@ -41,6 +41,7 @@ class MemberDetailsScreen extends ConsumerWidget {
           );
         }
         final isYou = member.id == user?.id;
+        final showPhone = member.phoneVisibleTo(user?.id ?? '');
 
         return Scaffold(
           appBar: AppBar(title: Text(l10n.memberDetails)),
@@ -98,7 +99,7 @@ class MemberDetailsScreen extends ConsumerWidget {
                                   ?.copyWith(fontWeight: FontWeight.w800),
                             ),
                             Text(
-                              member.phone,
+                              showPhone ? member.phone : l10n.phoneNotShared,
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -106,6 +107,41 @@ class MemberDetailsScreen extends ConsumerWidget {
                             ),
                           ],
                         ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(0, 40),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        onPressed: () => _comingSoon(context, l10n),
+                        icon: const Icon(Icons.chat_bubble_outline),
+                        label: Text(l10n.messageMember),
+                      ),
+                      if (showPhone)
+                        OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(0, 40),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                          onPressed: () => _comingSoon(context, l10n),
+                          icon: const Icon(Icons.call_outlined),
+                          label: Text(l10n.callMember),
+                        ),
+                      OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(0, 40),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        onPressed: () => context.push('/space/family'),
+                        icon: const Icon(Icons.folder_shared_outlined),
+                        label: Text(l10n.sharedWithMember),
                       ),
                     ],
                   ),
@@ -175,6 +211,12 @@ class MemberDetailsScreen extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+
+  void _comingSoon(BuildContext context, AppLocalizations l10n) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.comingSoon)),
     );
   }
 }

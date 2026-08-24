@@ -11,9 +11,10 @@ import '../../data/providers.dart';
 import '../../domain/models/task_item.dart';
 
 class TaskFormScreen extends ConsumerStatefulWidget {
-  const TaskFormScreen({super.key, this.taskId});
+  const TaskFormScreen({super.key, this.taskId, this.initialTitle});
 
   final String? taskId;
+  final String? initialTitle;
 
   @override
   ConsumerState<TaskFormScreen> createState() => _TaskFormScreenState();
@@ -34,6 +35,15 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
   String? _error;
 
   bool get _isEditing => widget.taskId != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final seed = widget.initialTitle?.trim();
+    if (seed != null && seed.isNotEmpty) {
+      _title.text = seed;
+    }
+  }
 
   @override
   void dispose() {

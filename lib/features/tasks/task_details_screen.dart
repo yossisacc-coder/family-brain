@@ -9,6 +9,7 @@ import '../../core/theme/task_semantics.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
 import '../../core/widgets/primary_button.dart';
+import '../../core/widgets/task_trash.dart';
 import '../../data/providers.dart';
 import '../../domain/models/task_item.dart';
 
@@ -269,38 +270,14 @@ class TaskDetailsScreen extends ConsumerWidget {
     WidgetRef ref,
     TaskItem task,
     AppLocalizations l10n,
-  ) async {
-    final confirmed = await showDialog<bool>(
+  ) {
+    return TaskTrash.confirmAndMove(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.deleteTaskTitle),
-        content: Text(l10n.deleteTaskMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.moveToTrash),
-          ),
-        ],
-      ),
+      ref: ref,
+      task: task,
+      l10n: l10n,
+      returnToTasks: true,
     );
-    if (confirmed != true || !context.mounted) return;
-    final repo = ref.read(taskRepositoryProvider);
-    await repo.moveToTrash(task);
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(l10n.taskMovedToTrash),
-        action: SnackBarAction(
-          label: l10n.undo,
-          onPressed: () => repo.restoreTask(task),
-        ),
-      ),
-    );
-    context.pop();
   }
 
   Future<void> _restore(
