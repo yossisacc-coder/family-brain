@@ -42,6 +42,8 @@ class TaskTrash {
       content: Text(l10n.taskMovedToTrash),
       duration: undoDuration,
       persist: false,
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 88),
       action: SnackBarAction(
         label: l10n.undo,
         onPressed: onUndo,
