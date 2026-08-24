@@ -202,7 +202,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          pendingBrainDraftProvider.overrideWithValue(draft),
+          pendingBrainDraftProvider.overrideWith((ref) => draft),
         ],
         child: const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
