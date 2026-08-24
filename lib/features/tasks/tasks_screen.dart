@@ -53,6 +53,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     final tasksAsync = ref.watch(familyTasksProvider);
     final members = ref.watch(familyMembersProvider).valueOrNull ?? const [];
 
+    final pendingUndo = ref.watch(trashUndoRequestProvider) != null;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.tasks),
@@ -74,7 +76,15 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           ),
         ],
       ),
-      body: tasksAsync.when(
+      body: Column(
+        children: [
+          if (pendingUndo)
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: TrashUndoBar(),
+            ),
+          Expanded(
+            child: tasksAsync.when(
         loading: () => LoadingView(label: l10n.loading),
         error: (_, _) => ErrorView(
           message: l10n.errorUnavailable,
@@ -202,6 +212,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             ],
           );
         },
+            ),
+          ),
+        ],
       ),
     );
   }

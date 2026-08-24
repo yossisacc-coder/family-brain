@@ -25,84 +25,94 @@ void main() {
     );
   }
 
-  testWidgets('trash undo snackbar auto-dismisses after about 3 seconds',
-      (tester) async {
-    late AppLocalizations l10n;
-    await tester.pumpWidget(
-      MaterialApp(
+  Widget harness({
+    required Widget Function(BuildContext context, WidgetRef ref) body,
+    List<Override> overrides = const [],
+    Widget? fab,
+  }) {
+    return ProviderScope(
+      overrides: overrides,
+      child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
-          body: Builder(
-            builder: (context) {
-              l10n = AppLocalizations.of(context);
-              return FilledButton(
-                onPressed: () {
-                  TaskTrash.showUndo(
-                    context: context,
-                    l10n: l10n,
-                    onUndo: () {},
-                  );
-                },
-                child: const Text('Trash'),
-              );
-            },
+          floatingActionButton: fab,
+          body: Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(8),
+                child: TrashUndoBar(),
+              ),
+              Expanded(
+                child: Consumer(
+                  builder: (context, ref, _) => body(context, ref),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
+  }
+
+  testWidgets('trash undo snackbar auto-dismisses after about 3 seconds',
+      (tester) async {
+    await tester.pumpWidget(
+      harness(
+        body: (context, ref) {
+          return FilledButton(
+            onPressed: () {
+              TaskTrash.showUndo(ref: ref, task: sampleTask());
+            },
+            child: const Text('Trash'),
+          );
+        },
+      ),
+    );
 
     await tester.tap(find.text('Trash'));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('Task moved to Trash'), findsOneWidget);
 
     await tester.pump(TaskTrash.undoDuration);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('Task moved to Trash'), findsNothing);
   });
 
   testWidgets('tapping Undo restores instead of opening a new task',
       (tester) async {
-    late AppLocalizations l10n;
     var undone = false;
     await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () {},
-            label: const Text('Add task'),
-          ),
-          body: Builder(
-            builder: (context) {
-              l10n = AppLocalizations.of(context);
-              return FilledButton(
-                onPressed: () {
-                  TaskTrash.showUndo(
-                    context: context,
-                    l10n: l10n,
-                    onUndo: () => undone = true,
-                  );
-                },
-                child: const Text('Trash'),
+      harness(
+        fab: FloatingActionButton.extended(
+          onPressed: () {},
+          label: const Text('Add task'),
+        ),
+        body: (context, ref) {
+          return FilledButton(
+            onPressed: () {
+              TaskTrash.showUndo(
+                ref: ref,
+                task: sampleTask(),
+                onUndo: () => undone = true,
               );
             },
-          ),
-        ),
+            child: const Text('Trash'),
+          );
+        },
       ),
     );
 
     await tester.tap(find.text('Trash'));
-    await tester.pumpAndSettle();
+    await tester.pump();
     await tester.tap(find.byKey(TaskTrash.undoButtonKey));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(undone, isTrue);
     expect(find.text('Task moved to Trash'), findsNothing);
     expect(find.text('New task'), findsNothing);
   });
 
-  testWidgets('Undo restores a trashed task above the shell Add task button',
+  testWidgets('Undo restores a trashed task from the Tasks banner',
       (tester) async {
     final store = LocalJsonStore(persist: false);
     final repo = LocalTaskRepository(store);
@@ -110,45 +120,35 @@ void main() {
     await repo.createTask(task);
 
     await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          taskRepositoryProvider.overrideWithValue(repo),
-        ],
-        child: MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: Scaffold(
-              body: Consumer(
-                builder: (context, ref, _) {
-                  final l10n = AppLocalizations.of(context);
-                  return FilledButton(
-                    onPressed: () {
-                      TaskTrash.move(
-                        context: context,
-                        ref: ref,
-                        task: task,
-                        l10n: l10n,
-                      );
-                    },
-                    child: const Text('Delete'),
-                  );
-                },
-              ),
-            ),
-            floatingActionButton: FloatingActionButton.extended(
-              onPressed: () {},
-              label: const Text('Add task'),
-            ),
-          ),
+      harness(
+        overrides: [taskRepositoryProvider.overrideWithValue(repo)],
+        fab: FloatingActionButton.extended(
+          onPressed: () {},
+          label: const Text('Add task'),
         ),
+        body: (context, ref) {
+          return FilledButton(
+            onPressed: () {
+              TaskTrash.move(
+                context: context,
+                ref: ref,
+                task: task,
+                l10n: AppLocalizations.of(context),
+              );
+            },
+            child: const Text('Delete'),
+          );
+        },
       ),
     );
 
     await tester.tap(find.text('Delete'));
     await tester.pumpAndSettle();
     expect(await repo.watchFamilyTasks('family-1').first, isEmpty);
-    expect((await repo.watchTrashedTasks('family-1').first).single.isTrashed, isTrue);
+    expect(
+      (await repo.watchTrashedTasks('family-1').first).single.isTrashed,
+      isTrue,
+    );
     expect(find.text('Task moved to Trash'), findsOneWidget);
 
     await tester.tap(find.byKey(TaskTrash.undoButtonKey));
@@ -159,64 +159,6 @@ void main() {
       isFalse,
     );
     expect(await repo.watchTrashedTasks('family-1').first, isEmpty);
-    expect(find.text('Task moved to Trash'), findsNothing);
-  });
-
-  testWidgets('Undo overlay stays tappable above nav and Add task',
-      (tester) async {
-    late AppLocalizations l10n;
-    var undone = false;
-    var openedNewTask = false;
-    await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
-          body: Scaffold(
-            body: Builder(
-              builder: (context) {
-                l10n = AppLocalizations.of(context);
-                return FilledButton(
-                  onPressed: () {
-                    TaskTrash.showUndo(
-                      context: context,
-                      l10n: l10n,
-                      onUndo: () => undone = true,
-                    );
-                  },
-                  child: const Text('Trash'),
-                );
-              },
-            ),
-          ),
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => openedNewTask = true,
-            label: const Text('Add task'),
-          ),
-          bottomNavigationBar: NavigationBar(
-            destinations: const [
-              NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                label: 'Home',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.check_circle_outline),
-                label: 'Tasks',
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.text('Trash'));
-    await tester.pump();
-    expect(find.text('Task moved to Trash'), findsOneWidget);
-
-    await tester.tap(find.byKey(TaskTrash.undoButtonKey));
-    await tester.pump();
-    expect(undone, isTrue);
-    expect(openedNewTask, isFalse);
     expect(find.text('Task moved to Trash'), findsNothing);
   });
 }

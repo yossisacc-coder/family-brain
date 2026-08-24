@@ -5,17 +5,24 @@ import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../routing/app_router.dart';
 import '../theme/app_colors.dart';
 import '../../data/providers.dart';
 import '../../domain/models/task_item.dart';
+
+class TrashUndoRequest {
+  const TrashUndoRequest({required this.task, this.onUndo});
+
+  final TaskItem task;
+  final VoidCallback? onUndo;
+}
+
+final trashUndoRequestProvider = StateProvider<TrashUndoRequest?>((ref) => null);
 
 /// Shared trash/undo behavior for task list and details.
 class TaskTrash {
   static const undoDuration = Duration(seconds: 3);
   static const undoButtonKey = Key('task-trash-undo');
 
-  static OverlayEntry? _entry;
   static Timer? _timer;
 
   static Future<bool> confirm(
@@ -42,71 +49,33 @@ class TaskTrash {
     return confirmed == true;
   }
 
-  static void dismiss() {
+  static StateController<TrashUndoRequest?>? _controller;
+
+  static void dismiss([WidgetRef? ref]) {
     _timer?.cancel();
     _timer = null;
-    _entry?.remove();
-    _entry = null;
+    final controller =
+        ref?.read(trashUndoRequestProvider.notifier) ?? _controller;
+    if (controller != null && controller.mounted) {
+      controller.state = null;
+    }
+    _controller = null;
   }
 
-  /// Snackbar-like Undo toast on the root overlay so nested scaffolds, the
-  /// bottom nav, and the Add task button cannot cover or steal it.
   static void showUndo({
-    BuildContext? context,
-    required AppLocalizations l10n,
-    required VoidCallback onUndo,
+    required WidgetRef ref,
+    required TaskItem task,
+    VoidCallback? onUndo,
   }) {
-    dismiss();
-    final overlay = rootNavigatorKey.currentState?.overlay ??
-        (context != null && context.mounted
-            ? Overlay.maybeOf(context, rootOverlay: true)
-            : null);
-    if (overlay == null) return;
-
-    late final OverlayEntry entry;
-    entry = OverlayEntry(
-      builder: (ctx) {
-        final bottomInset = MediaQuery.paddingOf(ctx).bottom;
-        return Positioned(
-          left: 16,
-          right: 16,
-          bottom: bottomInset + 88,
-          child: Material(
-            color: const Color(0xFF323232),
-            elevation: 8,
-            borderRadius: BorderRadius.circular(8),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 6, 4, 6),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.taskMovedToTrash,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  TextButton(
-                    key: undoButtonKey,
-                    onPressed: () {
-                      dismiss();
-                      onUndo();
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.primarySoft,
-                      minimumSize: const Size(72, 44),
-                    ),
-                    child: Text(l10n.undo),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-    _entry = entry;
-    overlay.insert(entry);
-    _timer = Timer(undoDuration, dismiss);
+    _timer?.cancel();
+    final controller = ref.read(trashUndoRequestProvider.notifier);
+    _controller = controller;
+    controller.state = TrashUndoRequest(task: task, onUndo: onUndo);
+    _timer = Timer(undoDuration, () {
+      if (identical(_controller, controller) && controller.mounted) {
+        controller.state = null;
+      }
+    });
   }
 
   static Future<void> move({
@@ -120,15 +89,7 @@ class TaskTrash {
     final repo = ref.read(taskRepositoryProvider);
     await repo.moveToTrash(task);
     if (!context.mounted) return;
-
-    showUndo(
-      context: context,
-      l10n: l10n,
-      onUndo: () {
-        onUndo?.call();
-        repo.restoreTask(task);
-      },
-    );
+    showUndo(ref: ref, task: task, onUndo: onUndo);
     if (returnToTasks) {
       context.go('/app/tasks');
     }
@@ -150,6 +111,49 @@ class TaskTrash {
       l10n: l10n,
       returnToTasks: returnToTasks,
       onUndo: onUndo,
+    );
+  }
+}
+
+/// In-tree Undo banner so it cannot be covered by nested scaffolds or the FAB.
+class TrashUndoBar extends ConsumerWidget {
+  const TrashUndoBar({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final request = ref.watch(trashUndoRequestProvider);
+    if (request == null) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context);
+    return Material(
+      color: const Color(0xFF323232),
+      elevation: 6,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 6, 4, 6),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                l10n.taskMovedToTrash,
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+            TextButton(
+              key: TaskTrash.undoButtonKey,
+              onPressed: () {
+                request.onUndo?.call();
+                ref.read(taskRepositoryProvider).restoreTask(request.task);
+                TaskTrash.dismiss(ref);
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primarySoft,
+                minimumSize: const Size(72, 44),
+              ),
+              child: Text(l10n.undo),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
