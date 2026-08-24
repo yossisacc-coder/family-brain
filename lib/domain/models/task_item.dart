@@ -6,7 +6,7 @@ enum TaskStatus { pending, inProgress, completed }
 
 /// Structured information Family Brain can save. Stored on [TaskItem]
 /// so existing task/calendar/today surfaces keep working.
-enum InformationKind { task, event, reminder, list }
+enum InformationKind { task, event, reminder, list, information }
 
 class TaskItem {
   const TaskItem({

@@ -720,6 +720,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get kindList => 'List';
 
   @override
+  String get kindInformation => 'Information';
+
+  @override
+  String brainFoundItems(int count) {
+    return 'Family Brain found $count items';
+  }
+
+  @override
+  String get brainUsingOnDevice =>
+      'No internet for AI. Using on-device understanding.';
+
+  @override
+  String get brainAiFailed =>
+      'AI is unavailable. Using on-device understanding.';
+
+  @override
+  String get brainRetry => 'Retry';
+
+  @override
+  String get recentBrain => 'Recent Family Brain';
+
+  @override
+  String get choosePhotoSource => 'Add a photo';
+
+  @override
+  String get photoFromGallery => 'Gallery';
+
+  @override
+  String get photoFromCamera => 'Camera';
+
+  @override
+  String get brainProcessing => 'Family Brain is understanding…';
+
+  @override
   String get listItems => 'Items';
 
   @override

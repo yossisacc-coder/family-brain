@@ -47,6 +47,8 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Family Brain can use the camera to send a photo for understanding.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Family Brain uses the microphone so you can dictate information.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>

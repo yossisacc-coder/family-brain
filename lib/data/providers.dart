@@ -121,6 +121,6 @@ final unreadCountProvider = Provider<int>((ref) {
   return notifications.where((item) => !item.read).length;
 });
 
-/// Survives GoRouter rebuilds that drop `state.extra` (which caused a black
-/// confirm screen when the route rebuilt with no draft).
-final pendingBrainDraftProvider = StateProvider<BrainDraft?>((ref) => null);
+final pendingBrainDraftsProvider = StateProvider<List<BrainDraft>>(
+  (ref) => const [],
+);

@@ -716,6 +716,38 @@ class AppLocalizationsHe extends AppLocalizations {
   String get kindList => 'רשימה';
 
   @override
+  String get kindInformation => 'מידע';
+
+  @override
+  String brainFoundItems(int count) {
+    return 'Family Brain מצא $count פריטים';
+  }
+
+  @override
+  String get brainUsingOnDevice => 'אין אינטרנט ל־AI. משתמשים בהבנה במכשיר.';
+
+  @override
+  String get brainAiFailed => 'ה־AI אינו זמין. משתמשים בהבנה במכשיר.';
+
+  @override
+  String get brainRetry => 'ניסיון נוסף';
+
+  @override
+  String get recentBrain => 'Family Brain לאחרונה';
+
+  @override
+  String get choosePhotoSource => 'הוספת תמונה';
+
+  @override
+  String get photoFromGallery => 'גלריה';
+
+  @override
+  String get photoFromCamera => 'מצלמה';
+
+  @override
+  String get brainProcessing => 'Family Brain מבין…';
+
+  @override
   String get listItems => 'פריטים';
 
   @override

@@ -50,4 +50,5 @@ app.*.map.json
 # Firebase emulator data
 emulator-data/
 node_modules/
-dist/family_brain.apk
+.env
+ai_gateway/.env

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../core/notifications/local_reminder_scheduler.dart';
 import '../../core/theme/task_semantics.dart';
 import '../../core/widgets/app_notice.dart';
 import '../../core/widgets/primary_button.dart';
@@ -194,6 +195,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
       final saved = existing == null
           ? await repo.createTask(task)
           : await repo.updateTask(task);
+      await LocalReminderScheduler.sync(saved);
       final service = ref.read(notificationServiceProvider);
       if (saved.assigneeId != null && saved.assigneeId != user.id) {
         await service.notifyTaskAssigned(

@@ -8,7 +8,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../core/brain/brain_activity.dart';
 import '../../core/brain/family_brain_parser.dart';
+import '../../core/notifications/local_reminder_scheduler.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/app_notice.dart';
@@ -27,17 +29,21 @@ class BrainConfirmScreen extends ConsumerStatefulWidget {
 }
 
 class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
-  BrainDraft? _draft;
+  List<BrainDraft> _drafts = const [];
+  var _index = 0;
   var _editing = false;
   var _saving = false;
   String? _error;
   late final TextEditingController _title;
   late final TextEditingController _items;
 
+  BrainDraft? get _draft =>
+      _drafts.isEmpty ? null : _drafts[_index.clamp(0, _drafts.length - 1)];
+
   @override
   void initState() {
     super.initState();
-    _draft = ref.read(pendingBrainDraftProvider);
+    _drafts = List.of(ref.read(pendingBrainDraftsProvider));
     _title = TextEditingController(text: _draft?.title ?? '');
     _items = TextEditingController(text: _draft?.listItems.join('\n') ?? '');
   }
@@ -82,7 +88,11 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.brainUnderstood),
+        title: Text(
+          _drafts.length > 1
+              ? l10n.brainFoundItems(_drafts.length)
+              : l10n.brainUnderstood,
+        ),
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
           tooltip: l10n.cancel,
@@ -97,6 +107,27 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
           32,
         ),
         children: [
+          if (_drafts.length > 1) ...[
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (var i = 0; i < _drafts.length; i++)
+                  ChoiceChip(
+                    label: Text(_kindLabel(l10n, _drafts[i].kind)),
+                    selected: i == _index,
+                    onSelected: (_) => setState(() {
+                      _applyEdits(members);
+                      _index = i;
+                      _title.text = _drafts[i].title;
+                      _items.text = _drafts[i].listItems.join('\n');
+                      _editing = false;
+                    }),
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
           if (draft.lowConfidence) ...[
             Text(
               l10n.brainUnclear,
@@ -214,7 +245,7 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
           ],
           onChanged: (value) {
             if (value != null) {
-              setState(() => _draft = draft.copyWith(kind: value));
+              setState(() => _replace(draft.copyWith(kind: value)));
             }
           },
         ),
@@ -249,10 +280,12 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
             onChanged: (value) {
               final member = members.where((m) => m.id == value).firstOrNull;
               setState(() {
-                _draft = draft.copyWith(
-                  assigneeId: value,
-                  assigneeName: member?.name,
-                  clearAssignee: value == null,
+                _replace(
+                  draft.copyWith(
+                    assigneeId: value,
+                    assigneeName: member?.name,
+                    clearAssignee: value == null,
+                  ),
                 );
               });
             },
@@ -262,8 +295,13 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
     );
   }
 
+  void _replace(BrainDraft draft) {
+    if (_drafts.isEmpty) return;
+    _drafts = [..._drafts]..[_index] = draft;
+  }
+
   void _cancel() {
-    ref.read(pendingBrainDraftProvider.notifier).state = null;
+    ref.read(pendingBrainDraftsProvider.notifier).state = const [];
     if (context.canPop()) {
       context.pop();
     } else {
@@ -279,9 +317,11 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
         .map((item) => item.trim())
         .where((item) => item.isNotEmpty)
         .toList();
-    _draft = draft.copyWith(
-      title: _title.text.trim(),
-      listItems: items,
+    _replace(
+      draft.copyWith(
+        title: _title.text.trim(),
+        listItems: items,
+      ),
     );
   }
 
@@ -292,8 +332,7 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
       return;
     }
     _applyEdits(ref.read(familyMembersProvider).valueOrNull ?? const []);
-    final draft = _draft;
-    if (draft == null || draft.title.trim().isEmpty) {
+    if (_drafts.isEmpty || _drafts.any((d) => d.title.trim().isEmpty)) {
       setState(() => _error = l10n.requiredField);
       return;
     }
@@ -302,14 +341,23 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
       _error = null;
     });
     try {
-      final task = draft.toTaskItem(
-        id: const Uuid().v4(),
-        familyId: user.familyId!,
-        creatorId: user.id,
+      final created = <TaskItem>[];
+      for (final draft in _drafts) {
+        final task = draft.toTaskItem(
+          id: const Uuid().v4(),
+          familyId: user.familyId!,
+          creatorId: user.id,
+        );
+        await ref.read(taskRepositoryProvider).createTask(task);
+        created.add(task);
+        await LocalReminderScheduler.sync(task);
+      }
+      BrainActivityLog.record(
+        _drafts.first.originalText,
+        [for (final draft in _drafts) draft.kind.name],
       );
-      await ref.read(taskRepositoryProvider).createTask(task);
       if (!mounted) return;
-      ref.read(pendingBrainDraftProvider.notifier).state = null;
+      ref.read(pendingBrainDraftsProvider.notifier).state = const [];
       context.go('/app/home');
       AppNotice.showAfterNavigation(l10n.brainSaved);
     } catch (_) {
@@ -327,6 +375,7 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
       InformationKind.event => l10n.kindEvent,
       InformationKind.reminder => l10n.kindReminder,
       InformationKind.list => l10n.kindList,
+      InformationKind.information => l10n.kindInformation,
     };
   }
 }

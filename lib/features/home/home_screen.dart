@@ -1,15 +1,18 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
-import '../../core/brain/family_brain_parser.dart';
+import '../../core/brain/brain_activity.dart';
+import '../../core/brain/family_brain_ai.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radii.dart';
 import '../../core/theme/app_spacing.dart';
@@ -44,6 +47,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Timer? _listenWatchdog;
 
   static const _maxImageBytes = 8 * 1024 * 1024;
+
+  @override
+  void initState() {
+    super.initState();
+    _listenForShares();
+  }
+
+  Future<void> _listenForShares() async {
+    const channel = MethodChannel('family_brain/share');
+    try {
+      final initial = await channel.invokeMethod<Map<dynamic, dynamic>>('getInitial');
+      if (initial != null) _applyShare(initial);
+      channel.setMethodCallHandler((call) async {
+        if (call.method == 'onShare' && call.arguments is Map) {
+          _applyShare(Map<dynamic, dynamic>.from(call.arguments as Map));
+        }
+        return null;
+      });
+    } catch (_) {}
+  }
+
+  void _applyShare(Map<dynamic, dynamic> payload) {
+    final text = payload['text']?.toString();
+    final path = payload['imagePath']?.toString();
+    if (!mounted) return;
+    setState(() {
+      if (text != null && text.isNotEmpty) _composer.text = text;
+      if (path != null && path.isNotEmpty) _imagePath = path;
+    });
+  }
 
   @override
   void dispose() {
@@ -197,6 +230,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     onMic: () => _toggleVoice(l10n),
                     onRemoveImage: () => setState(() => _imagePath = null),
                   ),
+                  if (BrainActivityLog.entries.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.section),
+                    AppSectionHeader(title: l10n.recentBrain),
+                    AppCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (final entry in BrainActivityLog.entries.take(3)) ...[
+                            Text(
+                              entry.originalText,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              entry.summary,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textMuted,
+                                  ),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: AppSpacing.section),
                   AppSectionHeader(
                     title: l10n.todayActivity,
@@ -277,9 +337,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _pickImage(AppLocalizations l10n) async {
+    final source = await showDialog<ImageSource>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.choosePhotoSource),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, ImageSource.gallery),
+            child: Text(l10n.photoFromGallery),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, ImageSource.camera),
+            child: Text(l10n.photoFromCamera),
+          ),
+        ],
+      ),
+    );
+    if (source == null || !mounted) return;
     try {
       final file = await _picker.pickImage(
-        source: ImageSource.gallery,
+        source: source,
         imageQuality: 85,
         maxWidth: 1920,
       );
@@ -366,11 +443,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (mounted) setState(() => _listening = false);
   }
 
-  void _submitComposer(
+  Future<void> _submitComposer(
     BuildContext context,
     AppLocalizations l10n,
     List<AppUser> members,
-  ) {
+  ) async {
     if (_sending) return;
     final text = _composer.text.trim();
     final imagePath = _imagePath;
@@ -381,32 +458,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() => _sending = true);
     try {
-      BrainDraft? draft;
-      if (text.isEmpty) {
-        draft = BrainDraft(
-          kind: InformationKind.task,
-          title: l10n.photoAttached,
-          originalText: l10n.photoAttached,
-          imagePath: imagePath,
-        );
-      } else {
-        final result = FamilyBrainParser.parse(
-          text,
-          now: DateTime.now(),
-          members: members,
-        );
-        if (!result.isOk || result.draft == null) {
-          AppNotice.show(context, l10n.brainUnclear);
-          return;
-        }
-        draft = result.draft!.copyWith(imagePath: imagePath);
+      String? imageBase64;
+      if (imagePath != null && !kIsWeb) {
+        try {
+          imageBase64 = base64Encode(await File(imagePath).readAsBytes());
+        } catch (_) {}
+      }
+      final result = await FamilyBrainAi.understand(
+        text: text,
+        now: DateTime.now(),
+        members: members,
+        imagePath: imagePath,
+        imageBase64: imageBase64,
+        mimeType: 'image/jpeg',
+      );
+      if (!mounted) return;
+      if (result.usedFallback && result.error == 'offline') {
+        AppNotice.show(context, l10n.brainUsingOnDevice);
+      } else if (result.usedFallback) {
+        AppNotice.show(context, l10n.brainAiFailed);
+      }
+      if (!result.isOk) {
+        AppNotice.show(context, l10n.brainUnclear);
+        return;
       }
       _composer.clear();
       setState(() => _imagePath = null);
-      ref.read(pendingBrainDraftProvider.notifier).state = draft;
+      ref.read(pendingBrainDraftsProvider.notifier).state = result.drafts;
       context.push('/brain/confirm');
     } catch (_) {
-      AppNotice.show(context, l10n.errorUnavailable);
+      if (mounted) AppNotice.show(context, l10n.errorUnavailable);
     } finally {
       if (mounted) setState(() => _sending = false);
     }

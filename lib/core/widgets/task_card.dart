@@ -103,6 +103,8 @@ class TaskCard extends StatelessWidget {
                               InformationKind.event => Icons.event_outlined,
                               InformationKind.reminder => Icons.alarm_outlined,
                               InformationKind.list => Icons.list_alt_rounded,
+                              InformationKind.information =>
+                                Icons.info_outline_rounded,
                               InformationKind.task => Icons.task_alt_rounded,
                             },
                           ),
@@ -170,6 +172,7 @@ class TaskCard extends StatelessWidget {
       InformationKind.event => l10n.kindEvent,
       InformationKind.reminder => l10n.kindReminder,
       InformationKind.list => l10n.kindList,
+      InformationKind.information => l10n.kindInformation,
     };
   }
 }

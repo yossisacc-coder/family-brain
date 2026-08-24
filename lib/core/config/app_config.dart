@@ -5,9 +5,8 @@
 /// or production Firebase. The Phone/OTP + Firebase architecture is unchanged
 /// and is selected with `--dart-define=BACKEND_MODE=firebase`.
 ///
-/// Cloud AI (Gemini / Google AI Studio) is not wired in this MVP: there is no
-/// secure backend to hold an API key, and keys must not be shipped in the
-/// Flutter client. Family Brain understanding uses the on-device parser.
+/// Cloud AI uses a separate gateway ([AppConfig.aiBackendUrl]). Gemini API
+/// keys stay on that server, never in this Flutter client.
 enum BackendMode { localDemo, firebase }
 
 class AppConfig {
@@ -55,4 +54,10 @@ class AppConfig {
   static const String demoPartnerId = 'demo-user-maya';
   static const String demoFamilyId = 'demo-family';
   static const String demoInviteCode = 'DEMO01';
+
+  /// Public URL of the AI gateway (no secrets). Empty = on-device parser only.
+  static const String aiBackendUrl = String.fromEnvironment(
+    'AI_BACKEND_URL',
+    defaultValue: '',
+  );
 }

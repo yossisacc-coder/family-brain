@@ -1442,6 +1442,66 @@ abstract class AppLocalizations {
   /// **'List'**
   String get kindList;
 
+  /// No description provided for @kindInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get kindInformation;
+
+  /// No description provided for @brainFoundItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Brain found {count} items'**
+  String brainFoundItems(int count);
+
+  /// No description provided for @brainUsingOnDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet for AI. Using on-device understanding.'**
+  String get brainUsingOnDevice;
+
+  /// No description provided for @brainAiFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'AI is unavailable. Using on-device understanding.'**
+  String get brainAiFailed;
+
+  /// No description provided for @brainRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get brainRetry;
+
+  /// No description provided for @recentBrain.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Family Brain'**
+  String get recentBrain;
+
+  /// No description provided for @choosePhotoSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a photo'**
+  String get choosePhotoSource;
+
+  /// No description provided for @photoFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get photoFromGallery;
+
+  /// No description provided for @photoFromCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get photoFromCamera;
+
+  /// No description provided for @brainProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Brain is understanding…'**
+  String get brainProcessing;
+
   /// No description provided for @listItems.
   ///
   /// In en, this message translates to:
