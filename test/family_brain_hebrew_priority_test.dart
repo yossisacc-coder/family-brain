@@ -256,5 +256,43 @@ void main() {
     expect(task.priority, TaskPriority.urgent);
     expect(task.assigneeId, 'david');
   });
+
+  test('E2E Hebrew reminder preserves text, tomorrow 16:00, urgent', () async {
+    const text = 'זה דחוף, תזכיר לי להתקשר לאבא מחר בשעה ארבע.';
+    final drafts = FamilyBrainParser.parseAll(text, now: now);
+    expect(drafts, isNotEmpty);
+    expect(drafts.single.kind, InformationKind.reminder);
+    expect(drafts.single.originalText, contains('אבא'));
+    expect(drafts.single.title, contains('אבא'));
+    expect(drafts.single.dueDate, DateTime(2026, 8, 25, 16, 0));
+    expect(drafts.single.hasDueTime, isTrue);
+    expect(drafts.single.priority, TaskPriority.urgent);
+    final saved = drafts.single.toTaskItem(
+      id: 'e2e-he',
+      familyId: 'fam',
+      creatorId: 'maya',
+      now: now,
+    );
+    final repo = LocalTaskRepository(LocalJsonStore(persist: false));
+    await repo.createTask(saved);
+    final loaded = await repo.watchFamilyTasks('fam').first;
+    expect(loaded.single.kind, InformationKind.reminder);
+    expect(loaded.single.priority, TaskPriority.urgent);
+    expect(loaded.single.dueDate, DateTime(2026, 8, 25, 16, 0));
+    expect(loaded.single.hasDueTime, isTrue);
+    expect(loaded.single.reminderAt, DateTime(2026, 8, 25, 16, 0));
+  });
+
+  test('E2E English reminder is semantically the same and urgent', () {
+    final drafts = FamilyBrainParser.parseAll(
+      "Remind me to call Dad tomorrow at 4 PM. It's urgent.",
+      now: now,
+    );
+    expect(drafts, isNotEmpty);
+    expect(drafts.single.kind, InformationKind.reminder);
+    expect(drafts.single.dueDate, DateTime(2026, 8, 25, 16, 0));
+    expect(drafts.single.hasDueTime, isTrue);
+    expect(drafts.single.priority, TaskPriority.urgent);
+  });
 }
 
