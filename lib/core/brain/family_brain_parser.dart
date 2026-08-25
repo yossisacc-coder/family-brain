@@ -1,5 +1,6 @@
 import '../../domain/models/app_user.dart';
 import '../../domain/models/task_item.dart';
+import 'priority_from_language.dart';
 
 class BrainDraft {
   const BrainDraft({
@@ -18,6 +19,7 @@ class BrainDraft {
     this.location,
     this.explanation,
     this.personal = false,
+    this.priority = TaskPriority.normal,
   });
 
   final InformationKind kind;
@@ -35,6 +37,7 @@ class BrainDraft {
   final String? location;
   final String? explanation;
   final bool personal;
+  final TaskPriority priority;
 
   String get notes {
     final parts = <String>[];
@@ -74,6 +77,7 @@ class BrainDraft {
     String? location,
     String? explanation,
     bool? personal,
+    TaskPriority? priority,
   }) {
     return BrainDraft(
       kind: kind ?? this.kind,
@@ -91,6 +95,7 @@ class BrainDraft {
       location: location ?? this.location,
       explanation: explanation ?? this.explanation,
       personal: personal ?? this.personal,
+      priority: priority ?? this.priority,
     );
   }
 
@@ -112,7 +117,7 @@ class BrainDraft {
       title: title.trim().isEmpty ? originalText.trim() : title.trim(),
       kind: kind,
       type: personal ? TaskType.personal : TaskType.family,
-      priority: TaskPriority.normal,
+      priority: priority,
       status: TaskStatus.pending,
       createdAt: stamp,
       updatedAt: stamp,
@@ -137,6 +142,13 @@ class BrainParseResult {
 
 /// On-device Family Brain parser. No network / LLM.
 class FamilyBrainParser {
+  static bool _he(String text, String word) {
+    return RegExp(
+      '(?:^|[^\\u0590-\\u05FF])${RegExp.escape(word)}(?:\$|[^\\u0590-\\u05FF])',
+      unicode: true,
+    ).hasMatch(text);
+  }
+
   static const emptyInput = 'empty';
   static const unclearInput = 'unclear';
 
@@ -164,6 +176,7 @@ class FamilyBrainParser {
       return const BrainParseResult.error(unclearInput);
     }
 
+    final hebrewDontForget = RegExp(r'אל תשכח', unicode: true).hasMatch(text);
     DateTime? reminder;
     if (kind == InformationKind.reminder) {
       reminder = when.date ?? now.add(const Duration(hours: 1));
@@ -171,12 +184,14 @@ class FamilyBrainParser {
 
     return BrainParseResult.ok(
       BrainDraft(
-        kind: kind,
+        kind: hebrewDontForget && kind == InformationKind.reminder
+            ? InformationKind.task
+            : kind,
         title: title,
         originalText: text,
         dueDate: when.date,
         hasDueTime: when.hasTime,
-        reminderAt: reminder,
+        reminderAt: hebrewDontForget ? null : reminder,
         assigneeId: person?.id,
         assigneeName: person?.name,
         listItems: kind == InformationKind.list ? items : const [],
@@ -184,6 +199,7 @@ class FamilyBrainParser {
             when.date == null &&
             items.length < 2 &&
             !_hasActionVerb(lower),
+        priority: PriorityFromLanguage.infer(text),
       ),
     );
   }
@@ -195,25 +211,39 @@ class FamilyBrainParser {
     required bool hasDate,
   }) {
     final listCue = RegExp(
-      r'\b(buy|get|pick up|need|shopping|list|grocer|קנו|לקנות|רשימה|קניות)\b',
-      unicode: true,
-    ).hasMatch(lower);
+          r'\b(buy|get|pick up|need|shopping|list|grocer)\b',
+        ).hasMatch(lower) ||
+        _he(lower, 'קנו') ||
+        _he(lower, 'לקנות') ||
+        _he(lower, 'רשימה') ||
+        _he(lower, 'קניות');
     if (items.length >= 3 || (listCue && items.length >= 2)) {
       return InformationKind.list;
     }
 
-    final remindCue = RegExp(
-      r'\b(remind|reminder|don.?t forget|תזכיר|תזכורת|לא לשכוח)\b',
-      unicode: true,
-    ).hasMatch(lower);
+    final remindCue = (RegExp(
+              r"\b(remind|reminder|don.?t forget)\b",
+            ).hasMatch(lower) ||
+            _he(lower, 'תזכיר') ||
+            _he(lower, 'תזכורת')) &&
+        !_he(lower, 'אל תשכח');
     if (remindCue) return InformationKind.reminder;
 
     final eventCue = RegExp(
-      r'\b(doctor|appointment|meeting|birthday|party|event|calendar|guests|'
-      r'רופא|תור|פגישה|יום הולדת|אירוע|אורחים)\b',
-      unicode: true,
-    ).hasMatch(lower);
-    if (eventCue || (hasDate && hasTime)) return InformationKind.event;
+          r'\b(doctor|appointment|meeting|birthday|party|event|calendar|guests)\b',
+        ).hasMatch(lower) ||
+        _he(lower, 'רופא') ||
+        _he(lower, 'תור') ||
+        _he(lower, 'פגישה') ||
+        _he(lower, 'יום הולדת') ||
+        _he(lower, 'אירוע') ||
+        _he(lower, 'אורחים');
+    final calling = RegExp(r'\bcall\b').hasMatch(lower) ||
+        _he(lower, 'התקשר') ||
+        _he(lower, 'להתקשר');
+    if ((eventCue && !calling) || (hasDate && hasTime && eventCue && !calling)) {
+      return InformationKind.event;
+    }
 
     return InformationKind.task;
   }
@@ -221,7 +251,7 @@ class FamilyBrainParser {
   static bool _hasActionVerb(String lower) {
     return RegExp(
       r'\b(take|call|finish|clean|pay|send|book|pick|make|do|'
-      r'קח|התקשר|גמור|נקה|שלם)\b',
+      r'קח|התקשר|להתקשר|גמור|נקה|שלם|תסדר|לטפל)\b',
       unicode: true,
     ).hasMatch(lower);
   }
@@ -242,7 +272,7 @@ class FamilyBrainParser {
     var cleaned = text;
     cleaned = cleaned.replaceAll(
       RegExp(
-        r'\b(tomorrow|today|tonight|yesterday|מחרתיים|מחר|היום|הערב)\b',
+        r'\b(tomorrow|today|tonight|yesterday|מחרתיים|מחר בערב|מחר בבוקר|מחר|היום|הערב|בבוקר|בערב)\b',
         caseSensitive: false,
         unicode: true,
       ),
@@ -257,19 +287,29 @@ class FamilyBrainParser {
       ' ',
     );
     cleaned = cleaned.replaceAll(
+      RegExp(
+        r'ב(?:שעה\s+)?(אחת|שתיים|שתים|שלוש|ארבע|חמש|שש|שבע|שמונה|תשע|עשר)',
+        unicode: true,
+      ),
+      ' ',
+    );
+    cleaned = cleaned.replaceAll(
       RegExp(r'\b\d{1,2}:\d{2}\b'),
       ' ',
     );
     cleaned = cleaned.replaceAll(
       RegExp(
-        r'\b(remind me to|remind me|reminder to|don.?t forget to|please)\b',
+        r'\b(remind me to|remind me|reminder to|don.?t forget to|please|'
+        r'אל תשכח|תזכיר לי|יש לנו|זה ממש דחוף|זה דחוף|וגם צריך|צריך)\b',
         caseSensitive: false,
+        unicode: true,
       ),
       ' ',
     );
     cleaned = cleaned.replaceAll(RegExp(r'\s+'), ' ').trim();
     cleaned = cleaned.replaceAll(RegExp(r'^[,.\-:;]+'), '').trim();
     if (cleaned.isEmpty) return text.trim();
+    if (RegExp(r'[\u0590-\u05FF]').hasMatch(cleaned[0])) return cleaned;
     return cleaned[0].toUpperCase() + cleaned.substring(1);
   }
 
@@ -292,40 +332,96 @@ class FamilyBrainParser {
     var working = text.trim();
     working = working.replaceFirst(
       RegExp(
-        r'^(buy|get|pick up|need|we need|shopping list:?|list:?|קנו|לקנות)\s+',
+        r'^(buy|get|pick up|need|we need|shopping list:?|list:?|קנו|לקנות|צריך לקנות)\s+',
         caseSensitive: false,
         unicode: true,
       ),
       '',
     );
-    if (!working.contains(',') &&
-        !working.contains(' and ') &&
-        !working.contains(' ו') &&
-        !working.contains(' ו־')) {
+    final prompted = RegExp(
+      r'buy|get|pick up|need|shopping|list|לקנות|קנו|רשימה|קניות',
+      caseSensitive: false,
+      unicode: true,
+    ).hasMatch(text);
+    final hasJoin = working.contains(',') ||
+        working.contains(' and ') ||
+        RegExp(r'\s+ו', unicode: true).hasMatch(working);
+    final hebrewGoods = working.contains('חלב') ||
+        working.contains('לחם') ||
+        working.contains('ביצ');
+    if (!prompted && !hebrewGoods) {
+      final hebrew = RegExp(r'[\u0590-\u05FF]').hasMatch(working);
+      if (hebrew || !hasJoin) return const [];
+    }
+    if (!hasJoin && !hebrewGoods) {
       return const [];
     }
     working = working.replaceAll(RegExp(r'\s+and\s+', caseSensitive: false), ',');
-    working = working.replaceAll(RegExp(r'\s+ו־?\s+', unicode: true), ',');
-    return working
-        .split(',')
+    working = working.replaceAll(RegExp(r'\s+ו־?\s*', unicode: true), ',');
+    working = working.replaceAll(RegExp(r'וזה דחוף|זה דחוף', unicode: true), '');
+    Iterable<String> parts = working.split(',');
+    if (hebrewGoods) {
+      parts = parts.expand((item) => item.trim().split(RegExp(r'\s+')));
+    }
+    var items = parts
         .map((item) => item.trim().replaceAll(RegExp(r'[.!?]+$'), ''))
         .where((item) => item.length > 1)
+        .where(
+          (item) => !RegExp(
+            r'^(buy|get|need|also|we|to|לקנות|צריך|וגם|גם)$',
+            caseSensitive: false,
+            unicode: true,
+          ).hasMatch(item),
+        )
         .toList();
+    if (hebrewGoods) {
+      const keep = {'חלב', 'לחם', 'ביצים', 'ביצה'};
+      items = items.where(keep.contains).toList();
+    }
+    return items;
   }
 
   static ({DateTime? date, bool hasTime}) _extractWhen(String text, DateTime now) {
     final lower = text.toLowerCase();
     DateTime day = DateTime(now.year, now.month, now.day);
     var hasDate = false;
+    var hasTime = false;
+    DateTime? dated;
 
-    if (RegExp(r'\b(today|tonight|היום|הערב)\b', unicode: true).hasMatch(lower)) {
-      hasDate = true;
-    } else if (RegExp(r'\b(tomorrow|מחר)\b', unicode: true).hasMatch(lower) &&
-        !lower.contains('מחרתיים')) {
-      day = day.add(const Duration(days: 1));
-      hasDate = true;
-    } else if (RegExp(r'\bמחרתיים\b', unicode: true).hasMatch(lower)) {
+    final inHours = RegExp(
+      r'(?:בעוד|עוד)\s+(שעה|שעתיים|(\d+)\s*שעות)',
+      unicode: true,
+    ).firstMatch(text);
+    final inHoursEn = RegExp(r'\bin\s+(\d+)\s+hours?\b').firstMatch(lower);
+    if (inHours != null) {
+      final token = inHours.group(1)!;
+      final hours = token == 'שעה'
+          ? 1
+          : token == 'שעתיים'
+              ? 2
+              : int.tryParse(inHours.group(2) ?? '') ?? 1;
+      dated = now.add(Duration(hours: hours));
+      return (date: dated, hasTime: true);
+    }
+    if (inHoursEn != null) {
+      dated = now.add(Duration(hours: int.parse(inHoursEn.group(1)!)));
+      return (date: dated, hasTime: true);
+    }
+
+    if (_he(text, 'מחרתיים') || _he(text, 'בעוד יומיים')) {
       day = day.add(const Duration(days: 2));
+      hasDate = true;
+    } else if (RegExp(r'\b(today|tonight)\b').hasMatch(lower) ||
+        _he(text, 'היום') ||
+        _he(text, 'הערב') ||
+        _he(text, 'בהקדם') ||
+        _he(text, 'עד הערב')) {
+      hasDate = true;
+    } else if ((RegExp(r'\btomorrow\b').hasMatch(lower) ||
+            _he(text, 'מחר') ||
+            _he(text, 'עד מחר')) &&
+        !_he(text, 'מחרתיים')) {
+      day = day.add(const Duration(days: 1));
       hasDate = true;
     } else {
       final weekday = _nextWeekday(lower, now);
@@ -335,15 +431,24 @@ class FamilyBrainParser {
       }
     }
 
-    final time = _extractTime(lower);
+    var time = _extractTime(text);
+    if (time == null) {
+      if (RegExp(r'בבוקר|tomorrow morning', unicode: true).hasMatch(lower)) {
+        time = (9, 0);
+      } else if (RegExp(r'בערב|הערב|עד הערב|tonight', unicode: true).hasMatch(lower)) {
+        time = (19, 0);
+      }
+    }
     if (time == null) {
       return (date: hasDate ? day : null, hasTime: false);
     }
-    final dated = DateTime(day.year, day.month, day.day, time.$1, time.$2);
-    return (date: dated, hasTime: true);
+    hasTime = true;
+    dated = DateTime(day.year, day.month, day.day, time.$1, time.$2);
+    return (date: dated, hasTime: hasTime);
   }
 
-  static (int, int)? _extractTime(String lower) {
+  static (int, int)? _extractTime(String text) {
+    final lower = text.toLowerCase();
     final hm = RegExp(r'\b(\d{1,2}):(\d{2})\b').firstMatch(lower);
     if (hm != null) {
       return (int.parse(hm.group(1)!), int.parse(hm.group(2)!));
@@ -361,6 +466,27 @@ class FamilyBrainParser {
       var hour = int.parse(at.group(1)!);
       if (hour >= 1 && hour <= 7) hour += 12;
       return (hour, 0);
+    }
+    const words = {
+      'אחת': 1,
+      'שתים': 2,
+      'שתיים': 2,
+      'שלוש': 3,
+      'ארבע': 4,
+      'חמש': 5,
+      'שש': 6,
+      'שבע': 7,
+      'שמונה': 8,
+      'תשע': 9,
+      'עשר': 10,
+    };
+    for (final entry in words.entries) {
+      if (RegExp('ב(?:שעה\\s+)?${entry.key}', unicode: true).hasMatch(text)) {
+        var hour = entry.value;
+        final morning = RegExp(r'בבוקר', unicode: true).hasMatch(text);
+        if (!morning && hour >= 1 && hour <= 7) hour += 12;
+        return (hour, 0);
+      }
     }
     return null;
   }
@@ -388,17 +514,20 @@ class FamilyBrainParser {
 
     final lower = text.toLowerCase();
     final eventCue = RegExp(
-      r'doctor|appointment|meeting|guests|birthday|party|event|school|trip|'
-      r'רופא|תור|פגישה|אורחים',
-      unicode: true,
-    ).hasMatch(lower);
+          r'doctor|appointment|meeting|guests|birthday|party|event|school|trip',
+        ).hasMatch(lower) ||
+        _he(text, 'רופא') ||
+        _he(text, 'תור') ||
+        _he(text, 'פגישה') ||
+        _he(text, 'אורחים');
     final listSlice = _listSlice(text);
     final listItems = _extractListItems(listSlice.isEmpty ? text : listSlice);
     final listCue = listItems.length >= 2;
-    final hoursBefore = _hoursBefore(lower);
+    final hoursBefore = _hoursBefore(lower, text);
     final remindCue = hoursBefore != null ||
-        RegExp(r'\b(remind|reminder|don.?t forget|תזכיר)\b', unicode: true)
-            .hasMatch(lower);
+        ((RegExp(r'\b(remind|reminder|don.?t forget)\b').hasMatch(lower) ||
+                _he(text, 'תזכיר')) &&
+            !_he(text, 'אל תשכח'));
     final leadingRemind = RegExp(
       r"^(remind|don't forget|dont forget|תזכיר)",
       caseSensitive: false,
@@ -455,6 +584,7 @@ class FamilyBrainParser {
           assigneeName: person?.name,
           imagePath: imagePath,
           personal: personal,
+          priority: PriorityFromLanguage.infer(text),
         ),
       );
     }
@@ -482,6 +612,7 @@ class FamilyBrainParser {
           assigneeId: remindPerson?.id,
           assigneeName: remindPerson?.name,
           personal: personal,
+          priority: PriorityFromLanguage.infer(text),
         ),
       );
     }
@@ -494,6 +625,7 @@ class FamilyBrainParser {
           originalText: text,
           listItems: listItems,
           personal: personal,
+          priority: PriorityFromLanguage.infer(text),
         ),
       );
     }
@@ -512,7 +644,9 @@ class FamilyBrainParser {
 
   static String _eventTitle(String text, AppUser? person) {
     final lower = text.toLowerCase();
-    if (lower.contains('doctor') || lower.contains('רופא')) {
+    final hebrew = RegExp(r'[\u0590-\u05FF]').hasMatch(text);
+    if (lower.contains('doctor') || lower.contains('רופא') || lower.contains('תור')) {
+      if (hebrew) return 'תור לרופא';
       if (person != null) return 'Take ${person.name} to the doctor';
       return 'Doctor appointment';
     }
@@ -524,25 +658,31 @@ class FamilyBrainParser {
 
   static String _listSlice(String text) {
     final match = RegExp(
-      r'\b(?:also\s+)?(?:buy|get|need to buy|we need)\b(.*)$',
+      r'\b(?:also\s+)?(?:buy|get|need to buy|we need)\b(.*)$|'
+      r'(?:וגם\s+)?(?:צריך\s+)?לקנות\s+(.*)$',
       caseSensitive: false,
+      unicode: true,
     ).firstMatch(text);
-    return match?.group(1)?.trim() ?? '';
+    return (match?.group(1) ?? match?.group(2))?.trim() ?? '';
   }
 
   static String _remindSlice(String text) {
     final match = RegExp(
-      r'\b(remind.+)$',
+      r'\b(remind.+)$|תזכיר.+$',
       caseSensitive: false,
+      unicode: true,
     ).firstMatch(text);
     return match?.group(0) ?? text;
   }
 
-  static int? _hoursBefore(String lower) {
+  static int? _hoursBefore(String lower, [String? original]) {
     final numeric = RegExp(r'(\d+)\s+hours?\s+before').firstMatch(lower);
     if (numeric != null) return int.parse(numeric.group(1)!);
     if (RegExp(r'\btwo\s+hours?\s+before\b').hasMatch(lower)) return 2;
     if (RegExp(r'\bone\s+hours?\s+before\b').hasMatch(lower)) return 1;
+    final source = original ?? lower;
+    if (RegExp(r'שעתיים לפני', unicode: true).hasMatch(source)) return 2;
+    if (RegExp(r'שעה לפני', unicode: true).hasMatch(source)) return 1;
     return null;
   }
 
@@ -555,9 +695,26 @@ class FamilyBrainParser {
       'friday': DateTime.friday,
       'saturday': DateTime.saturday,
       'sunday': DateTime.sunday,
+      'יום שני': DateTime.monday,
+      'ביום שני': DateTime.monday,
+      'יום שלישי': DateTime.tuesday,
+      'ביום שלישי': DateTime.tuesday,
+      'יום רביעי': DateTime.wednesday,
+      'ביום רביעי': DateTime.wednesday,
+      'יום חמישי': DateTime.thursday,
+      'ביום חמישי': DateTime.thursday,
+      'יום שישי': DateTime.friday,
+      'ביום שישי': DateTime.friday,
+      'שבת': DateTime.saturday,
+      'יום ראשון': DateTime.sunday,
+      'ביום ראשון': DateTime.sunday,
     };
     for (final entry in names.entries) {
-      if (!RegExp('\\b${entry.key}\\b').hasMatch(lower)) continue;
+      final hebrew = RegExp(r'[\u0590-\u05FF]').hasMatch(entry.key);
+      final hit = hebrew
+          ? lower.contains(entry.key)
+          : RegExp('\\b${entry.key}\\b').hasMatch(lower);
+      if (!hit) continue;
       var day = DateTime(now.year, now.month, now.day);
       while (day.weekday != entry.value) {
         day = day.add(const Duration(days: 1));

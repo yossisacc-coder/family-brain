@@ -13,6 +13,8 @@ import 'package:speech_to_text/speech_to_text.dart';
 
 import '../../core/brain/brain_activity.dart';
 import '../../core/brain/family_brain_ai.dart';
+import '../../core/brain/speech_locale.dart';
+import '../settings/locale_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radii.dart';
 import '../../core/theme/app_spacing.dart';
@@ -43,6 +45,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _picker = ImagePicker();
   var _sending = false;
   var _listening = false;
+  var _heardSpeech = false;
   String? _imagePath;
   Timer? _listenWatchdog;
 
@@ -379,15 +382,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _toggleVoice(AppLocalizations l10n) async {
     if (_listening) {
-      await _stopVoice();
+      await _stopVoice(l10n);
       return;
     }
     try {
       final ready = await _speech.initialize(
-        onError: (_) {
+        onError: (error) {
           if (!mounted) return;
           setState(() => _listening = false);
-          AppNotice.show(context, l10n.voiceFailed);
+          final msg = error.errorMsg;
+          if (msg.contains('permission')) {
+            AppNotice.show(context, l10n.voiceDenied);
+          } else if (msg.contains('language')) {
+            AppNotice.show(context, l10n.voiceLanguageUnsupported);
+          } else if (msg.contains('no_match') || msg.contains('speech_timeout')) {
+            AppNotice.show(context, l10n.voiceEmpty);
+          } else {
+            AppNotice.show(context, l10n.voiceFailed);
+          }
         },
         onStatus: (status) {
           if (!mounted) return;
@@ -400,29 +412,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         if (mounted) AppNotice.show(context, l10n.voiceUnavailable);
         return;
       }
+      final appLang = ref.read(localeControllerProvider).languageCode;
+      final available = await _speech.locales();
+      final localeId = SpeechLocalePicker.resolve(
+        appLanguageCode: appLang,
+        availableIds: available.map((locale) => locale.localeId),
+      );
+      if (appLang == 'he' && localeId == null) {
+        if (mounted) AppNotice.show(context, l10n.voiceLanguageUnsupported);
+        return;
+      }
       if (!mounted) return;
-      setState(() => _listening = true);
+      setState(() {
+        _listening = true;
+        _heardSpeech = false;
+      });
       _listenWatchdog?.cancel();
       _listenWatchdog = Timer(const Duration(seconds: 8), () {
-        _stopVoice();
+        _stopVoice(l10n);
       });
       await _speech.listen(
         listenOptions: SpeechListenOptions(
-          listenFor: Duration(seconds: 8),
-          pauseFor: Duration(seconds: 2),
+          listenFor: const Duration(seconds: 8),
+          pauseFor: const Duration(seconds: 2),
           partialResults: true,
           listenMode: ListenMode.dictation,
+          localeId: localeId,
+          cancelOnError: true,
         ),
         onResult: (result) {
           if (!mounted) return;
           final text = result.recognizedWords.trim();
           if (text.isEmpty) return;
+          _heardSpeech = true;
           _composer.value = TextEditingValue(
             text: text,
             selection: TextSelection.collapsed(offset: text.length),
           );
           if (result.finalResult) {
-            _stopVoice();
+            _stopVoice(l10n);
           }
         },
       );
@@ -434,13 +462,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  Future<void> _stopVoice() async {
+  Future<void> _stopVoice([AppLocalizations? l10n]) async {
     _listenWatchdog?.cancel();
     _listenWatchdog = null;
     try {
       await _speech.stop();
     } catch (_) {}
-    if (mounted) setState(() => _listening = false);
+    if (!mounted) return;
+    final empty = !_heardSpeech && _composer.text.trim().isEmpty;
+    setState(() => _listening = false);
+    if (empty && l10n != null) {
+      AppNotice.show(context, l10n.voiceEmpty);
+    }
   }
 
   Future<void> _submitComposer(
@@ -456,6 +489,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return;
     }
     FocusManager.instance.primaryFocus?.unfocus();
+    final language = Localizations.localeOf(context).languageCode;
     setState(() => _sending = true);
     try {
       String? imageBase64;
@@ -471,6 +505,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         imagePath: imagePath,
         imageBase64: imageBase64,
         mimeType: 'image/jpeg',
+        language: language,
       );
       if (!mounted) return;
       if (result.usedFallback && result.error == 'offline') {

@@ -13,6 +13,7 @@ import '../../core/brain/family_brain_parser.dart';
 import '../../core/notifications/local_reminder_scheduler.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/theme/task_semantics.dart';
 import '../../core/widgets/app_notice.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/primary_button.dart';
@@ -202,6 +203,15 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
     if (draft.assigneeName != null) {
       rows.add((l10n.brainPerson, draft.assigneeName!));
     }
+    rows.add((l10n.priority, TaskSemantics.priorityLabel(l10n, draft.priority)));
+    if (draft.reminderAt != null) {
+      rows.add((
+        l10n.reminder,
+        draft.hasDueTime || draft.reminderAt!.hour != 0 || draft.reminderAt!.minute != 0
+            ? DateFormat.yMMMd().add_Hm().format(draft.reminderAt!)
+            : DateFormat.yMMMd().format(draft.reminderAt!),
+      ));
+    }
     if (draft.listItems.isNotEmpty) {
       rows.add((l10n.listItems, draft.listItems.join(', ')));
     }
@@ -291,6 +301,26 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
             },
           ),
         ],
+        const SizedBox(height: AppSpacing.md),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final priority in TaskPriority.values)
+              ChoiceChip(
+                avatar: Icon(
+                  TaskSemantics.priorityIcon(priority),
+                  size: 18,
+                  color: TaskSemantics.priorityColor(priority),
+                ),
+                label: Text(TaskSemantics.priorityLabel(l10n, priority)),
+                selected: draft.priority == priority,
+                onSelected: (_) => setState(
+                  () => _replace(draft.copyWith(priority: priority)),
+                ),
+              ),
+          ],
+        ),
       ],
     );
   }

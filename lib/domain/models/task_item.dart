@@ -1,6 +1,6 @@
 enum TaskType { personal, family }
 
-enum TaskPriority { normal, high, urgent }
+enum TaskPriority { low, normal, high, urgent }
 
 enum TaskStatus { pending, inProgress, completed }
 

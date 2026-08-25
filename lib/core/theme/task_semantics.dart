@@ -15,6 +15,7 @@ class TaskSemantics {
 
   static String priorityLabel(AppLocalizations l10n, TaskPriority priority) {
     return switch (priority) {
+      TaskPriority.low => l10n.low,
       TaskPriority.normal => l10n.normal,
       TaskPriority.high => l10n.high,
       TaskPriority.urgent => l10n.urgent,
@@ -31,6 +32,7 @@ class TaskSemantics {
 
   static IconData priorityIcon(TaskPriority priority) {
     return switch (priority) {
+      TaskPriority.low => Icons.low_priority_rounded,
       TaskPriority.normal => Icons.flag_outlined,
       TaskPriority.high => Icons.outlined_flag,
       TaskPriority.urgent => Icons.priority_high_rounded,
@@ -47,7 +49,8 @@ class TaskSemantics {
 
   static Color priorityColor(TaskPriority priority) {
     return switch (priority) {
-      TaskPriority.normal => AppColors.textMuted,
+      TaskPriority.low => AppColors.textMuted,
+      TaskPriority.normal => AppColors.primary,
       TaskPriority.high => AppColors.high,
       TaskPriority.urgent => AppColors.urgent,
     };

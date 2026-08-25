@@ -518,6 +518,12 @@ abstract class AppLocalizations {
   /// **'Priority'**
   String get priority;
 
+  /// No description provided for @low.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get low;
+
   /// No description provided for @normal.
   ///
   /// In en, this message translates to:
@@ -1573,6 +1579,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not understand the speech. Try again.'**
   String get voiceFailed;
+
+  /// No description provided for @voiceLanguageUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Hebrew speech recognition is not available on this device.'**
+  String get voiceLanguageUnsupported;
+
+  /// No description provided for @voiceEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No speech was captured. Try again.'**
+  String get voiceEmpty;
 
   /// No description provided for @imageFailed.
   ///

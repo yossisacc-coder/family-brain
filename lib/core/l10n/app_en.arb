@@ -84,6 +84,7 @@
   "dueDate": "Due date",
   "none": "None",
   "priority": "Priority",
+  "low": "Low",
   "normal": "Normal",
   "urgent": "Urgent",
   "notes": "Notes",
@@ -280,6 +281,8 @@
   "voiceUnavailable": "Voice input is not available on this device.",
   "voiceDenied": "Microphone permission was denied.",
   "voiceFailed": "Could not understand the speech. Try again.",
+  "voiceLanguageUnsupported": "Hebrew speech recognition is not available on this device.",
+  "voiceEmpty": "No speech was captured. Try again.",
   "imageFailed": "Could not open the photo picker.",
   "imageTooLarge": "That photo is too large. Choose a smaller one."
 }

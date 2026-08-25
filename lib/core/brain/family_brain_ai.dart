@@ -7,6 +7,7 @@ import '../../domain/models/app_user.dart';
 import '../../domain/models/task_item.dart';
 import '../config/app_config.dart';
 import 'family_brain_parser.dart';
+import 'priority_from_language.dart';
 
 class BrainUnderstandResult {
   const BrainUnderstandResult({
@@ -38,6 +39,7 @@ class FamilyBrainAi {
     String? imagePath,
     String? imageBase64,
     String? mimeType,
+    String language = 'en',
     http.Client? client,
     Duration timeout = const Duration(seconds: 12),
     String? backendUrl,
@@ -52,6 +54,7 @@ class FamilyBrainAi {
           members: members,
           imageBase64: imageBase64,
           mimeType: mimeType,
+          language: language,
           client: client,
           timeout: timeout,
         );
@@ -105,6 +108,7 @@ class FamilyBrainAi {
     required List<AppUser> members,
     String? imageBase64,
     String? mimeType,
+    String language = 'en',
     http.Client? client,
     required Duration timeout,
   }) async {
@@ -118,7 +122,7 @@ class FamilyBrainAi {
             body: jsonEncode({
               'text': text,
               'now': now.toIso8601String(),
-              'language': 'en',
+              'language': language,
               'members': [
                 for (final member in members)
                   {'id': member.id, 'name': member.name},
@@ -221,6 +225,8 @@ class FamilyBrainAi {
     final confidence = item['confidence'];
     final low = confidence is num ? confidence < 0.55 : item['lowConfidence'] == true;
     final space = (item['space'] ?? '').toString().toLowerCase();
+    final priority = PriorityFromLanguage.tryParse(item['priority']) ??
+        PriorityFromLanguage.infer(originalText);
 
     return BrainDraft(
       kind: kind,
@@ -237,6 +243,7 @@ class FamilyBrainAi {
       location: item['location']?.toString(),
       explanation: item['explanation']?.toString() ?? item['context']?.toString(),
       personal: space == 'personal' || space == 'private',
+      priority: priority,
     );
   }
 

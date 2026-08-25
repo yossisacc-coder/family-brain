@@ -233,6 +233,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get priority => 'עדיפות';
 
   @override
+  String get low => 'נמוכה';
+
+  @override
   String get normal => 'רגילה';
 
   @override
@@ -782,6 +785,13 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get voiceFailed => 'לא הצלחנו להבין את הדיבור. נסו שוב.';
+
+  @override
+  String get voiceLanguageUnsupported =>
+      'זיהוי דיבור בעברית אינו זמין במכשיר זה.';
+
+  @override
+  String get voiceEmpty => 'לא נקלט דיבור. נסו שוב.';
 
   @override
   String get imageFailed => 'לא ניתן לפתוח את בוחר התמונות.';
