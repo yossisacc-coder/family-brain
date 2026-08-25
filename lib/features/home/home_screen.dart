@@ -46,6 +46,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   var _sending = false;
   var _listening = false;
   var _heardSpeech = false;
+  var _localeFallbackUsed = false;
   String? _imagePath;
   Timer? _listenWatchdog;
 
@@ -389,14 +390,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       final ready = await _speech.initialize(
         onError: (error) {
           if (!mounted) return;
-          setState(() => _listening = false);
           final msg = error.errorMsg;
+          if (!_localeFallbackUsed && msg.contains('language')) {
+            _localeFallbackUsed = true;
+            _listenWithLocale(l10n, null);
+            return;
+          }
+          setState(() => _listening = false);
           if (msg.contains('permission')) {
             AppNotice.show(context, l10n.voiceDenied);
-          } else if (msg.contains('language')) {
-            AppNotice.show(context, l10n.voiceLanguageUnsupported);
           } else if (msg.contains('no_match') || msg.contains('speech_timeout')) {
             AppNotice.show(context, l10n.voiceEmpty);
+          } else if (msg.contains('language')) {
+            AppNotice.show(context, l10n.voiceFailed);
           } else {
             AppNotice.show(context, l10n.voiceFailed);
           }
@@ -412,34 +418,49 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         if (mounted) AppNotice.show(context, l10n.voiceUnavailable);
         return;
       }
-      final appLang = ref.read(localeControllerProvider).languageCode;
-      final available = await _speech.locales();
-      final localeId = SpeechLocalePicker.resolve(
-        appLanguageCode: appLang,
-        availableIds: available.map((locale) => locale.localeId),
-      );
-      if (appLang == 'he' && localeId == null) {
-        if (mounted) AppNotice.show(context, l10n.voiceLanguageUnsupported);
-        return;
+      _localeFallbackUsed = false;
+      String? localeId;
+      try {
+        final appLang = ref.read(localeControllerProvider).languageCode;
+        final available = await _speech.locales();
+        localeId = SpeechLocalePicker.resolve(
+          appLanguageCode: appLang,
+          availableIds: available.map((locale) => locale.localeId),
+        );
+      } catch (_) {
+        localeId = null;
       }
       if (!mounted) return;
-      setState(() {
-        _listening = true;
-        _heardSpeech = false;
-      });
-      _listenWatchdog?.cancel();
-      _listenWatchdog = Timer(const Duration(seconds: 8), () {
-        _stopVoice(l10n);
-      });
+      await _listenWithLocale(l10n, localeId);
+    } catch (_) {
+      if (mounted) {
+        setState(() => _listening = false);
+        AppNotice.show(context, l10n.voiceUnavailable);
+      }
+    }
+  }
+
+  Future<void> _listenWithLocale(AppLocalizations l10n, String? localeId) async {
+    if (!mounted) return;
+    setState(() {
+      _listening = true;
+      _heardSpeech = false;
+    });
+    _listenWatchdog?.cancel();
+    _listenWatchdog = Timer(const Duration(seconds: 8), () {
+      _stopVoice(l10n);
+    });
+    final options = SpeechListenOptions(
+      listenFor: const Duration(seconds: 8),
+      pauseFor: const Duration(seconds: 2),
+      partialResults: true,
+      listenMode: ListenMode.dictation,
+      cancelOnError: false,
+      localeId: localeId,
+    );
+    try {
       await _speech.listen(
-        listenOptions: SpeechListenOptions(
-          listenFor: const Duration(seconds: 8),
-          pauseFor: const Duration(seconds: 2),
-          partialResults: true,
-          listenMode: ListenMode.dictation,
-          localeId: localeId,
-          cancelOnError: true,
-        ),
+        listenOptions: options,
         onResult: (result) {
           if (!mounted) return;
           final text = result.recognizedWords.trim();
@@ -455,6 +476,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         },
       );
     } catch (_) {
+      if (localeId != null && !_localeFallbackUsed) {
+        _localeFallbackUsed = true;
+        await _listenWithLocale(l10n, null);
+        return;
+      }
       if (mounted) {
         setState(() => _listening = false);
         AppNotice.show(context, l10n.voiceUnavailable);

@@ -1,64 +1,57 @@
-/// Picks a speech-to-text locale from what the device actually supports.
+/// Picks a speech-to-text locale that matches the in-app language.
+///
+/// Samsung/Google recognizers often omit `he-IL` from [SpeechToText.locales]
+/// even when the engine can still transcribe Hebrew using the device default.
+/// An empty or missing preferred locale must never be treated as
+/// "speech recognition is unavailable".
 class SpeechLocalePicker {
-  static const hebrewCandidates = [
-    'he_IL',
-    'he-IL',
-    'iw_IL',
-    'iw-IL',
-    'he',
-    'iw',
-  ];
-
-  static const englishCandidates = [
-    'en_US',
-    'en-US',
-    'en_GB',
-    'en-GB',
-    'en_IN',
-    'en-IN',
-    'en',
-  ];
+  const SpeechLocalePicker._();
 
   static String? resolve({
     required String appLanguageCode,
     required Iterable<String> availableIds,
   }) {
-    final available = [
-      for (final id in availableIds)
-        if (id.trim().isNotEmpty) id.trim(),
-    ];
-    if (appLanguageCode == 'he') {
-      return _firstMatch(hebrewCandidates, available) ??
-          _firstWhereLang(available, const ['he', 'iw']);
+    final available = availableIds
+        .map((id) => id.trim())
+        .where((id) => id.isNotEmpty)
+        .toList();
+    if (available.isEmpty) return null;
+
+    final preferred = appLanguageCode.toLowerCase() == 'he'
+        ? const ['he_IL', 'he-IL', 'iw_IL', 'iw-IL', 'he', 'iw']
+        : const ['en_US', 'en-US', 'en_GB', 'en-GB', 'en'];
+
+    for (final candidate in preferred) {
+      for (final id in available) {
+        if (id.toLowerCase() == candidate.toLowerCase()) return id;
+      }
     }
-    return _firstMatch(englishCandidates, available) ??
-        _firstWhereLang(available, const ['en']);
+
+    final prefix = appLanguageCode.toLowerCase() == 'he' ? 'he' : 'en';
+    final iwPrefix = appLanguageCode.toLowerCase() == 'he';
+    for (final id in available) {
+      final lower = id.toLowerCase();
+      if (lower.startsWith('$prefix-') ||
+          lower.startsWith('${prefix}_') ||
+          lower == prefix) {
+        return id;
+      }
+      if (iwPrefix &&
+          (lower.startsWith('iw-') ||
+              lower.startsWith('iw_') ||
+              lower == 'iw')) {
+        return id;
+      }
+    }
+    return null;
   }
+
+  /// Hebrew (or English) can still be dictated when the preferred locale
+  /// is not advertised. The OS default recognizer remains usable.
+  static bool canListenWithoutPreferredLocale() => true;
 
   static bool isHebrewId(String id) {
     final lower = id.toLowerCase().replaceAll('-', '_');
     return lower.startsWith('he') || lower.startsWith('iw');
   }
-
-  static String? _firstMatch(List<String> preferred, List<String> available) {
-    for (final want in preferred) {
-      for (final have in available) {
-        if (_norm(have) == _norm(want)) return have;
-      }
-    }
-    return null;
-  }
-
-  static String? _firstWhereLang(List<String> available, List<String> prefixes) {
-    for (final have in available) {
-      final lower = _norm(have);
-      if (prefixes.any((p) => lower == p || lower.startsWith('${p}_'))) {
-        return have;
-      }
-    }
-    return null;
-  }
-
-  static String _norm(String id) =>
-      id.toLowerCase().replaceAll('-', '_').trim();
 }

@@ -46,6 +46,14 @@ void main() {
       ),
       isNull,
     );
+    expect(SpeechLocalePicker.canListenWithoutPreferredLocale(), isTrue);
+    expect(
+      SpeechLocalePicker.resolve(
+        appLanguageCode: 'he',
+        availableIds: const [],
+      ),
+      isNull,
+    );
   });
 
   test('English voice still prefers an English locale', () {
