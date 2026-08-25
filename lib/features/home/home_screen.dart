@@ -46,7 +46,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   var _sending = false;
   var _listening = false;
   var _heardSpeech = false;
-  var _localeFallbackUsed = false;
+  var _localeAttempt = 0;
+  List<String?> _localeAttempts = const [null];
   String? _imagePath;
   Timer? _listenWatchdog;
 
@@ -381,6 +382,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
+  void _sttLog(String message) {
+    debugPrint('family_brain_stt $message');
+  }
+
   Future<void> _toggleVoice(AppLocalizations l10n) async {
     if (_listening) {
       await _stopVoice(l10n);
@@ -388,12 +393,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
     try {
       final ready = await _speech.initialize(
+        debugLogging: true,
         onError: (error) {
           if (!mounted) return;
           final msg = error.errorMsg;
-          if (!_localeFallbackUsed && msg.contains('language')) {
-            _localeFallbackUsed = true;
-            _listenWithLocale(l10n, null);
+          _sttLog('error=$msg permanent=${error.permanent}');
+          if (_localeAttempt < _localeAttempts.length - 1 &&
+              SpeechLocalePicker.isLanguageError(msg)) {
+            _localeAttempt += 1;
+            _listenCurrent(l10n);
             return;
           }
           setState(() => _listening = false);
@@ -401,38 +409,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             AppNotice.show(context, l10n.voiceDenied);
           } else if (msg.contains('no_match') || msg.contains('speech_timeout')) {
             AppNotice.show(context, l10n.voiceEmpty);
-          } else if (msg.contains('language')) {
-            AppNotice.show(context, l10n.voiceFailed);
           } else {
             AppNotice.show(context, l10n.voiceFailed);
           }
         },
         onStatus: (status) {
+          _sttLog('status=$status');
           if (!mounted) return;
           if (status == 'notListening' || status == 'done') {
             setState(() => _listening = false);
           }
         },
       );
+      _sttLog('initialize ready=$ready');
       if (!ready) {
         if (mounted) AppNotice.show(context, l10n.voiceUnavailable);
         return;
       }
-      _localeFallbackUsed = false;
-      String? localeId;
-      try {
-        final appLang = ref.read(localeControllerProvider).languageCode;
-        final available = await _speech.locales();
-        localeId = SpeechLocalePicker.resolve(
-          appLanguageCode: appLang,
-          availableIds: available.map((locale) => locale.localeId),
-        );
-      } catch (_) {
-        localeId = null;
-      }
+      final appLang = ref.read(localeControllerProvider).languageCode;
+      _localeAttempts = SpeechLocalePicker.listenAttempts(appLang);
+      _localeAttempt = 0;
+      _sttLog('appLang=$appLang attempts=$_localeAttempts');
       if (!mounted) return;
-      await _listenWithLocale(l10n, localeId);
-    } catch (_) {
+      await _listenCurrent(l10n);
+    } catch (error) {
+      _sttLog('toggle failed $error');
       if (mounted) {
         setState(() => _listening = false);
         AppNotice.show(context, l10n.voiceUnavailable);
@@ -440,8 +441,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  Future<void> _listenWithLocale(AppLocalizations l10n, String? localeId) async {
+  Future<void> _listenCurrent(AppLocalizations l10n) async {
     if (!mounted) return;
+    final localeId = _localeAttempts[_localeAttempt];
     setState(() {
       _listening = true;
       _heardSpeech = false;
@@ -450,6 +452,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _listenWatchdog = Timer(const Duration(seconds: 8), () {
       _stopVoice(l10n);
     });
+    _sttLog('listen locale=${localeId ?? 'device_default'}');
+    if (_localeAttempt > 0) {
+      try {
+        await _speech.cancel();
+      } catch (_) {}
+    }
     final options = SpeechListenOptions(
       listenFor: const Duration(seconds: 8),
       pauseFor: const Duration(seconds: 2),
@@ -475,10 +483,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           }
         },
       );
-    } catch (_) {
-      if (localeId != null && !_localeFallbackUsed) {
-        _localeFallbackUsed = true;
-        await _listenWithLocale(l10n, null);
+    } catch (error) {
+      _sttLog('listen threw $error locale=${localeId ?? 'device_default'}');
+      if (_localeAttempt < _localeAttempts.length - 1) {
+        _localeAttempt += 1;
+        await _listenCurrent(l10n);
         return;
       }
       if (mounted) {

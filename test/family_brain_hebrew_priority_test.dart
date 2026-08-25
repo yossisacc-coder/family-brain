@@ -54,6 +54,11 @@ void main() {
       ),
       isNull,
     );
+    expect(
+      SpeechLocalePicker.listenAttempts('he'),
+      ['he_IL', 'iw_IL', 'he', null],
+    );
+    expect(SpeechLocalePicker.listenAttempts('en'), [null]);
   });
 
   test('English voice still prefers an English locale', () {
