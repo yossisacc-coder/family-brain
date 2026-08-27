@@ -21,7 +21,7 @@ class AgendaScreen extends ConsumerWidget {
   final AgendaKind kind;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final user = ref.watch(currentUserProvider).valueOrNull;
     final tasksAsync = ref.watch(familyTasksProvider);
