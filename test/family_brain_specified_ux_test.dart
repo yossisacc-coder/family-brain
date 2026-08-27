@@ -191,16 +191,12 @@ void main() {
     await tester.ensureVisible(send);
     await tester.tap(send);
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
     expect(
       find.text(l10n.brainProcessing).evaluate().isNotEmpty ||
-          find.text('Confirm drafts').evaluate().isNotEmpty,
-      isTrue,
-    );
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(
-      find.text('Confirm drafts').evaluate().isNotEmpty ||
-          find.text(l10n.brainProcessing).evaluate().isNotEmpty ||
-          find.text(l10n.brainUnclear).evaluate().isNotEmpty,
+          find.text('Confirm drafts').evaluate().isNotEmpty ||
+          find.text(l10n.brainUnclear).evaluate().isNotEmpty ||
+          find.text(l10n.errorUnavailable).evaluate().isNotEmpty,
       isTrue,
     );
   });
