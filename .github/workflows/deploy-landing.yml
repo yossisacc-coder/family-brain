@@ -3,6 +3,10 @@ name: Deploy landing page
 on:
   workflow_dispatch:
   push:
+    branches:
+      - cursor/family-brain-landing-d2d5
+      - cursor/family-brain-mvp-8ebd
+      - main
     paths:
       - "landing/**"
       - ".github/workflows/deploy-landing.yml"
@@ -14,17 +18,18 @@ permissions:
 
 concurrency:
   group: landing-pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
-    if: github.ref == 'refs/heads/cursor/family-brain-mvp-8ebd' || github.event_name == 'workflow_dispatch'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Confirm landing folder only
+        run: test -d landing && test -f landing/index.html && test -f landing/robots.txt && test -f landing/sitemap.xml
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

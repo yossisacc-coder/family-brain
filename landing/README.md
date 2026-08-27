@@ -4,6 +4,12 @@ This folder is a **standalone static website** for Family Brain. It does not cha
 
 Official logo: **08E — Two-tone** (`assets/brand` in the app; copied here as `images/logo-mark.png`).
 
+Expected GitHub Pages URL (project site for this repository):
+
+`https://yossisacc-coder.github.io/family-brain/`
+
+That URL is not live until GitHub Pages is enabled on the repository (see below). This repository is currently **private**. GitHub Pages on a private repo requires GitHub Pro. On the free plan, make the repository **public** first.
+
 ## Run locally
 
 From this folder:
@@ -15,64 +21,40 @@ python3 -m http.server 4173
 
 Open [http://127.0.0.1:4173](http://127.0.0.1:4173).
 
-Any static file server works (`npx serve .`, VS Code Live Server, etc.). There is no build step and no paid API.
+There is no build step and no paid API.
 
-## Deploy for free
+## Deploy for free with GitHub Pages
 
-Do **not** buy a domain or hosting. Pick one free static host:
+Do **not** buy a domain or hosting.
 
-### Option A — GitHub Pages (free)
+### What you must click in GitHub
 
-1. In the GitHub repo: **Settings → Pages**.
-2. Source: **GitHub Actions**.
-3. The workflow in `.github/workflows/deploy-landing.yml` publishes this `landing/` folder.
-4. After the workflow succeeds, the site URL is typically:
-   `https://<user>.github.io/<repo>/`
-5. Update these files to that exact public URL:
-   - `robots.txt` (`Sitemap:` line)
-   - `sitemap.xml` (`<loc>` values)
-   - canonical / Open Graph URLs in `index.html`
+1. Open [https://github.com/yossisacc-coder/family-brain](https://github.com/yossisacc-coder/family-brain).
+2. If the repo is private and you are on the free plan: **Settings → General → Danger Zone → Change repository visibility → Public**.
+3. Open **Settings → Pages**.
+4. Under **Build and deployment → Source**, choose **GitHub Actions**.
+5. Save.
+6. Open **Actions**, select **Deploy landing page**, and confirm a run succeeded (or wait for the next push of `landing/`).
+7. After a green deploy, open:
 
-Private repositories may need GitHub Pro for public Pages. If Pages is unavailable, use Option B or C.
+`https://yossisacc-coder.github.io/family-brain/`
 
-You can also copy **only the contents of `landing/`** into a new **public** GitHub repository and enable Pages from the root (`/`).
+The workflow `.github/workflows/deploy-landing.yml` publishes **only** the `landing/` folder. It does not build or deploy the Flutter app.
 
-### Option B — Cloudflare Pages (free)
+Canonical, Open Graph, `robots.txt`, and `sitemap.xml` already use that GitHub Pages project URL.
 
-1. Go to [Cloudflare Pages](https://pages.cloudflare.com/).
-2. Create a project from this GitHub repo.
-3. Set **build command** empty and **output directory** to `landing`.
-4. Deploy. You get a `*.pages.dev` URL at no cost.
-5. Update `robots.txt`, `sitemap.xml`, and the canonical/OG URLs to that hostname.
+## Google Search Console
 
-### Option C — Netlify Drop (free, no account required for a trial upload)
+Indexing is **not immediate and not guaranteed**. Google decides if and when to crawl and index.
 
-1. Zip the **contents** of `landing/` (not the Flutter project).
-2. Open [https://app.netlify.com/drop](https://app.netlify.com/drop).
-3. Drop the folder or zip. You get a free `*.netlify.app` URL.
-4. Update the SEO URLs as above.
+1. Open [https://search.google.com/search-console](https://search.google.com/search-console) and sign in with a Google account.
+2. Click **Add property**.
+3. Choose **URL prefix**.
+4. Enter `https://yossisacc-coder.github.io/family-brain/` (include the trailing path).
+5. Verify ownership with the easiest method that Search Console offers:
+   - **HTML file** (usually easiest for GitHub Pages): download the `google*.html` file Google gives you, put it in this `landing/` folder, commit and push, wait for Pages to deploy, then click **Verify**.
+   - **HTML tag**: paste the meta tag Google gives you into `landing/index.html` `<head>`, commit, push, wait for deploy, then **Verify**.
+6. After verification, open **Sitemaps**, enter `sitemap.xml`, and click **Submit**.
+7. Open **URL inspection**, enter `https://yossisacc-coder.github.io/family-brain/`, and click **Request indexing**.
 
-## Google Search
-
-This site includes:
-
-- Title and meta description
-- Open Graph tags
-- JSON-LD (`SoftwareApplication` + `FAQPage`)
-- Semantic headings
-- `robots.txt`
-- `sitemap.xml`
-
-Indexing is **not guaranteed**. After the site is on a public HTTPS URL:
-
-1. Confirm `robots.txt` and `sitemap.xml` use that URL.
-2. Open [Google Search Console](https://search.google.com/search-console).
-3. Add the property, verify ownership, and submit the sitemap (`/sitemap.xml`).
-
-## Appearance
-
-The landing page defaults to the Personal (light) Family Brain identity. Use the ◐ control in the header to preview the Professional (dark) companion theme from the app.
-
-## Beta form
-
-The “Join the Beta” form stores interest in the browser (`localStorage`) so this page needs no paid backend. Replace it later with any free form tool if you want email delivery.
+Do this only after the GitHub Pages URL loads in a browser over HTTPS.

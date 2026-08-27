@@ -1,5 +1,6 @@
 # Family Brain landing page
-# Update Sitemap to your published URL after you deploy.
+# GitHub Pages project URL for yossisacc-coder/family-brain.
+# This file allows search engines, including Google, to crawl the site.
 User-agent: *
 Allow: /
 
