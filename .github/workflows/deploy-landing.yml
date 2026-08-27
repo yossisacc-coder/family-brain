@@ -31,6 +31,8 @@ jobs:
       - name: Confirm landing folder only
         run: test -d landing && test -f landing/index.html && test -f landing/robots.txt && test -f landing/sitemap.xml
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: landing
