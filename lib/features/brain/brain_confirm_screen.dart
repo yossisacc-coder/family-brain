@@ -132,11 +132,52 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
           ],
           if (draft.lowConfidence) ...[
             Text(
-              l10n.brainUnclear,
+              draft.assigneeId == null
+                  ? l10n.brainUnsureAssignee
+                  : l10n.brainUnclear,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: context.palette.textMuted,
+                    fontWeight: FontWeight.w600,
                   ),
             ),
+            if (draft.assigneeId == null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final member in members)
+                    ChoiceChip(
+                      label: Text(member.name),
+                      selected: draft.assigneeId == member.id,
+                      onSelected: (_) => setState(() {
+                        _replace(
+                          draft.copyWith(
+                            assigneeId: member.id,
+                            assigneeName: member.name,
+                            personal: member.id ==
+                                ref.read(currentUserProvider).valueOrNull?.id,
+                            lowConfidence: false,
+                          ),
+                        );
+                      }),
+                    ),
+                  ChoiceChip(
+                    label: Text(l10n.brainAssignFamily),
+                    selected: false,
+                    onSelected: (_) => setState(() {
+                      _replace(
+                        draft.copyWith(
+                          clearAssignee: true,
+                          personal: false,
+                          lowConfidence: false,
+                        ),
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: AppSpacing.md),
           ],
           AppCard(

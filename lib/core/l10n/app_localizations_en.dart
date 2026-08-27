@@ -1012,4 +1012,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accessPlanBetaHint =>
       'You are on Family Brain Beta. The full product is available with no payment. A Premium plan can be added later without rebuilding the app.';
+
+  @override
+  String get brainUnsureAssignee =>
+      'I found a task, but I\'m not sure who it belongs to.';
+
+  @override
+  String get brainAssignFamily => 'Family';
+
+  @override
+  String get activityClearOlder => 'Clear older than 7 days';
 }

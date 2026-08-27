@@ -15,6 +15,7 @@ class MainActivity : FlutterActivity() {
     private val channelName = "family_brain/share"
     private var channel: MethodChannel? = null
     private var pending: HashMap<String, Any>? = null
+    private var lastFingerprint: String? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -50,8 +51,6 @@ class MainActivity : FlutterActivity() {
         if (action != Intent.ACTION_SEND && action != Intent.ACTION_SEND_MULTIPLE) return
 
         val data = HashMap<String, Any>()
-        data["shareId"] = UUID.randomUUID().toString()
-        data["source"] = "android_share"
         intent.type?.let { data["mimeType"] = it }
 
         val subject = intent.getStringExtra(Intent.EXTRA_SUBJECT)?.trim()
@@ -67,12 +66,35 @@ class MainActivity : FlutterActivity() {
         if (!data.containsKey("text")) {
             readFirstTextUri(intent)?.let { data["text"] = it }
         }
-        if (data.containsKey("text") ||
-            data.containsKey("subject") ||
-            data.containsKey("imagePath")
+        if (!data.containsKey("text") &&
+            !data.containsKey("subject") &&
+            !data.containsKey("imagePath")
         ) {
-            pending = data
+            return
         }
+        val fingerprint = shareFingerprint(intent, data)
+        if (fingerprint == lastFingerprint && pending != null) return
+        lastFingerprint = fingerprint
+        data["shareId"] = fingerprint
+        data["source"] = "android_share"
+        pending = data
+    }
+
+    private fun shareFingerprint(intent: Intent, data: HashMap<String, Any>): String {
+        val raw = buildString {
+            append(intent.action)
+            append('|')
+            append(intent.type)
+            append('|')
+            append(data["subject"])
+            append('|')
+            append(data["text"])
+            append('|')
+            append(data["imagePaths"] ?: data["imagePath"])
+            append('|')
+            append(intent.data)
+        }
+        return "share-${raw.hashCode().toUInt()}"
     }
 
     private fun copyUri(uri: Uri, intentType: String?): String? {

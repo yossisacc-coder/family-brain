@@ -30,10 +30,12 @@ class LocalReminderScheduler {
   static var _askedPermissions = false;
   static final Map<String, int> _ids = {};
   static bool? _exactAllowed;
+  static String? lastDiagnostic;
+  static var _timezoneReady = false;
 
   static Future<void> initialize() async {
     if (_ready) return;
-    tzdata.initializeTimeZones();
+    _bindLocalTimezone();
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
     const settings = InitializationSettings(android: android);
     await plugin.initialize(
@@ -163,7 +165,10 @@ class LocalReminderScheduler {
         priority: Priority.high,
       ),
     );
-    final zoned = tz.TZDateTime.from(when, tz.local);
+    final zoned = tz.TZDateTime.from(when.toLocal(), tz.local);
+    lastDiagnostic =
+        'schedule ${task.id} at ${when.toIso8601String()} tz=${tz.local.name} exact=$usesExactAlarms';
+    debugPrint('FamilyBrain reminder $lastDiagnostic');
     try {
       await plugin.zonedSchedule(
         key,
@@ -174,8 +179,10 @@ class LocalReminderScheduler {
         androidScheduleMode: scheduleMode(),
         payload: task.id,
       );
+      lastDiagnostic = 'scheduled ${task.id} at ${when.toIso8601String()}';
     } catch (error) {
       debugPrint('Reminder schedule failed, retrying inexact: $error');
+      lastDiagnostic = 'retry-inexact ${task.id}: $error';
       _exactAllowed = false;
       try {
         await plugin.zonedSchedule(
@@ -187,7 +194,9 @@ class LocalReminderScheduler {
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
           payload: task.id,
         );
+        lastDiagnostic = 'scheduled-inexact ${task.id} at ${when.toIso8601String()}';
       } catch (fallbackError) {
+        lastDiagnostic = 'failed ${task.id}: $fallbackError';
         debugPrint('Reminder schedule failed: $fallbackError');
       }
     }
@@ -199,6 +208,7 @@ class LocalReminderScheduler {
     if (!_ready) return;
     final key = _ids[taskId] ?? notificationIdFor(taskId);
     await plugin.cancel(key);
+    lastDiagnostic = 'cancelled $taskId';
     await _persistIds();
   }
 
@@ -218,6 +228,26 @@ class LocalReminderScheduler {
       }
     }
     await _persistIds();
+  }
+
+  static void _bindLocalTimezone() {
+    if (_timezoneReady) return;
+    tzdata.initializeTimeZones();
+    final offsetMs = DateTime.now().timeZoneOffset.inMilliseconds;
+    tz.Location? match;
+    for (final loc in tz.timeZoneDatabase.locations.values) {
+      if (loc.currentTimeZone.offset != offsetMs) continue;
+      match = loc;
+      if (loc.name.contains('Jerusalem') ||
+          loc.name.contains('New_York') ||
+          loc.name.contains('London') ||
+          loc.name == 'UTC') {
+        break;
+      }
+    }
+    tz.setLocalLocation(match ?? tz.getLocation('UTC'));
+    _timezoneReady = true;
+    debugPrint('FamilyBrain reminder timezone ${tz.local.name}');
   }
 
   static Future<void> _loadIds() async {
@@ -253,6 +283,8 @@ class LocalReminderScheduler {
     _ready = false;
     _askedPermissions = false;
     _exactAllowed = null;
+    lastDiagnostic = null;
+    _timezoneReady = false;
   }
 
   @visibleForTesting

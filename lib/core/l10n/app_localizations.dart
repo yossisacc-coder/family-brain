@@ -1999,6 +1999,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You are on Family Brain Beta. The full product is available with no payment. A Premium plan can be added later without rebuilding the app.'**
   String get accessPlanBetaHint;
+
+  /// No description provided for @brainUnsureAssignee.
+  ///
+  /// In en, this message translates to:
+  /// **'I found a task, but I\'m not sure who it belongs to.'**
+  String get brainUnsureAssignee;
+
+  /// No description provided for @brainAssignFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get brainAssignFamily;
+
+  /// No description provided for @activityClearOlder.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear older than 7 days'**
+  String get activityClearOlder;
 }
 
 class _AppLocalizationsDelegate

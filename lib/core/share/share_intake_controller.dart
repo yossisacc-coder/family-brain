@@ -10,6 +10,7 @@ class ShareIntakeController extends StateNotifier<IncomingShare?> {
 
   final MethodChannel _channel;
   var _bound = false;
+  final _seen = <String>{};
 
   Future<void> bind() async {
     if (_bound) return;
@@ -28,11 +29,17 @@ class ShareIntakeController extends StateNotifier<IncomingShare?> {
 
   void apply(IncomingShare share) {
     if (share.isEmpty) return;
-    if (state?.id == share.id) return;
+    if (_seen.contains(share.id) || state?.id == share.id) return;
     state = share;
   }
 
+  bool get hasProcessedPending => state != null;
+
+  bool alreadyProcessed(String id) => _seen.contains(id);
+
   void clear() {
+    final current = state;
+    if (current != null) _seen.add(current.id);
     state = null;
   }
 }

@@ -252,15 +252,12 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
         }
       }
       if (!mounted) return;
-      if (existing == null) {
-        context.go('/app/home');
-        AppNotice.showAfterNavigation(l10n.taskSaved);
-      } else if (context.canPop()) {
-        context.pop();
-        AppNotice.showAfterNavigation(l10n.taskSaved);
-      } else {
-        AppNotice.show(context, l10n.taskSaved);
-      }
+      ref.invalidate(familyTasksProvider);
+      context.go('/app/home');
+      AppNotice.showAfterNavigation(l10n.taskSaved);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _error = l10n.errorUnavailable);
     } finally {
       if (mounted) setState(() => _loading = false);
     }

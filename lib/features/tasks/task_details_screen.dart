@@ -99,6 +99,26 @@ class TaskDetailsScreen extends ConsumerWidget {
             children: [
               _labeledValue(
                 context,
+                l10n.dueDate,
+                task.dueDate == null
+                    ? l10n.noDueDate
+                    : (task.hasDueTime
+                            ? DateFormat.yMMMd().add_jm()
+                            : DateFormat.yMMMd())
+                        .format(task.dueDate!.toLocal()),
+                icon: Icons.event_outlined,
+              ),
+              _labeledValue(
+                context,
+                l10n.assignee,
+                assignee?.name ??
+                    (task.type == TaskType.personal
+                        ? l10n.personal
+                        : l10n.familyType),
+                icon: Icons.person_outline,
+              ),
+              _labeledValue(
+                context,
                 l10n.changeStatus,
                 TaskSemantics.statusLabel(l10n, task.status),
                 icon: TaskSemantics.statusIcon(task.status),
@@ -120,20 +140,11 @@ class TaskDetailsScreen extends ConsumerWidget {
               ),
               _labeledValue(
                 context,
-                l10n.dueDate,
-                task.dueDate == null
-                    ? l10n.noDueDate
-                    : (task.hasDueTime
-                            ? DateFormat.yMMMd().add_jm()
-                            : DateFormat.yMMMd())
-                        .format(task.dueDate!.toLocal()),
-                icon: Icons.event_outlined,
-              ),
-              _labeledValue(
-                context,
-                l10n.assignee,
-                assignee?.name ?? l10n.unassigned,
-                icon: Icons.person_outline,
+                l10n.reminder,
+                task.reminderAt == null
+                    ? l10n.noReminder
+                    : DateFormat.yMMMd().add_jm().format(task.reminderAt!),
+                icon: Icons.alarm_outlined,
               ),
               _labeledValue(
                 context,
@@ -179,14 +190,6 @@ class TaskDetailsScreen extends ConsumerWidget {
                     InformationKind.information => Icons.info_outline_rounded,
                     InformationKind.task => Icons.task_alt_rounded,
                   },
-                ),
-                _labeledValue(
-                  context,
-                  l10n.reminder,
-                  task.reminderAt == null
-                      ? l10n.noReminder
-                      : DateFormat.yMMMd().add_jm().format(task.reminderAt!),
-                  icon: Icons.alarm_outlined,
                 ),
                 _labeledValue(
                   context,
@@ -313,7 +316,8 @@ class TaskDetailsScreen extends ConsumerWidget {
       task: updated,
     );
     if (!context.mounted) return;
-    context.pop();
+    ref.invalidate(familyTasksProvider);
+    context.go('/app/home');
     AppNotice.showAfterNavigation(l10n.taskCompleted);
   }
 

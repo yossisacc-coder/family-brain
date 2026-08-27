@@ -324,5 +324,8 @@
   "shareReceivedBody": "Family Brain קיבל את התוכן ויהפוך אותו למשימה, אירוע או תזכורת כשאפשר.",
   "shareOriginalContent": "התוכן המקורי ששותף",
   "accessPlan": "גישה",
-  "accessPlanBetaHint": "אתם בגרסת בטא של Family Brain. כל המוצר זמין בלי תשלום. אפשר להוסיף תוכנית Premium בעתיד בלי לבנות מחדש את האפליקציה."
+  "accessPlanBetaHint": "אתם בגרסת בטא של Family Brain. כל המוצר זמין בלי תשלום. אפשר להוסיף תוכנית Premium בעתיד בלי לבנות מחדש את האפליקציה.",
+  "brainUnsureAssignee": "מצאתי משימה, אבל אני לא בטוח למי היא שייכת.",
+  "brainAssignFamily": "משפחה",
+  "activityClearOlder": "ניקוי פעילות ישנה מ־7 ימים"
 }

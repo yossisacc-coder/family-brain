@@ -45,4 +45,20 @@ class FirestoreActivityRepository implements ActivityRepository {
     }
     await batch.commit();
   }
+
+  @override
+  Future<void> clearOlderThan({
+    required String familyId,
+    required DateTime cutoff,
+  }) async {
+    final snap = await _col.where('familyId', isEqualTo: familyId).get();
+    final batch = _db.batch();
+    for (final doc in snap.docs) {
+      final item = FamilyActivity.fromMap(doc.data());
+      if (!item.createdAt.isAfter(cutoff)) {
+        batch.delete(doc.reference);
+      }
+    }
+    await batch.commit();
+  }
 }

@@ -11,4 +11,9 @@ abstract class ActivityRepository {
   Future<void> deleteActivity(String activityId);
 
   Future<void> clearFamilyActivity(String familyId);
+
+  Future<void> clearOlderThan({
+    required String familyId,
+    required DateTime cutoff,
+  });
 }

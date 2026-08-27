@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'ai_provider.dart';
+import 'ai_retry.dart';
 import 'family_brain_ai_schema.dart';
 import 'family_brain_context.dart';
 import 'local_fallback_adapter.dart';
@@ -36,7 +37,9 @@ class FamilyBrainAiService {
     if (provider != null) {
       try {
         final cloud = FamilyBrainAiValidator.resolve(
-          await provider!.interpret(input: input, context: context),
+          await AiRetryPolicy.run(
+            () => provider!.interpret(input: input, context: context),
+          ),
           context: context,
           originalText: input.text,
         );

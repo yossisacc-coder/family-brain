@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:family_brain/core/l10n/app_localizations.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../domain/models/app_user.dart';
 import '../../domain/models/task_item.dart';
@@ -30,9 +31,12 @@ class TaskCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final palette = context.palette;
     final assignee = members.where((m) => m.id == task.assigneeId).firstOrNull;
-    final dueLabel = _dueLabel(l10n, task);
     final accent = TaskSemantics.accentFor(task, primary: palette.primary);
     final completed = task.status == TaskStatus.completed;
+    final dueLine = _dueLine(l10n, task);
+    final who = assignee?.name ??
+        (task.type == TaskType.personal ? l10n.personal : l10n.familyType);
+    final scope = task.type == TaskType.personal ? l10n.personal : l10n.familyType;
 
     return Material(
       color: palette.card,
@@ -55,7 +59,7 @@ class TaskCard extends StatelessWidget {
             children: [
               Container(
                 width: 4,
-                height: compact ? 52 : 64,
+                height: compact ? 56 : 72,
                 decoration: BoxDecoration(
                   color: accent,
                   borderRadius: BorderRadius.circular(8),
@@ -71,72 +75,42 @@ class TaskCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
                             color: completed ? AppColors.completed : null,
                             decoration: completed
                                 ? TextDecoration.lineThrough
                                 : null,
                           ),
                     ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: [
-                        _MetaChip(
-                          label: TaskSemantics.statusLabel(l10n, task.status),
-                          icon: TaskSemantics.statusIcon(task.status),
-                          color: TaskSemantics.statusColor(
-                            task.status,
-                            muted: palette.textMuted,
+                    if (dueLine != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        dueLine,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: task.isOverdue()
+                                  ? AppColors.urgent
+                                  : palette.textMuted,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ],
+                    const SizedBox(height: 4),
+                    Text(
+                      assignee == null ? scope : '$who · $scope',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: palette.text,
                           ),
-                        ),
-                        _MetaChip(
-                          label: TaskSemantics.priorityLabel(l10n, task.priority),
-                          icon: TaskSemantics.priorityIcon(task.priority),
-                          color: TaskSemantics.priorityColor(
-                            task.priority,
-                            primary: palette.primary,
-                            muted: palette.textMuted,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '${l10n.changeStatus}: ${TaskSemantics.statusLabel(l10n, task.status)} · ${l10n.priority}: ${TaskSemantics.priorityLabel(l10n, task.priority)}',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: TaskSemantics.priorityColor(
+                              task.priority,
+                              primary: palette.primary,
+                              muted: palette.textMuted,
+                            ),
                           ),
-                        ),
-                        if (dueLabel != null)
-                          _MetaChip(
-                            label: dueLabel,
-                            icon: Icons.event_outlined,
-                            color: task.isOverdue() ? AppColors.urgent : palette.textMuted,
-                          ),
-                        if (task.kind != InformationKind.task)
-                          _MetaChip(
-                            label: _kindLabel(l10n, task.kind),
-                            icon: switch (task.kind) {
-                              InformationKind.event => Icons.event_outlined,
-                              InformationKind.reminder => Icons.alarm_outlined,
-                              InformationKind.list => Icons.list_alt_rounded,
-                              InformationKind.information =>
-                                Icons.info_outline_rounded,
-                              InformationKind.task => Icons.task_alt_rounded,
-                            },
-                          ),
-                        if (assignee != null)
-                          _MetaChip(
-                            label: assignee.name,
-                            icon: Icons.person_outline,
-                          ),
-                        if (!compact)
-                          _MetaChip(
-                            label: task.type == TaskType.personal
-                                ? l10n.personal
-                                : l10n.familyType,
-                            icon: task.type == TaskType.personal
-                                ? Icons.person_outline
-                                : Icons.groups_outlined,
-                          ),
-                        if (task.hasReminder)
-                          _MetaChip(
-                            label: l10n.reminder,
-                            icon: Icons.alarm_outlined,
-                          ),
-                      ],
                     ),
                   ],
                 ),
@@ -164,61 +138,19 @@ class TaskCard extends StatelessWidget {
     );
   }
 
-  String? _dueLabel(AppLocalizations l10n, TaskItem task) {
-    if (task.dueDate == null) return null;
+  String? _dueLine(AppLocalizations l10n, TaskItem task) {
+    if (task.dueDate == null) return task.hasReminder ? l10n.reminder : null;
     if (task.isOverdue()) return l10n.overdue;
+    final due = task.dueDate!.toLocal();
     final now = DateTime.now();
-    final due = DateTime(task.dueDate!.year, task.dueDate!.month, task.dueDate!.day);
+    final day = DateTime(due.year, due.month, due.day);
     final today = DateTime(now.year, now.month, now.day);
-    if (due == today) return l10n.today;
-    if (due == today.add(const Duration(days: 1))) return l10n.dueTomorrow;
-    return '${due.day}/${due.month}';
-  }
-
-  String _kindLabel(AppLocalizations l10n, InformationKind kind) {
-    return switch (kind) {
-      InformationKind.task => l10n.kindTask,
-      InformationKind.event => l10n.kindEvent,
-      InformationKind.reminder => l10n.kindReminder,
-      InformationKind.list => l10n.kindList,
-      InformationKind.information => l10n.kindInformation,
-    };
-  }
-}
-
-class _MetaChip extends StatelessWidget {
-  const _MetaChip({
-    required this.label,
-    this.icon,
-    this.color,
-  });
-
-  final String label;
-  final IconData? icon;
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    final fg = color ?? context.palette.textMuted;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: fg.withValues(alpha: 0.10),
-        borderRadius: AppRadii.chip,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 13, color: fg),
-            const SizedBox(width: 4),
-          ],
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(color: fg),
-          ),
-        ],
-      ),
-    );
+    final dateLabel = day == today
+        ? l10n.today
+        : day == today.add(const Duration(days: 1))
+            ? l10n.dueTomorrow
+            : DateFormat.MMMd().format(due);
+    if (!task.hasDueTime) return dateLabel;
+    return '$dateLabel · ${DateFormat.Hm().format(due)}';
   }
 }

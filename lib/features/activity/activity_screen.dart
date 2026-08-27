@@ -24,27 +24,39 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
   final _selected = <String>{};
 
   Future<void> _confirmClear(AppLocalizations l10n) async {
-    final ok = await showDialog<bool>(
+    final choice = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.activityClearTitle),
         content: Text(l10n.activityClearBody),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
+            onPressed: () => Navigator.pop(ctx),
             child: Text(l10n.cancel),
           ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, 'older'),
+            child: Text(l10n.activityClearOlder),
+          ),
           FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
+            onPressed: () => Navigator.pop(ctx, 'all'),
             child: Text(l10n.activityClearConfirm),
           ),
         ],
       ),
     );
-    if (ok != true || !mounted) return;
+    if (choice == null || !mounted) return;
     final family = ref.read(currentFamilyProvider).valueOrNull;
     if (family == null) return;
-    await ref.read(activityRepositoryProvider).clearFamilyActivity(family.id);
+    final repo = ref.read(activityRepositoryProvider);
+    if (choice == 'older') {
+      await repo.clearOlderThan(
+        familyId: family.id,
+        cutoff: DateTime.now().subtract(const Duration(days: 7)),
+      );
+    } else {
+      await repo.clearFamilyActivity(family.id);
+    }
     if (!mounted) return;
     setState(() => _selected.clear());
     AppNotice.show(context, l10n.activityCleared);

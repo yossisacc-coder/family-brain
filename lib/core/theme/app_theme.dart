@@ -198,6 +198,36 @@ class AppTheme {
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
+      dividerTheme: DividerThemeData(color: palette.border, thickness: 1),
+      listTileTheme: ListTileThemeData(
+        iconColor: palette.primary,
+        textColor: palette.text,
+        subtitleTextStyle: textTheme.bodySmall?.copyWith(color: palette.textMuted),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return palette.onPrimary;
+          return palette.card;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return palette.primary;
+          return palette.border;
+        }),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return palette.primary;
+          return Colors.transparent;
+        }),
+        checkColor: WidgetStateProperty.all(palette.onPrimary),
+        side: BorderSide(color: palette.border, width: 1.6),
+      ),
+      radioTheme: RadioThemeData(
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return palette.primary;
+          return palette.textMuted;
+        }),
+      ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: palette.nav,
         indicatorColor: palette.primarySoft,

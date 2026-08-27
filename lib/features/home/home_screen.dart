@@ -43,6 +43,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _composer = TextEditingController();
+  final _composerFocus = FocusNode();
   final _speech = SpeechToText();
   final _picker = ImagePicker();
   var _sending = false;
@@ -69,6 +70,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _listenWatchdog?.cancel();
     _silenceTimer?.cancel();
     _composer.dispose();
+    _composerFocus.dispose();
     super.dispose();
   }
 
@@ -137,7 +139,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     subtitle: l10n.greetingSubtitle,
                     unreadCount: unread,
                     onNotifications: () => context.push('/notifications'),
-                    onSettings: () => context.go('/app/settings'),
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -199,11 +200,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: QuickActionCard(
-                          icon: Icons.check_circle_outline_rounded,
-                          label: l10n.quickAccessTasks,
+                          icon: Icons.ios_share_rounded,
+                          label: l10n.sendToFamilyBrain,
                           iconColor: palette.homeTasks,
                           iconBackground: palette.homeTasksSoft,
-                          onTap: () => context.go('/app/tasks'),
+                          onTap: () => _focusComposer(),
                         ),
                       ),
                     ],
@@ -242,11 +243,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                   _ComposerCard(
                     controller: _composer,
+                    focusNode: _composerFocus,
                     sending: _sending,
                     listening: _listening,
                     imagePath: _imagePath,
                     statusKind: _brainStatus,
                     statusMessage: _brainStatusMessage,
+                    onRetry: _brainStatus == BrainStatusKind.error
+                        ? () => _submitComposer(
+                              context,
+                              l10n,
+                              members,
+                              user,
+                              open,
+                            )
+                        : null,
                     onSubmit: () => _submitComposer(
                       context,
                       l10n,
@@ -805,6 +816,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (hour < 17) return l10n.greetingAfternoon(name);
     return l10n.greetingEvening(name);
   }
+
+  void _focusComposer() {
+    _composerFocus.requestFocus();
+  }
 }
 
 class _ShareReceivedCard extends StatelessWidget {
@@ -870,14 +885,17 @@ class _ComposerCard extends StatefulWidget {
     required this.onAdd,
     required this.onMic,
     required this.onRemoveImage,
+    this.focusNode,
     this.sending = false,
     this.listening = false,
     this.imagePath,
     this.statusKind,
     this.statusMessage,
+    this.onRetry,
   });
 
   final TextEditingController controller;
+  final FocusNode? focusNode;
   final VoidCallback onSubmit;
   final void Function(BuildContext buttonContext) onAdd;
   final VoidCallback onMic;
@@ -887,17 +905,20 @@ class _ComposerCard extends StatefulWidget {
   final String? imagePath;
   final BrainStatusKind? statusKind;
   final String? statusMessage;
+  final VoidCallback? onRetry;
 
   @override
   State<_ComposerCard> createState() => _ComposerCardState();
 }
 
 class _ComposerCardState extends State<_ComposerCard> {
-  final _focus = FocusNode();
+  late final FocusNode _ownedFocus;
+  FocusNode get _focus => widget.focusNode ?? _ownedFocus;
 
   @override
   void initState() {
     super.initState();
+    _ownedFocus = FocusNode();
     widget.controller.addListener(_onChanged);
     _focus.addListener(_onChanged);
   }
@@ -914,7 +935,8 @@ class _ComposerCardState extends State<_ComposerCard> {
   @override
   void dispose() {
     widget.controller.removeListener(_onChanged);
-    _focus.dispose();
+    _focus.removeListener(_onChanged);
+    _ownedFocus.dispose();
     super.dispose();
   }
 
@@ -1059,6 +1081,10 @@ class _ComposerCardState extends State<_ComposerCard> {
           BrainStatusStrip(
             kind: widget.statusKind!,
             message: widget.statusMessage!,
+            retryLabel: widget.onRetry == null
+                ? null
+                : AppLocalizations.of(context).brainRetry,
+            onRetry: widget.onRetry,
           ),
         ],
       ],

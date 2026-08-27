@@ -1,4 +1,6 @@
 import 'package:family_brain/core/access/access_entitlement.dart';
+import 'package:family_brain/core/brain/ai/ai_retry.dart';
+import 'package:family_brain/core/notifications/local_reminder_scheduler.dart';
 import 'package:family_brain/core/share/incoming_share.dart';
 import 'package:family_brain/core/share/share_intake_controller.dart';
 import 'package:family_brain/data/local/local_activity_repository.dart';
@@ -88,6 +90,13 @@ void main() {
 
       controller.clear();
       expect(controller.state, isNull);
+      controller.apply(
+        IncomingShare.fromMap({
+          'shareId': 'keep',
+          'text': 'Buy milk tomorrow',
+        }),
+      );
+      expect(controller.state, isNull);
     });
   });
 
@@ -162,6 +171,56 @@ void main() {
         hasLength(1),
       );
     });
+
+    test('clearing older activity keeps recent records and tasks', () async {
+      final store = LocalJsonStore(persist: false);
+      final activities = LocalActivityRepository(store);
+      final tasks = LocalTaskRepository(store);
+      await tasks.createTask(
+        TaskItem(
+          id: 'keep-task',
+          familyId: 'fam',
+          creatorId: alex.id,
+          title: 'Keep me',
+          type: TaskType.family,
+          priority: TaskPriority.normal,
+          status: TaskStatus.pending,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+      await activities.addActivity(
+        FamilyActivity(
+          id: 'old',
+          familyId: 'fam',
+          actorId: alex.id,
+          actorName: alex.name,
+          type: ActivityType.taskCreated,
+          summary: 'Old activity',
+          createdAt: now.subtract(const Duration(days: 10)),
+        ),
+      );
+      await activities.addActivity(
+        FamilyActivity(
+          id: 'new',
+          familyId: 'fam',
+          actorId: alex.id,
+          actorName: alex.name,
+          type: ActivityType.taskCreated,
+          summary: 'New activity',
+          createdAt: now,
+        ),
+      );
+      await activities.clearOlderThan(
+        familyId: 'fam',
+        cutoff: now.subtract(const Duration(days: 7)),
+      );
+      final remaining = await activities
+          .watchFamilyActivity(familyId: 'fam', viewerId: alex.id)
+          .first;
+      expect(remaining.map((item) => item.id), ['new']);
+      expect(store.tasks.containsKey('keep-task'), isTrue);
+    });
   });
 
   group('beta entitlement', () {
@@ -186,6 +245,67 @@ void main() {
       expect(
         AppUser.fromMap(alex.toMap()).plan,
         AccessPlan.beta,
+      );
+    });
+  });
+
+  group('retry limits and reminders', () {
+    test('automatic AI retries stop after two attempts', () async {
+      var calls = 0;
+      await expectLater(
+        AiRetryPolicy.run(() async {
+          calls += 1;
+          throw Exception('fail');
+        }),
+        throwsA(isA<Exception>()),
+      );
+      expect(calls, AiRetryPolicy.maxAttempts);
+      expect(AiRetryPolicy.maxAttempts, 2);
+    });
+
+    test('reminder ids stay stable and past times are not scheduled', () {
+      LocalReminderScheduler.debugReset();
+      final first = LocalReminderScheduler.notificationIdFor('task-a');
+      final second = LocalReminderScheduler.notificationIdFor('task-a');
+      expect(first, second);
+      final now = DateTime(2026, 8, 27, 10);
+      expect(
+        LocalReminderScheduler.shouldSchedule(
+          TaskItem(
+            id: 'future',
+            familyId: 'fam',
+            creatorId: alex.id,
+            title: 'Later',
+            type: TaskType.family,
+            kind: InformationKind.reminder,
+            reminderAt: now.add(const Duration(hours: 2)),
+            priority: TaskPriority.normal,
+            status: TaskStatus.pending,
+            createdAt: now,
+            updatedAt: now,
+          ),
+          now,
+        ),
+        isTrue,
+      );
+      expect(
+        LocalReminderScheduler.shouldSchedule(
+          TaskItem(
+            id: 'past',
+            familyId: 'fam',
+            creatorId: alex.id,
+            title: 'Past',
+            type: TaskType.family,
+            kind: InformationKind.reminder,
+            reminderAt: now.subtract(const Duration(hours: 1)),
+            priority: TaskPriority.normal,
+            status: TaskStatus.pending,
+            createdAt: now,
+            updatedAt: now,
+          ),
+          now,
+        ),
+        isFalse,
       );
     });
   });

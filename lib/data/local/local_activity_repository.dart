@@ -43,6 +43,24 @@ class LocalActivityRepository implements ActivityRepository {
     await _store.commit();
   }
 
+  @override
+  Future<void> clearOlderThan({
+    required String familyId,
+    required DateTime cutoff,
+  }) async {
+    final ids = _store.activity.values
+        .map(FamilyActivity.fromMap)
+        .where(
+          (item) => item.familyId == familyId && !item.createdAt.isAfter(cutoff),
+        )
+        .map((item) => item.id)
+        .toList();
+    for (final id in ids) {
+      _store.activity.remove(id);
+    }
+    await _store.commit();
+  }
+
   List<FamilyActivity> _list(String familyId, String viewerId) {
     return _store.activity.values
         .map(FamilyActivity.fromMap)

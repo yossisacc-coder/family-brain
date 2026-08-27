@@ -11,10 +11,14 @@ class BrainStatusStrip extends StatelessWidget {
     super.key,
     required this.message,
     required this.kind,
+    this.retryLabel,
+    this.onRetry,
   });
 
   final String message;
   final BrainStatusKind kind;
+  final String? retryLabel;
+  final VoidCallback? onRetry;
 
   static const stripKey = Key('brain-status-strip');
 
@@ -57,7 +61,13 @@ class BrainStatusStrip extends StatelessWidget {
                     ),
               ),
             ),
-            if (kind == BrainStatusKind.sending ||
+            if (kind == BrainStatusKind.error && onRetry != null) ...[
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: onRetry,
+                child: Text(retryLabel ?? 'Retry'),
+              ),
+            ] else if (kind == BrainStatusKind.sending ||
                 kind == BrainStatusKind.listening) ...[
               const SizedBox(width: 10),
               SizedBox(

@@ -350,5 +350,8 @@
   "shareReceivedBody": "Family Brain received this and will turn it into a task, event, or reminder when it can.",
   "shareOriginalContent": "Original shared content",
   "accessPlan": "Access",
-  "accessPlanBetaHint": "You are on Family Brain Beta. The full product is available with no payment. A Premium plan can be added later without rebuilding the app."
+  "accessPlanBetaHint": "You are on Family Brain Beta. The full product is available with no payment. A Premium plan can be added later without rebuilding the app.",
+  "brainUnsureAssignee": "I found a task, but I'm not sure who it belongs to.",
+  "brainAssignFamily": "Family",
+  "activityClearOlder": "Clear older than 7 days"
 }

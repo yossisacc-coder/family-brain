@@ -152,7 +152,8 @@ void main() {
     final l10n = lookupAppLocalizations(const Locale('en'));
 
     expect(find.text(l10n.quickAccessCalendar), findsOneWidget);
-    expect(find.text(l10n.quickAccessTasks), findsOneWidget);
+    expect(find.text(l10n.sendToFamilyBrain), findsOneWidget);
+    expect(find.text(l10n.quickAccessTasks), findsNothing);
     expect(find.text(l10n.quickAccessMySpace), findsOneWidget);
     expect(find.text(l10n.quickAccessFamilySpace), findsOneWidget);
     expect(find.text(l10n.seeAllTasks), findsOneWidget);
@@ -179,7 +180,7 @@ void main() {
     final l10n = lookupAppLocalizations(const Locale('he'));
 
     expect(find.text(l10n.quickAccessCalendar), findsOneWidget);
-    expect(find.text(l10n.quickAccessTasks), findsWidgets);
+    expect(find.text(l10n.sendToFamilyBrain), findsOneWidget);
     expect(find.text(l10n.quickAccessMySpace), findsOneWidget);
     expect(find.text(l10n.quickAccessFamilySpace), findsOneWidget);
     expect(find.text(l10n.seeAllTasks), findsOneWidget);

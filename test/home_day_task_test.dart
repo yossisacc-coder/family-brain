@@ -105,8 +105,8 @@ void main() {
     );
 
     expect(find.text('Soccer club'), findsOneWidget);
-    expect(find.text('Urgent'), findsOneWidget);
-    expect(find.text('In progress'), findsOneWidget);
-    expect(find.text('David'), findsOneWidget);
+    expect(find.textContaining('Urgent'), findsOneWidget);
+    expect(find.textContaining('In progress'), findsOneWidget);
+    expect(find.textContaining('David'), findsOneWidget);
   });
 }

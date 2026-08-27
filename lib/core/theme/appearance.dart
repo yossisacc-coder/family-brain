@@ -80,79 +80,73 @@ class FamilyBrainPalette extends ThemeExtension<FamilyBrainPalette> {
     return _personal(seed);
   }
 
-  /// Friendly light theme: clean white base, selected color throughout.
+  /// Mix [seed] into a light base so each app color has its own surfaces.
+  static Color _tint(Color base, Color seed, double amount) =>
+      Color.lerp(base, seed, amount)!;
+
+  /// Friendly light theme: clean white/light surfaces with a seed-tinted family.
   static FamilyBrainPalette _personal(Color seed) {
-    final background = Color.lerp(const Color(0xFFFFFFFF), seed, 0.07)!;
-    final surface = Color.lerp(const Color(0xFFF7F6FB), seed, 0.12)!;
-    final card = Color.lerp(const Color(0xFFFFFFFF), seed, 0.03)!;
-    final nav = Color.lerp(const Color(0xFFFFFFFF), seed, 0.06)!;
-    final border = Color.lerp(const Color(0xFFE4E2EA), seed, 0.32)!;
-    final text = const Color(0xFF1B1D29);
-    final textMuted = Color.lerp(const Color(0xFF667085), seed, 0.14)!;
-    final primary = seed;
-    final primaryDark = Color.lerp(seed, const Color(0xFF101018), 0.28)!;
-    final primarySoft = Color.lerp(seed, const Color(0xFFFFFFFF), 0.86)!;
+    final scheme = ColorScheme.fromSeed(
+      seedColor: seed,
+      brightness: Brightness.light,
+    );
     return FamilyBrainPalette(
       mode: AppearanceMode.colorful,
       brightness: Brightness.light,
-      background: background,
-      surface: surface,
-      card: card,
-      text: text,
-      textMuted: textMuted,
-      border: border,
-      nav: nav,
-      desktopBackdrop: Color.lerp(const Color(0xFFE8EBF3), seed, 0.18)!,
-      primary: primary,
-      primaryDark: primaryDark,
-      primarySoft: primarySoft,
-      onPrimary: Colors.white,
-      homeEvents: Color.lerp(const Color(0xFF7B61FF), seed, 0.32)!,
-      homeEventsSoft: Color.lerp(const Color(0xFFEEE6FF), seed, 0.18)!,
-      homeTasks: Color.lerp(const Color(0xFF2FA874), seed, 0.28)!,
-      homeTasksSoft: Color.lerp(const Color(0xFFE1F6EA), seed, 0.16)!,
-      homeReminders: Color.lerp(const Color(0xFFE0893C), seed, 0.28)!,
-      homeRemindersSoft: Color.lerp(const Color(0xFFFFF0E0), seed, 0.16)!,
-      homeFamily: Color.lerp(const Color(0xFF4C82F0), seed, 0.28)!,
-      homeFamilySoft: Color.lerp(const Color(0xFFE4EEFE), seed, 0.16)!,
+      background: _tint(const Color(0xFFF8F7FB), seed, 0.08),
+      surface: _tint(const Color(0xFFF3F2F8), seed, 0.10),
+      card: _tint(const Color(0xFFFFFFFF), seed, 0.045),
+      text: scheme.onSurface,
+      textMuted: scheme.onSurfaceVariant,
+      border: _tint(const Color(0xFFE6E4EE), seed, 0.22),
+      nav: _tint(const Color(0xFFFFFFFF), seed, 0.07),
+      desktopBackdrop: _tint(const Color(0xFFEEEAF6), seed, 0.10),
+      primary: seed,
+      primaryDark: Color.lerp(seed, const Color(0xFF101018), 0.28)!,
+      primarySoft: scheme.primaryContainer,
+      onPrimary: seed.computeLuminance() > 0.55
+          ? const Color(0xFF1B1D29)
+          : Colors.white,
+      homeEvents: Color.lerp(const Color(0xFF7B61FF), seed, 0.38)!,
+      homeEventsSoft: Color.lerp(scheme.primaryContainer, const Color(0xFFEEE6FF), 0.45)!,
+      homeTasks: Color.lerp(const Color(0xFF2FA874), seed, 0.32)!,
+      homeTasksSoft: Color.lerp(scheme.primaryContainer, const Color(0xFFE1F6EA), 0.45)!,
+      homeReminders: Color.lerp(const Color(0xFFE0893C), seed, 0.32)!,
+      homeRemindersSoft: Color.lerp(scheme.primaryContainer, const Color(0xFFFFF0E0), 0.45)!,
+      homeFamily: Color.lerp(const Color(0xFF4C82F0), seed, 0.32)!,
+      homeFamilySoft: Color.lerp(scheme.primaryContainer, const Color(0xFFE4EEFE), 0.45)!,
     );
   }
 
   /// Darker, higher-contrast workspace using the same color family.
   static FamilyBrainPalette _professional(Color seed) {
-    final background = Color.lerp(const Color(0xFF121018), seed, 0.20)!;
-    final surface = Color.lerp(const Color(0xFF1A1822), seed, 0.24)!;
-    final card = Color.lerp(const Color(0xFF24212C), seed, 0.22)!;
-    final nav = Color.lerp(const Color(0xFF18161F), seed, 0.18)!;
-    final border = Color.lerp(const Color(0xFF3C3848), seed, 0.30)!;
-    final text = const Color(0xFFF4F2F8);
-    final textMuted = Color.lerp(const Color(0xFFB8B3C4), seed, 0.12)!;
-    final primary = Color.lerp(seed, const Color(0xFFFFFFFF), 0.12)!;
-    final primaryDark = Color.lerp(seed, const Color(0xFF000000), 0.22)!;
-    final primarySoft = Color.lerp(seed, background, 0.62)!;
+    final scheme = ColorScheme.fromSeed(
+      seedColor: seed,
+      brightness: Brightness.dark,
+    );
     return FamilyBrainPalette(
       mode: AppearanceMode.professional,
       brightness: Brightness.dark,
-      background: background,
-      surface: surface,
-      card: card,
-      text: text,
-      textMuted: textMuted,
-      border: border,
-      nav: nav,
-      desktopBackdrop: Color.lerp(const Color(0xFF0C0B10), seed, 0.14)!,
-      primary: primary,
-      primaryDark: primaryDark,
-      primarySoft: primarySoft,
-      onPrimary: Colors.white,
+      background: Color.lerp(const Color(0xFF12141C), seed, 0.16)!,
+      surface: Color.lerp(scheme.surfaceContainer, seed, 0.10)!,
+      card: Color.lerp(scheme.surfaceContainerHigh, seed, 0.08)!,
+      text: scheme.onSurface,
+      textMuted: scheme.onSurfaceVariant,
+      border: scheme.outlineVariant,
+      nav: scheme.surfaceContainerLow,
+      desktopBackdrop: scheme.surfaceContainerLowest,
+      primary: Color.lerp(seed, const Color(0xFFFFFFFF), 0.16)!,
+      primaryDark: Color.lerp(seed, const Color(0xFF000000), 0.18)!,
+      primarySoft: scheme.primaryContainer,
+      onPrimary: scheme.onPrimary,
       homeEvents: Color.lerp(const Color(0xFF9B89FF), seed, 0.40)!,
-      homeEventsSoft: Color.lerp(card, const Color(0xFF7B61FF), 0.22)!,
+      homeEventsSoft: Color.lerp(scheme.surfaceContainerHigh, const Color(0xFF7B61FF), 0.22)!,
       homeTasks: Color.lerp(const Color(0xFF3FBF88), seed, 0.32)!,
-      homeTasksSoft: Color.lerp(card, const Color(0xFF2FA874), 0.22)!,
+      homeTasksSoft: Color.lerp(scheme.surfaceContainerHigh, const Color(0xFF2FA874), 0.22)!,
       homeReminders: Color.lerp(const Color(0xFFE39A55), seed, 0.32)!,
-      homeRemindersSoft: Color.lerp(card, const Color(0xFFE0893C), 0.22)!,
+      homeRemindersSoft: Color.lerp(scheme.surfaceContainerHigh, const Color(0xFFE0893C), 0.22)!,
       homeFamily: Color.lerp(const Color(0xFF6A9AFF), seed, 0.32)!,
-      homeFamilySoft: Color.lerp(card, const Color(0xFF4C82F0), 0.22)!,
+      homeFamilySoft: Color.lerp(scheme.surfaceContainerHigh, const Color(0xFF4C82F0), 0.22)!,
     );
   }
 
