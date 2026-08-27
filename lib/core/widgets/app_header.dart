@@ -4,7 +4,7 @@ import 'package:family_brain/core/l10n/app_localizations.dart';
 
 import '../theme/app_spacing.dart';
 import '../theme/appearance.dart';
-import 'app_section_header.dart';
+import 'family_brain_logo.dart';
 
 class AppHeader extends StatelessWidget {
   const AppHeader({
@@ -43,25 +43,11 @@ class AppHeader extends StatelessWidget {
                   badge: unreadCount,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 48),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const AppBrandMark(size: 28),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        AppLocalizations.of(context).appTitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                      ),
-                    ),
-                  ],
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 48),
+                child: FamilyBrainLogoLockup(
+                  markSize: 32,
+                  compact: true,
                 ),
               ),
               Align(

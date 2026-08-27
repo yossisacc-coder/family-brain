@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_spacing.dart';
 import '../theme/appearance.dart';
+import 'family_brain_logo.dart';
 
 class AppSectionHeader extends StatelessWidget {
   const AppSectionHeader({
@@ -59,19 +60,6 @@ class AppBrandMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: palette.primarySoft,
-        shape: BoxShape.circle,
-      ),
-      child: Icon(
-        Icons.psychology_rounded,
-        color: palette.primary,
-        size: size * 0.62,
-      ),
-    );
+    return FamilyBrainLogoMark(size: size);
   }
 }
