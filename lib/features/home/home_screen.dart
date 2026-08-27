@@ -125,7 +125,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(
                   AppSpacing.page,
-                  AppSpacing.md,
+                  AppSpacing.sm,
                   AppSpacing.page,
                   8,
                 ),
@@ -137,23 +137,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     onNotifications: () => context.push('/notifications'),
                     onSettings: () => context.go('/app/settings'),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   Row(
                     children: [
                       StatCard(
-                        label: l10n.events,
+                        label: l10n.statEventsToday,
                         value: events.length,
-                        subtitle: l10n.today,
                         icon: Icons.calendar_today_rounded,
                         color: AppColors.homeEvents,
                         background: AppColors.homeEventsSoft,
-                        onTap: () => context.push('/tasks/calendar'),
+                        onTap: () => context.push('/tasks/events'),
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       StatCard(
-                        label: l10n.tasks,
+                        label: l10n.statPendingTasks,
                         value: open.length,
-                        subtitle: l10n.statPending,
                         icon: Icons.check_circle_outline_rounded,
                         color: AppColors.homeTasks,
                         background: AppColors.homeTasksSoft,
@@ -161,19 +159,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       StatCard(
-                        label: l10n.reminders,
+                        label: l10n.statImportantReminders,
                         value: reminders.length,
-                        subtitle: l10n.statImportant,
                         icon: Icons.notifications_none_rounded,
                         color: AppColors.homeReminders,
                         background: AppColors.homeRemindersSoft,
-                        onTap: () => context.push('/tasks/calendar'),
+                        onTap: () => context.push('/tasks/reminders'),
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       StatCard(
-                        label: l10n.membersLabel,
+                        label: l10n.statFamilyConnected,
                         value: members.length,
-                        subtitle: l10n.statConnected,
                         icon: Icons.groups_rounded,
                         color: AppColors.homeFamily,
                         background: AppColors.homeFamilySoft,
@@ -181,7 +177,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   AppSectionHeader(title: l10n.quickAccess),
                   Row(
                     children: [
@@ -189,7 +185,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: QuickActionCard(
                           icon: Icons.calendar_today_rounded,
                           label: l10n.quickAccessCalendar,
-                          subtitle: l10n.calendar,
                           iconColor: AppColors.homeEvents,
                           iconBackground: AppColors.homeEventsSoft,
                           onTap: () => context.push('/tasks/calendar'),
@@ -200,7 +195,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: QuickActionCard(
                           icon: Icons.check_circle_outline_rounded,
                           label: l10n.quickAccessTasks,
-                          subtitle: l10n.tasks,
                           iconColor: AppColors.homeTasks,
                           iconBackground: AppColors.homeTasksSoft,
                           onTap: () => context.go('/app/tasks'),
@@ -208,14 +202,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.sm),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: QuickActionCard(
                           icon: Icons.person_rounded,
                           label: l10n.quickAccessMySpace,
-                          subtitle: l10n.mySpace,
                           iconColor: AppColors.homeFamily,
                           iconBackground: AppColors.homeFamilySoft,
                           onTap: () => context.push('/space/personal'),
@@ -226,7 +219,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: QuickActionCard(
                           icon: Icons.groups_rounded,
                           label: l10n.quickAccessFamilySpace,
-                          subtitle: l10n.familySpace,
                           iconColor: AppColors.homeReminders,
                           iconBackground: AppColors.homeRemindersSoft,
                           onTap: () => context.push('/space/family'),
@@ -234,7 +226,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   _ComposerCard(
                     controller: _composer,
                     sending: _sending,
@@ -247,7 +239,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                     onRemoveImage: () => setState(() => _imagePath = null),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   AppSectionHeader(
                     title: l10n.todayActivity,
                     actionLabel: l10n.seeAllTasks,
@@ -272,7 +264,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         isLast: i == today.length - 1,
                         onTap: () => context.push('/tasks/${today[i].id}'),
                       ),
-                  const SizedBox(height: AppSpacing.lg),
+                  const SizedBox(height: AppSpacing.md),
                   _FamilyMembersRow(
                     members: members,
                     currentUserId: user.id,
@@ -692,11 +684,11 @@ class _ComposerCardState extends State<_ComposerCard> {
           const SizedBox(height: 8),
         ],
         Container(
-          constraints: const BoxConstraints(minHeight: 56),
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+          constraints: const BoxConstraints(minHeight: 52),
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
           decoration: BoxDecoration(
             color: AppColors.primarySoft,
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(26),
             border: Border.all(
               color: AppColors.primary.withValues(alpha: 0.16),
             ),
@@ -837,8 +829,8 @@ class _PillButton extends StatelessWidget {
           customBorder: const CircleBorder(),
           onTap: onPressed,
           child: SizedBox(
-            width: 44,
-            height: 44,
+            width: 40,
+            height: 40,
             child: Center(child: child),
           ),
         ),
@@ -940,20 +932,20 @@ class _FamilyMembersRow extends StatelessWidget {
             itemCount: members.length + 1,
             separatorBuilder: (_, _) => const SizedBox(width: 14),
             itemBuilder: (context, index) {
-              if (index == members.length) {
+              if (index == 0) {
                 return _MemberAvatar(
                   label: l10n.addFamilyMember,
                   onTap: onAdd,
                   isAdd: true,
                 );
               }
-              final member = members[index];
+              final member = members[index - 1];
               return _MemberAvatar(
                 label: member.id == currentUserId
                     ? l10n.you
                     : member.name.split(' ').first,
                 initial: member.name,
-                color: _avatarColors[index % _avatarColors.length],
+                color: _avatarColors[(index - 1) % _avatarColors.length],
                 onTap: () => context.push('/family/members/${member.id}'),
               );
             },

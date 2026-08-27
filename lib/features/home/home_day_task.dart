@@ -35,11 +35,11 @@ class HomeDayTask extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 56),
+                child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 52),
           child: IntrinsicHeight(
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -136,13 +136,13 @@ class HomeDayTask extends StatelessWidget {
                   Align(
                     alignment: Alignment.center,
                     child: Container(
-                      width: 40,
-                      height: 40,
+                      width: 36,
+                      height: 36,
                       decoration: BoxDecoration(
                         color: accent.withValues(alpha: 0.12),
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(_kindIcon(task.kind), color: accent, size: 20),
+                      child: Icon(_kindIcon(task.kind), color: accent, size: 18),
                     ),
                   ),
                 ],

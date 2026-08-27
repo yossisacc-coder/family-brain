@@ -78,10 +78,29 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                                 const SizedBox(height: 10),
                             itemBuilder: (context, index) {
                               final task = forDay[index];
-                              return TaskCard(
-                                task: task,
-                                members: members,
-                                onTap: () => context.push('/tasks/${task.id}'),
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  TaskCard(
+                                    task: task,
+                                    members: members,
+                                    onTap: () =>
+                                        context.push('/tasks/${task.id}'),
+                                  ),
+                                  Align(
+                                    alignment: AlignmentDirectional.centerStart,
+                                    child: TextButton.icon(
+                                      key: Key('open-related-task-${task.id}'),
+                                      onPressed: () =>
+                                          context.push('/tasks/${task.id}'),
+                                      icon: const Icon(
+                                        Icons.task_alt_rounded,
+                                        size: 18,
+                                      ),
+                                      label: Text(l10n.openRelatedTask),
+                                    ),
+                                  ),
+                                ],
                               );
                             },
                           ),

@@ -1286,6 +1286,30 @@ abstract class AppLocalizations {
   /// **'Connected'**
   String get statConnected;
 
+  /// No description provided for @statEventsToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Events today'**
+  String get statEventsToday;
+
+  /// No description provided for @statPendingTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending tasks'**
+  String get statPendingTasks;
+
+  /// No description provided for @statImportantReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Important reminders'**
+  String get statImportantReminders;
+
+  /// No description provided for @statFamilyConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Family connected'**
+  String get statFamilyConnected;
+
   /// No description provided for @everyone.
   ///
   /// In en, this message translates to:
@@ -1333,6 +1357,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reminders'**
   String get reminders;
+
+  /// No description provided for @openRelatedTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Open related task'**
+  String get openRelatedTask;
+
+  /// No description provided for @noEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'No events yet'**
+  String get noEvents;
+
+  /// No description provided for @noEventsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Events with a date will appear here.'**
+  String get noEventsMessage;
+
+  /// No description provided for @noReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'No reminders yet'**
+  String get noReminders;
+
+  /// No description provided for @noRemindersMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders you add will appear here.'**
+  String get noRemindersMessage;
 
   /// No description provided for @membersLabel.
   ///

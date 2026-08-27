@@ -19,6 +19,7 @@ import '../../features/home/home_screen.dart';
 import '../../features/notifications/notifications_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/shell/app_shell.dart';
+import '../../features/tasks/agenda_screen.dart';
 import '../../features/tasks/calendar_screen.dart';
 import '../../features/tasks/space_screen.dart';
 import '../../features/tasks/task_details_screen.dart';
@@ -111,6 +112,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/tasks/calendar',
         builder: (context, state) => const CalendarScreen(),
+      ),
+      GoRoute(
+        path: '/tasks/events',
+        builder: (context, state) =>
+            const AgendaScreen(kind: AgendaKind.events),
+      ),
+      GoRoute(
+        path: '/tasks/reminders',
+        builder: (context, state) =>
+            const AgendaScreen(kind: AgendaKind.reminders),
       ),
       GoRoute(
         path: '/tasks/trash',

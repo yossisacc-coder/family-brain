@@ -641,6 +641,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statConnected => 'Connected';
 
   @override
+  String get statEventsToday => 'Events today';
+
+  @override
+  String get statPendingTasks => 'Pending tasks';
+
+  @override
+  String get statImportantReminders => 'Important reminders';
+
+  @override
+  String get statFamilyConnected => 'Family connected';
+
+  @override
   String get everyone => 'Everyone';
 
   @override
@@ -663,6 +675,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reminders => 'Reminders';
+
+  @override
+  String get openRelatedTask => 'Open related task';
+
+  @override
+  String get noEvents => 'No events yet';
+
+  @override
+  String get noEventsMessage => 'Events with a date will appear here.';
+
+  @override
+  String get noReminders => 'No reminders yet';
+
+  @override
+  String get noRemindersMessage => 'Reminders you add will appear here.';
 
   @override
   String get membersLabel => 'Members';

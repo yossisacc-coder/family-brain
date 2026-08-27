@@ -41,34 +41,35 @@ class StatCard extends StatelessWidget {
               boxShadow: AppShadows.card,
             ),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(8, 10, 8, 10),
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (icon != null)
-                    Icon(icon, size: 18, color: color),
-                  if (icon != null) const SizedBox(height: 8),
+                    Icon(icon, size: 16, color: color),
+                  if (icon != null) const SizedBox(height: 6),
                   Text(
                     '$value',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           color: color,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          height: 1.1,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          height: 1.05,
                         ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     label,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: AppColors.text,
                           fontWeight: FontWeight.w600,
-                          fontSize: 11,
+                          fontSize: 10,
+                          height: 1.2,
                         ),
                   ),
-                  if (subtitle != null) ...[
+                  if (subtitle != null && subtitle != label) ...[
                     const SizedBox(height: 1),
                     Text(
                       subtitle!,

@@ -136,6 +136,64 @@ class LocalAuthRepository implements AuthRepository {
       createdAt: now.subtract(const Duration(hours: 2)),
       updatedAt: now.subtract(const Duration(hours: 2)),
     );
+    final teacher = TaskItem(
+      id: 'demo-task-teacher',
+      familyId: family.id,
+      creatorId: alex.id,
+      title: 'Meeting with teacher — math',
+      kind: InformationKind.event,
+      assigneeId: maya.id,
+      type: TaskType.family,
+      dueDate: DateTime(now.year, now.month, now.day, 10),
+      hasDueTime: true,
+      priority: TaskPriority.normal,
+      status: TaskStatus.pending,
+      createdAt: now.subtract(const Duration(hours: 3)),
+      updatedAt: now.subtract(const Duration(hours: 3)),
+    );
+    final soccer = TaskItem(
+      id: 'demo-task-soccer',
+      familyId: family.id,
+      creatorId: alex.id,
+      title: 'Soccer practice',
+      kind: InformationKind.event,
+      assigneeId: alex.id,
+      type: TaskType.family,
+      dueDate: DateTime(now.year, now.month, now.day, 16, 30),
+      hasDueTime: true,
+      priority: TaskPriority.normal,
+      status: TaskStatus.pending,
+      createdAt: now.subtract(const Duration(hours: 4)),
+      updatedAt: now.subtract(const Duration(hours: 4)),
+    );
+    final dinner = TaskItem(
+      id: 'demo-task-dinner',
+      familyId: family.id,
+      creatorId: maya.id,
+      title: 'Family dinner',
+      kind: InformationKind.event,
+      type: TaskType.family,
+      dueDate: DateTime(now.year, now.month, now.day, 19),
+      hasDueTime: true,
+      priority: TaskPriority.normal,
+      status: TaskStatus.pending,
+      createdAt: now.subtract(const Duration(hours: 5)),
+      updatedAt: now.subtract(const Duration(hours: 5)),
+    );
+    final packBag = TaskItem(
+      id: 'demo-task-pack',
+      familyId: family.id,
+      creatorId: alex.id,
+      title: 'Pack water bottles',
+      kind: InformationKind.reminder,
+      assigneeId: alex.id,
+      type: TaskType.family,
+      reminderAt: DateTime(now.year, now.month, now.day, 15, 30),
+      priority: TaskPriority.high,
+      status: TaskStatus.pending,
+      createdAt: now.subtract(const Duration(hours: 1)),
+      updatedAt: now.subtract(const Duration(hours: 1)),
+    );
     final grandma = TaskItem(
       id: 'demo-task-grandma',
       familyId: family.id,
@@ -177,6 +235,10 @@ class LocalAuthRepository implements AuthRepository {
     _store.users[maya.id] = maya.toMap();
     _store.families[family.id] = family.toMap();
     _store.tasks[milk.id] = milk.toMap();
+    _store.tasks[teacher.id] = teacher.toMap();
+    _store.tasks[soccer.id] = soccer.toMap();
+    _store.tasks[dinner.id] = dinner.toMap();
+    _store.tasks[packBag.id] = packBag.toMap();
     _store.tasks[grandma.id] = grandma.toMap();
     _store.tasks[mayaPersonal.id] = mayaPersonal.toMap();
     _store.notifications[assigned.id] = assigned.toMap();

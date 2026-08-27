@@ -29,45 +29,59 @@ class AppHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            _HeaderIcon(
-              tooltip: AppLocalizations.of(context).notifications,
-              onPressed: onNotifications,
-              icon: Icons.notifications_none_rounded,
-              badge: unreadCount,
-            ),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const AppBrandMark(size: 28),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      AppLocalizations.of(context).appTitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                    ),
-                  ),
-                ],
+        SizedBox(
+          height: AppSpacing.touch,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: _HeaderIcon(
+                  tooltip: AppLocalizations.of(context).notifications,
+                  onPressed: onNotifications,
+                  icon: Icons.notifications_none_rounded,
+                  badge: unreadCount,
+                ),
               ),
-            ),
-            trailing ??
-                (onSettings == null
-                    ? const SizedBox(width: AppSpacing.touch, height: AppSpacing.touch)
-                    : _HeaderIcon(
-                        tooltip: AppLocalizations.of(context).settings,
-                        onPressed: onSettings!,
-                        icon: Icons.settings_outlined,
-                      )),
-          ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 48),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const AppBrandMark(size: 28),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        AppLocalizations.of(context).appTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: trailing ??
+                    (onSettings == null
+                        ? const SizedBox(
+                            width: AppSpacing.touch,
+                            height: AppSpacing.touch,
+                          )
+                        : _HeaderIcon(
+                            tooltip: AppLocalizations.of(context).settings,
+                            onPressed: onSettings!,
+                            icon: Icons.settings_outlined,
+                          )),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 12),
         Text(
           title,
           maxLines: 1,

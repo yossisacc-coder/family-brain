@@ -625,7 +625,7 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
-  String get sendToFamilyBrain => 'Send to Family Brain';
+  String get sendToFamilyBrain => 'שליחה ל־Family Brain';
 
   @override
   String get statPending => 'ממתינות';
@@ -637,19 +637,31 @@ class AppLocalizationsHe extends AppLocalizations {
   String get statConnected => 'מחוברים';
 
   @override
+  String get statEventsToday => 'אירועים היום';
+
+  @override
+  String get statPendingTasks => 'משימות ממתינות';
+
+  @override
+  String get statImportantReminders => 'תזכורות חשובות';
+
+  @override
+  String get statFamilyConnected => 'בני משפחה מחוברים';
+
+  @override
   String get everyone => 'כולם';
 
   @override
-  String get quickAccessCalendar => 'Calendar';
+  String get quickAccessCalendar => 'לוח שנה';
 
   @override
-  String get quickAccessTasks => 'Tasks';
+  String get quickAccessTasks => 'משימות';
 
   @override
-  String get quickAccessMySpace => 'My Space';
+  String get quickAccessMySpace => 'המרחב שלי';
 
   @override
-  String get quickAccessFamilySpace => 'Family Space';
+  String get quickAccessFamilySpace => 'מרחב משפחתי';
 
   @override
   String get quickAccess => 'גישה מהירה';
@@ -659,6 +671,21 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get reminders => 'תזכורות';
+
+  @override
+  String get openRelatedTask => 'פתח את המשימה הקשורה';
+
+  @override
+  String get noEvents => 'אין אירועים עדיין';
+
+  @override
+  String get noEventsMessage => 'אירועים עם תאריך יופיעו כאן.';
+
+  @override
+  String get noReminders => 'אין תזכורות עדיין';
+
+  @override
+  String get noRemindersMessage => 'תזכורות שתוסיפו יופיעו כאן.';
 
   @override
   String get membersLabel => 'בני משפחה';

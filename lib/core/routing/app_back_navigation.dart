@@ -47,6 +47,8 @@ class AppBackNavigation {
       return '/tasks/${edit.group(1)}';
     }
     if (path == '/tasks/calendar' ||
+        path == '/tasks/events' ||
+        path == '/tasks/reminders' ||
         path == '/space/personal' ||
         path == '/space/family' ||
         path == '/brain/confirm' ||

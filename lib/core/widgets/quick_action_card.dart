@@ -28,6 +28,7 @@ class QuickActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final fg = emphasized ? Colors.white : (iconColor ?? AppColors.primary);
     final bg = emphasized ? AppColors.primary : AppColors.card;
+    final showSubtitle = subtitle != null && subtitle != label;
     return Material(
       color: bg,
       borderRadius: AppRadii.card,
@@ -44,46 +45,55 @@ class QuickActionCard extends StatelessWidget {
             boxShadow: emphasized ? null : AppShadows.card,
           ),
           child: Container(
-            constraints: const BoxConstraints(minHeight: 80),
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            constraints: const BoxConstraints(minHeight: 58),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 36,
+                  height: 36,
                   decoration: BoxDecoration(
                     color: emphasized
                         ? Colors.white.withValues(alpha: 0.18)
                         : (iconBackground ?? AppColors.primarySoft),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(icon, color: fg, size: 22),
+                  child: Icon(icon, color: fg, size: 20),
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: emphasized ? Colors.white : AppColors.text,
-                        fontWeight: FontWeight.w700,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              color: emphasized ? Colors.white : AppColors.text,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                              height: 1.2,
+                            ),
                       ),
-                ),
-                if (subtitle != null && subtitle != label) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle!,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: emphasized
-                              ? Colors.white.withValues(alpha: 0.8)
-                              : AppColors.textMuted,
-                          fontSize: 12,
+                      if (showSubtitle) ...[
+                        const SizedBox(height: 1),
+                        Text(
+                          subtitle!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: emphasized
+                                    ? Colors.white.withValues(alpha: 0.8)
+                                    : AppColors.textMuted,
+                                fontSize: 11,
+                              ),
                         ),
+                      ],
+                    ],
                   ),
-                ],
+                ),
               ],
             ),
           ),

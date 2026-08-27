@@ -89,6 +89,24 @@ class TaskDetailsScreen extends ConsumerWidget {
           const SizedBox(height: 18),
           _labeledValue(
             context,
+            l10n.brainType,
+            switch (task.kind) {
+              InformationKind.task => l10n.kindTask,
+              InformationKind.event => l10n.kindEvent,
+              InformationKind.reminder => l10n.kindReminder,
+              InformationKind.list => l10n.kindList,
+              InformationKind.information => l10n.kindInformation,
+            },
+            icon: switch (task.kind) {
+              InformationKind.event => Icons.event_outlined,
+              InformationKind.reminder => Icons.alarm_outlined,
+              InformationKind.list => Icons.list_alt_rounded,
+              InformationKind.information => Icons.info_outline_rounded,
+              InformationKind.task => Icons.task_alt_rounded,
+            },
+          ),
+          _labeledValue(
+            context,
             l10n.changeStatus,
             TaskSemantics.statusLabel(l10n, task.status),
             icon: TaskSemantics.statusIcon(task.status),

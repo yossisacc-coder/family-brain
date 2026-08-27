@@ -56,6 +56,14 @@ void main() {
         '/app/home',
       );
       expect(
+        AppBackNavigation.fallbackLocation('/tasks/events'),
+        '/app/home',
+      );
+      expect(
+        AppBackNavigation.fallbackLocation('/tasks/reminders'),
+        '/app/home',
+      );
+      expect(
         AppBackNavigation.fallbackLocation('/tasks/trash'),
         '/app/tasks',
       );
