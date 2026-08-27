@@ -979,10 +979,10 @@ class _ComposerSendButton extends StatelessWidget {
     return Tooltip(
       message: tooltip,
       child: Material(
-        key: buttonKey,
         color: enabled ? palette.primary : palette.border,
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
+          key: buttonKey,
           onTap: enabled ? onPressed : null,
           borderRadius: BorderRadius.circular(14),
           child: SizedBox(
