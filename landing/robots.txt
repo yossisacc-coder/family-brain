@@ -1,0 +1,6 @@
+# Family Brain landing page
+# Update Sitemap to your published URL after you deploy.
+User-agent: *
+Allow: /
+
+Sitemap: https://yossisacc-coder.github.io/family-brain/sitemap.xml

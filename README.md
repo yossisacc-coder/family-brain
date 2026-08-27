@@ -91,6 +91,11 @@ Phone SMS in production requires a Firebase project with Phone Authentication en
 - `lib/domain` — models and repository interfaces
 - `lib/data` — Firebase implementations plus the on-device local demo store
 - `lib/features` — screens and feature controllers
+- `landing/` — standalone marketing website (does not modify the Flutter app)
 - `DEVELOPMENT_STATUS.md` — current progress and known limits
 
 Family is the first workspace type. Other workspace types are not implemented yet.
+
+## Marketing website
+
+The Family Brain landing page lives in `landing/`. It is static HTML/CSS/JS and can be hosted for free (GitHub Pages, Cloudflare Pages, or Netlify Drop). See `landing/README.md` for local preview and deploy steps.
