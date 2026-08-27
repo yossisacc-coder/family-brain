@@ -208,24 +208,8 @@ void main() {
   testWidgets('Quick Access cards stay compact on a phone viewport', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Align(
-            alignment: Alignment.topCenter,
-            child: SizedBox(
-              width: 175,
-              child: QuickActionCard(
-                icon: Icons.calendar_today_rounded,
-                label: 'Calendar',
-                onTap: () {},
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    final size = tester.getSize(find.byType(QuickActionCard));
+    await pumpHome(tester, locale: const Locale('en'));
+    final size = tester.getSize(find.byType(QuickActionCard).first);
     expect(size.height, lessThan(72));
   });
 
