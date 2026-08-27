@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/notifications/local_reminder_scheduler.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/appearance.dart';
 import '../../core/widgets/app_notice.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_view.dart';
@@ -54,7 +55,7 @@ class TrashScreen extends ConsumerWidget {
             itemBuilder: (context, index) {
               final task = tasks[index];
               return Material(
-                color: AppColors.card,
+                color: context.palette.card,
                 borderRadius: BorderRadius.circular(18),
                 child: ListTile(
                   onTap: () => context.push('/tasks/${task.id}'),

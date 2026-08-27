@@ -6,6 +6,7 @@ import '../../domain/models/task_item.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_radii.dart';
 import '../theme/app_spacing.dart';
+import '../theme/appearance.dart';
 import '../theme/task_semantics.dart';
 
 class TaskCard extends StatelessWidget {
@@ -27,13 +28,14 @@ class TaskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final palette = context.palette;
     final assignee = members.where((m) => m.id == task.assigneeId).firstOrNull;
     final dueLabel = _dueLabel(l10n, task);
-    final accent = TaskSemantics.accentFor(task);
+    final accent = TaskSemantics.accentFor(task, primary: palette.primary);
     final completed = task.status == TaskStatus.completed;
 
     return Material(
-      color: AppColors.card,
+      color: palette.card,
       borderRadius: AppRadii.card,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -45,7 +47,7 @@ class TaskCard extends StatelessWidget {
             border: Border.all(
               color: task.isUrgent
                   ? AppColors.urgent.withValues(alpha: 0.35)
-                  : AppColors.border,
+                  : palette.border,
             ),
           ),
           child: Row(
@@ -83,18 +85,25 @@ class TaskCard extends StatelessWidget {
                         _MetaChip(
                           label: TaskSemantics.statusLabel(l10n, task.status),
                           icon: TaskSemantics.statusIcon(task.status),
-                          color: TaskSemantics.statusColor(task.status),
+                          color: TaskSemantics.statusColor(
+                            task.status,
+                            muted: palette.textMuted,
+                          ),
                         ),
                         _MetaChip(
                           label: TaskSemantics.priorityLabel(l10n, task.priority),
                           icon: TaskSemantics.priorityIcon(task.priority),
-                          color: TaskSemantics.priorityColor(task.priority),
+                          color: TaskSemantics.priorityColor(
+                            task.priority,
+                            primary: palette.primary,
+                            muted: palette.textMuted,
+                          ),
                         ),
                         if (dueLabel != null)
                           _MetaChip(
                             label: dueLabel,
                             icon: Icons.event_outlined,
-                            color: task.isOverdue() ? AppColors.urgent : AppColors.textMuted,
+                            color: task.isOverdue() ? AppColors.urgent : palette.textMuted,
                           ),
                         if (task.kind != InformationKind.task)
                           _MetaChip(
@@ -145,7 +154,7 @@ class TaskCard extends StatelessWidget {
                       ? Icons.chevron_left_rounded
                       : Icons.chevron_right_rounded,
                   size: 20,
-                  color: AppColors.textMuted,
+                  color: palette.textMuted,
                 ),
               ),
             ],
@@ -190,7 +199,7 @@ class _MetaChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fg = color ?? AppColors.textMuted;
+    final fg = color ?? context.palette.textMuted;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(

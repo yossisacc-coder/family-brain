@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:family_brain/core/l10n/app_localizations.dart';
 
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/appearance.dart';
 import '../../domain/models/app_user.dart';
 import '../../domain/models/task_item.dart';
@@ -27,6 +26,7 @@ class HomeDayTask extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final palette = context.palette;
     final assignee = members.where((m) => m.id == task.assigneeId).firstOrNull;
     final accent = _accentFor(context, task);
     final time = _timeLabel(task);
@@ -51,7 +51,7 @@ class HomeDayTask extends StatelessWidget {
                       child: Text(
                         time ?? '',
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                              color: AppColors.textMuted,
+                              color: palette.textMuted,
                               fontWeight: FontWeight.w700,
                             ),
                       ),
@@ -68,7 +68,7 @@ class HomeDayTask extends StatelessWidget {
                               width: 2,
                               color: isFirst
                                   ? Colors.transparent
-                                  : AppColors.border,
+                                  : palette.border,
                             ),
                           ),
                         ),
@@ -87,7 +87,7 @@ class HomeDayTask extends StatelessWidget {
                               width: 2,
                               color: isLast
                                   ? Colors.transparent
-                                  : AppColors.border,
+                                  : palette.border,
                             ),
                           ),
                         ),
@@ -124,7 +124,7 @@ class HomeDayTask extends StatelessWidget {
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodySmall
-                                      ?.copyWith(color: AppColors.textMuted),
+                                      ?.copyWith(color: palette.textMuted),
                                 ),
                               ),
                             ],
@@ -172,10 +172,10 @@ class HomeDayTask extends StatelessWidget {
 
   static Color _accentFor(BuildContext context, TaskItem task) {
     return switch (task.kind) {
-      InformationKind.event => AppColors.homeEvents,
-      InformationKind.task => AppColors.homeTasks,
-      InformationKind.reminder => AppColors.homeReminders,
-      InformationKind.list => AppColors.homeFamily,
+      InformationKind.event => context.palette.homeEvents,
+      InformationKind.task => context.palette.homeTasks,
+      InformationKind.reminder => context.palette.homeReminders,
+      InformationKind.list => context.palette.homeFamily,
       InformationKind.information => context.palette.primary,
     };
   }

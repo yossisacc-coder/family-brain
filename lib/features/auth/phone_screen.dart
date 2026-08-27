@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/appearance.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../data/providers.dart';
 import '../settings/locale_controller.dart';
@@ -70,7 +71,7 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
           Text(
             l10n.phoneSubtitle,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textMuted,
+                  color: context.palette.textMuted,
                 ),
           ),
           const SizedBox(height: 20),

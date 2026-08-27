@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
 import '../theme/app_radii.dart';
 import '../theme/app_spacing.dart';
 
@@ -49,7 +48,7 @@ class DangerButton extends StatelessWidget {
     return FilledButton(
       onPressed: onPressed,
       style: FilledButton.styleFrom(
-        backgroundColor: AppColors.urgent,
+        backgroundColor: Theme.of(context).colorScheme.error,
         foregroundColor: Colors.white,
         minimumSize: const Size(AppSpacing.touch, 52),
         shape: const RoundedRectangleBorder(borderRadius: AppRadii.button),

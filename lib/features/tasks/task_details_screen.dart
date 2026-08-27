@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/notifications/local_reminder_scheduler.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radii.dart';
 import '../../core/theme/appearance.dart';
 import '../../core/theme/task_semantics.dart';
@@ -89,7 +88,7 @@ class TaskDetailsScreen extends ConsumerWidget {
               task.notes!,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     height: 1.4,
-                    color: AppColors.textMuted,
+                    color: palette.textMuted,
                   ),
             ),
           ],
@@ -101,14 +100,21 @@ class TaskDetailsScreen extends ConsumerWidget {
                 l10n.changeStatus,
                 TaskSemantics.statusLabel(l10n, task.status),
                 icon: TaskSemantics.statusIcon(task.status),
-                color: TaskSemantics.statusColor(task.status),
+                color: TaskSemantics.statusColor(
+                  task.status,
+                  muted: palette.textMuted,
+                ),
               ),
               _labeledValue(
                 context,
                 l10n.priority,
                 TaskSemantics.priorityLabel(l10n, task.priority),
                 icon: TaskSemantics.priorityIcon(task.priority),
-                color: TaskSemantics.priorityColor(task.priority),
+                color: TaskSemantics.priorityColor(
+                  task.priority,
+                  primary: palette.primary,
+                  muted: palette.textMuted,
+                ),
               ),
               _labeledValue(
                 context,
@@ -146,7 +152,7 @@ class TaskDetailsScreen extends ConsumerWidget {
               tilePadding: EdgeInsets.zero,
               childrenPadding: const EdgeInsets.only(bottom: 8),
               iconColor: palette.primary,
-              collapsedIconColor: AppColors.textMuted,
+              collapsedIconColor: palette.textMuted,
               title: Text(
                 l10n.moreDetails,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -247,7 +253,7 @@ class TaskDetailsScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 18, color: color ?? AppColors.textMuted),
+            Icon(icon, size: 18, color: color ?? context.palette.textMuted),
             const SizedBox(width: 10),
           ],
           Expanded(
@@ -257,7 +263,7 @@ class TaskDetailsScreen extends ConsumerWidget {
                 Text(
                   label,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textMuted,
+                        color: context.palette.textMuted,
                         fontWeight: FontWeight.w600,
                       ),
                 ),
@@ -266,7 +272,7 @@ class TaskDetailsScreen extends ConsumerWidget {
                   value,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: color ?? AppColors.text,
+                        color: color ?? context.palette.text,
                       ),
                 ),
               ],
@@ -389,14 +395,14 @@ class _DetailsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.card,
+      color: context.palette.card,
       borderRadius: AppRadii.card,
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
         decoration: BoxDecoration(
           borderRadius: AppRadii.card,
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: context.palette.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

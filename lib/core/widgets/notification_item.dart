@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:family_brain/core/l10n/app_localizations.dart';
 
 import '../../domain/models/app_notification.dart';
-import '../theme/app_colors.dart';
+import '../theme/appearance.dart';
 
 class NotificationItem extends StatelessWidget {
   const NotificationItem({
@@ -22,8 +22,9 @@ class NotificationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Material(
-      color: notification.read ? AppColors.card : AppColors.infoSoft,
+      color: notification.read ? palette.card : palette.primarySoft,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         onTap: onTap,
@@ -32,7 +33,7 @@ class NotificationItem extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: palette.border),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,16 +53,16 @@ class NotificationItem extends StatelessWidget {
                         Icons.update_outlined,
                     },
                     color: notification.read
-                        ? AppColors.textMuted
-                        : AppColors.info,
+                        ? palette.textMuted
+                        : palette.primary,
                   ),
                   if (!notification.read)
-                    const Positioned(
+                    Positioned(
                       right: 0,
                       top: 0,
                       child: CircleAvatar(
                         radius: 4,
-                        backgroundColor: AppColors.info,
+                        backgroundColor: palette.primary,
                       ),
                     ),
                 ],
@@ -83,7 +84,7 @@ class NotificationItem extends StatelessWidget {
                     Text(
                       notification.message,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textMuted,
+                            color: palette.textMuted,
                           ),
                     ),
                     if (!notification.read && unreadLabel != null) ...[
@@ -91,7 +92,7 @@ class NotificationItem extends StatelessWidget {
                       Text(
                         unreadLabel!,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: AppColors.info,
+                              color: palette.primary,
                               fontWeight: FontWeight.w700,
                             ),
                       ),

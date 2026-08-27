@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'app_accent.dart';
-import 'app_colors.dart';
 import 'app_radii.dart';
 import 'app_spacing.dart';
 import 'appearance.dart';
@@ -15,6 +14,7 @@ class AppTheme {
   }) {
     final isHebrew = locale.languageCode == 'he';
     final palette = FamilyBrainPalette.of(appearance, accent: accent);
+    final scheme = palette.colorScheme;
     final textTheme = _hierarchy(
       isHebrew
           ? GoogleFonts.heeboTextTheme()
@@ -24,21 +24,15 @@ class AppTheme {
     final base = ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      colorScheme: ColorScheme.light(
-        primary: palette.primary,
-        onPrimary: Colors.white,
-        secondary: AppColors.action,
-        onSecondary: Colors.white,
-        surface: palette.card,
-        onSurface: palette.text,
-        error: AppColors.urgent,
-        outline: palette.border,
-      ),
+      colorScheme: scheme,
       extensions: [palette],
     );
 
     return base.copyWith(
       scaffoldBackgroundColor: palette.background,
+      canvasColor: palette.background,
+      dividerColor: palette.border,
+      iconTheme: IconThemeData(color: palette.text, size: 22),
       textTheme: textTheme.apply(
         bodyColor: palette.text,
         displayColor: palette.text,
@@ -49,20 +43,29 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleTextStyle: textTheme.titleLarge?.copyWith(
-          color: AppColors.text,
-        ),
+        iconTheme: IconThemeData(color: palette.text),
+        titleTextStyle: textTheme.titleLarge?.copyWith(color: palette.text),
       ),
       cardTheme: CardThemeData(
         color: palette.card,
         elevation: 0,
         margin: EdgeInsets.zero,
+        surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: AppRadii.card,
           side: BorderSide(color: palette.border),
         ),
       ),
-      dividerColor: palette.border,
+      dialogTheme: DialogThemeData(
+        backgroundColor: palette.card,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: AppRadii.card),
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: palette.card,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: AppRadii.card),
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: palette.surface,
@@ -88,6 +91,8 @@ class AppTheme {
         style: FilledButton.styleFrom(
           backgroundColor: palette.primary,
           foregroundColor: Colors.white,
+          disabledBackgroundColor: palette.border,
+          disabledForegroundColor: palette.textMuted,
           minimumSize: const Size(AppSpacing.touch, 52),
           textStyle: textTheme.labelLarge,
           shape: const RoundedRectangleBorder(borderRadius: AppRadii.button),
@@ -95,11 +100,12 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.text,
-          backgroundColor: AppColors.card,
+          foregroundColor: palette.text,
+          backgroundColor: palette.card,
+          disabledForegroundColor: palette.textMuted,
           minimumSize: const Size(AppSpacing.touch, 52),
           textStyle: textTheme.labelLarge,
-          side: const BorderSide(color: AppColors.border),
+          side: BorderSide(color: palette.border),
           shape: const RoundedRectangleBorder(borderRadius: AppRadii.button),
         ),
       ),
@@ -116,6 +122,9 @@ class AppTheme {
         elevation: 2,
         extendedPadding: const EdgeInsets.symmetric(horizontal: 18),
       ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(foregroundColor: palette.text),
+      ),
       chipTheme: ChipThemeData(
         backgroundColor: palette.surface,
         selectedColor: palette.primarySoft,
@@ -124,11 +133,62 @@ class AppTheme {
         secondaryLabelStyle: textTheme.labelMedium!,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         shape: const RoundedRectangleBorder(borderRadius: AppRadii.chip),
-        side: const BorderSide(color: AppColors.border),
+        side: BorderSide(color: palette.border),
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return palette.primarySoft;
+            }
+            return palette.card;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return palette.primaryDark;
+            }
+            return palette.text;
+          }),
+          side: WidgetStateProperty.all(BorderSide(color: palette.border)),
+        ),
+      ),
+      datePickerTheme: DatePickerThemeData(
+        backgroundColor: palette.card,
+        surfaceTintColor: Colors.transparent,
+        headerBackgroundColor: palette.primary,
+        headerForegroundColor: Colors.white,
+        dividerColor: palette.border,
+        dayForegroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return Colors.white;
+          if (states.contains(WidgetState.disabled)) return palette.textMuted;
+          return palette.text;
+        }),
+        dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return palette.primary;
+          return Colors.transparent;
+        }),
+        todayForegroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return Colors.white;
+          return palette.primary;
+        }),
+        todayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return palette.primary;
+          return palette.primarySoft;
+        }),
+        todayBorder: BorderSide(color: palette.primary),
+        weekdayStyle: textTheme.labelMedium?.copyWith(color: palette.textMuted),
+        yearForegroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return Colors.white;
+          return palette.text;
+        }),
+        yearBackgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return palette.primary;
+          return Colors.transparent;
+        }),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: AppColors.text,
+        backgroundColor: palette.text,
         contentTextStyle: textTheme.bodyMedium?.copyWith(color: Colors.white),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),

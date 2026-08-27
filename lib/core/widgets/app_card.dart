@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
 import '../theme/app_radii.dart';
 import '../theme/app_shadows.dart';
 import '../theme/app_spacing.dart';
+import '../theme/appearance.dart';
 
 class AppCard extends StatelessWidget {
   const AppCard({
@@ -11,7 +11,7 @@ class AppCard extends StatelessWidget {
     required this.child,
     this.padding,
     this.onTap,
-    this.color = AppColors.card,
+    this.color,
     this.borderColor,
     this.elevated = true,
   });
@@ -19,17 +19,18 @@ class AppCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final VoidCallback? onTap;
-  final Color color;
+  final Color? color;
   final Color? borderColor;
   final bool elevated;
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: color,
+        color: color ?? palette.card,
         borderRadius: AppRadii.card,
-        border: Border.all(color: borderColor ?? AppColors.border),
+        border: Border.all(color: borderColor ?? palette.border),
         boxShadow: elevated ? AppShadows.card : null,
       ),
       child: Material(

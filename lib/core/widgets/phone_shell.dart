@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
 import '../theme/app_shadows.dart';
+import '../theme/appearance.dart';
 
 /// Keeps a phone-first layout even when the preview is opened on a wide screen.
 class PhoneShell extends StatelessWidget {
@@ -13,22 +13,23 @@ class PhoneShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth <= maxPhoneWidth + 24) {
           return child;
         }
         return ColoredBox(
-          color: AppColors.desktopBackdrop,
+          color: palette.desktopBackdrop,
           child: Center(
             child: Container(
               width: maxPhoneWidth,
               height: constraints.maxHeight.clamp(640, 920),
               margin: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                color: AppColors.background,
+                color: palette.background,
                 borderRadius: BorderRadius.circular(32),
-                border: Border.all(color: const Color(0xFFDDE1EB), width: 8),
+                border: Border.all(color: palette.border, width: 8),
                 boxShadow: AppShadows.phone,
               ),
               clipBehavior: Clip.antiAlias,

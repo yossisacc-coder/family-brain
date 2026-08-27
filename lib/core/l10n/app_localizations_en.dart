@@ -597,7 +597,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appearanceHint =>
-      'Family Brain uses a clean white theme with purple brand accents on phones and in the browser.';
+      'Choose a visual theme. Backgrounds, cards, and buttons all follow it. App Color still tints primary actions.';
 
   @override
   String get appearanceProfessional => 'Professional';
@@ -606,10 +606,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appearanceColorful => 'Colorful';
 
   @override
-  String get appearanceProfessionalHint => 'Slightly darker, mature pastels.';
+  String get appearanceProfessionalHint =>
+      'Mature, slightly darker surfaces, cards, and buttons.';
 
   @override
-  String get appearanceColorfulHint => 'Soft pastel brand accents.';
+  String get appearanceColorfulHint =>
+      'Coordinated pastel surfaces, cards, and buttons.';
 
   @override
   String get calendarItemsForDay => 'Items for this day';

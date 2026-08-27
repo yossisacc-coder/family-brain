@@ -15,7 +15,6 @@ import '../../core/brain/family_brain_ai.dart';
 import '../../core/brain/speech_locale.dart';
 import '../../core/brain/voice_listen_patience.dart';
 import '../settings/locale_controller.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/appearance.dart';
 import '../../core/theme/app_radii.dart';
 import '../../core/theme/app_spacing.dart';
@@ -269,7 +268,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: Text(
                         l10n.noUpcoming,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textMuted,
+                              color: palette.textMuted,
                             ),
                       ),
                     )
@@ -350,7 +349,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         Offset.zero & overlay.size,
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: AppColors.card,
+      color: context.palette.card,
       elevation: 8,
       items: [
         _menuItem(

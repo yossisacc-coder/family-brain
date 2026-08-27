@@ -39,29 +39,29 @@ class TaskSemantics {
     };
   }
 
-  static Color statusColor(TaskStatus status) {
+  static Color statusColor(TaskStatus status, {Color? muted}) {
     return switch (status) {
-      TaskStatus.pending => AppColors.textMuted,
+      TaskStatus.pending => muted ?? AppColors.textMuted,
       TaskStatus.inProgress => AppColors.success,
       TaskStatus.completed => AppColors.completed,
     };
   }
 
-  static Color priorityColor(TaskPriority priority) {
+  static Color priorityColor(TaskPriority priority, {Color? primary, Color? muted}) {
     return switch (priority) {
-      TaskPriority.low => AppColors.textMuted,
-      TaskPriority.normal => AppColors.primary,
+      TaskPriority.low => muted ?? AppColors.textMuted,
+      TaskPriority.normal => primary ?? AppColors.primary,
       TaskPriority.high => AppColors.high,
       TaskPriority.urgent => AppColors.urgent,
     };
   }
 
-  static Color accentFor(TaskItem task) {
+  static Color accentFor(TaskItem task, {Color? primary}) {
     if (task.isTrashed) return AppColors.trash;
     if (task.status == TaskStatus.completed) return AppColors.completed;
     if (task.status == TaskStatus.inProgress) return AppColors.success;
     if (task.isUrgent) return AppColors.urgent;
     if (task.isHigh || task.isOverdue()) return AppColors.high;
-    return AppColors.primary;
+    return primary ?? AppColors.primary;
   }
 }

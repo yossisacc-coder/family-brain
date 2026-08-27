@@ -3,7 +3,6 @@ import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/appearance.dart';
 import '../../core/widgets/app_notice.dart';
 import '../../core/widgets/empty_state.dart';
@@ -105,7 +104,7 @@ class MemberDetailsScreen extends ConsumerWidget {
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
-                                  ?.copyWith(color: AppColors.textMuted),
+                                  ?.copyWith(color: context.palette.textMuted),
                             ),
                           ],
                         ),
@@ -203,7 +202,7 @@ class MemberDetailsScreen extends ConsumerWidget {
                     Text(
                       l10n.privateSpaceHint,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textMuted,
+                            color: context.palette.textMuted,
                           ),
                     ),
                   ],

@@ -74,9 +74,12 @@ void main() {
   }
 
   ThemeData testTheme() {
+    final palette = FamilyBrainPalette.of(AppearanceMode.colorful);
     return ThemeData(
       useMaterial3: true,
-      extensions: [FamilyBrainPalette.of(AppearanceMode.colorful)],
+      colorScheme: palette.colorScheme,
+      scaffoldBackgroundColor: palette.background,
+      extensions: [palette],
     );
   }
 
@@ -135,8 +138,19 @@ void main() {
     );
     expect(purple.primary, AppAccent.purple.color);
     expect(teal.primary, AppAccent.teal.color);
-    expect(professional.primary, AppAccent.blue.color);
+    expect(
+      professional.primary,
+      isNot(
+        equals(
+          FamilyBrainPalette.of(
+            AppearanceMode.professional,
+            accent: AppAccent.purple,
+          ).primary,
+        ),
+      ),
+    );
     expect(professional.background, isNot(equals(teal.background)));
+    expect(professional.card, isNot(equals(teal.card)));
   });
 
   testWidgets('Home send button is disabled when empty and sends typed text', (

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../domain/models/app_user.dart';
 import '../../domain/models/task_item.dart';
-import '../theme/app_colors.dart';
 import '../theme/app_radii.dart';
 import '../theme/app_spacing.dart';
 import '../theme/appearance.dart';
@@ -30,7 +29,7 @@ class FamilyMemberItem extends StatelessWidget {
     final initial = member.name.isEmpty ? '?' : member.name.characters.first;
     final palette = context.palette;
     return Material(
-      color: AppColors.card,
+      color: palette.card,
       borderRadius: AppRadii.card,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -39,7 +38,7 @@ class FamilyMemberItem extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.card),
           decoration: BoxDecoration(
             borderRadius: AppRadii.card,
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: palette.border),
           ),
           child: Row(
             children: [
@@ -62,7 +61,7 @@ class FamilyMemberItem extends StatelessWidget {
                       Text(
                         member.phone,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textMuted,
+                              color: palette.textMuted,
                             ),
                       ),
                     ],
@@ -82,7 +81,7 @@ class FamilyMemberItem extends StatelessWidget {
                     ? Icons.chevron_left_rounded
                     : Icons.chevron_right_rounded,
                 size: 20,
-                color: AppColors.textMuted,
+                color: palette.textMuted,
               ),
               ],
             ],

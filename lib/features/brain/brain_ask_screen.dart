@@ -3,7 +3,6 @@ import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/brain/family_brain_ask.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/appearance.dart';
 import '../../core/widgets/app_card.dart';
@@ -45,7 +44,7 @@ class _BrainAskScreenState extends ConsumerState<BrainAskScreen> {
           Text(
             l10n.askFamilyBrainHint,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textMuted,
+                  color: context.palette.textMuted,
                 ),
           ),
           const SizedBox(height: AppSpacing.lg),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
 import '../theme/app_radii.dart';
 import '../theme/app_shadows.dart';
 import '../theme/appearance.dart';
@@ -29,7 +28,7 @@ class QuickActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final fg = emphasized ? Colors.white : (iconColor ?? palette.primary);
-    final bg = emphasized ? palette.primary : AppColors.card;
+    final bg = emphasized ? palette.primary : palette.card;
     final showSubtitle = subtitle != null && subtitle != label;
     return Material(
       color: bg,
@@ -42,7 +41,7 @@ class QuickActionCard extends StatelessWidget {
             color: bg,
             borderRadius: AppRadii.card,
             border: Border.all(
-              color: emphasized ? palette.primary : AppColors.border,
+              color: emphasized ? palette.primary : palette.border,
             ),
             boxShadow: emphasized ? null : AppShadows.card,
           ),
@@ -73,7 +72,7 @@ class QuickActionCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: emphasized ? Colors.white : AppColors.text,
+                              color: emphasized ? Colors.white : palette.text,
                               fontWeight: FontWeight.w700,
                               fontSize: 13,
                               height: 1.2,
@@ -88,7 +87,7 @@ class QuickActionCard extends StatelessWidget {
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: emphasized
                                     ? Colors.white.withValues(alpha: 0.8)
-                                    : AppColors.textMuted,
+                                    : palette.textMuted,
                                 fontSize: 11,
                               ),
                         ),

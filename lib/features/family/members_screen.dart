@@ -4,7 +4,6 @@ import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide Family;
 import 'package:go_router/go_router.dart';
 
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/appearance.dart';
 import '../../core/widgets/app_notice.dart';
 import '../../core/widgets/empty_state.dart';
@@ -55,7 +54,7 @@ class MembersScreen extends ConsumerWidget {
                   Text(
                     l10n.familyOverview,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: AppColors.textMuted,
+                          color: context.palette.textMuted,
                         ),
                   ),
                   const SizedBox(height: 4),
@@ -67,7 +66,7 @@ class MembersScreen extends ConsumerWidget {
                   Text(
                     l10n.membersSubtitle,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textMuted,
+                          color: context.palette.textMuted,
                         ),
                   ),
                   const SizedBox(height: 8),
@@ -91,7 +90,7 @@ class MembersScreen extends ConsumerWidget {
                   Text(
                     l10n.privateSpaceHint,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textMuted,
+                          color: context.palette.textMuted,
                         ),
                   ),
                   const SizedBox(height: 16),
@@ -122,7 +121,7 @@ class MembersScreen extends ConsumerWidget {
                                   style: Theme.of(context)
                                       .textTheme
                                       .labelMedium
-                                      ?.copyWith(color: AppColors.textMuted),
+                                      ?.copyWith(color: context.palette.textMuted),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
@@ -151,7 +150,7 @@ class MembersScreen extends ConsumerWidget {
                   Text(
                     l10n.inviteMemberMessage,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textMuted,
+                          color: context.palette.textMuted,
                         ),
                   ),
                   const SizedBox(height: 12),

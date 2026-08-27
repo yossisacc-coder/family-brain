@@ -11,8 +11,8 @@ import '../../core/brain/ai/action_engine.dart';
 import '../../core/brain/brain_activity.dart';
 import '../../core/brain/family_brain_parser.dart';
 import '../../core/notifications/local_reminder_scheduler.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/theme/appearance.dart';
 import '../../core/theme/task_semantics.dart';
 import '../../core/widgets/app_notice.dart';
 import '../../core/widgets/app_card.dart';
@@ -133,7 +133,7 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
             Text(
               l10n.brainUnclear,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textMuted,
+                    color: context.palette.textMuted,
                   ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -159,7 +159,7 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
           ],
           if (_error != null) ...[
             const SizedBox(height: AppSpacing.md),
-            Text(_error!, style: const TextStyle(color: AppColors.urgent)),
+            Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ],
           const SizedBox(height: AppSpacing.xl),
           PrimaryButton(
@@ -223,7 +223,7 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
           Text(
             row.$1,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: AppColors.textMuted,
+                  color: context.palette.textMuted,
                 ),
           ),
           const SizedBox(height: 4),
@@ -311,7 +311,11 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
                 avatar: Icon(
                   TaskSemantics.priorityIcon(priority),
                   size: 18,
-                  color: TaskSemantics.priorityColor(priority),
+                  color: TaskSemantics.priorityColor(
+                    priority,
+                    primary: context.palette.primary,
+                    muted: context.palette.textMuted,
+                  ),
                 ),
                 label: Text(TaskSemantics.priorityLabel(l10n, priority)),
                 selected: draft.priority == priority,

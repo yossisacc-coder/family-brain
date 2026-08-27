@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
 import 'primary_button.dart';
 import '../theme/appearance.dart';
 
@@ -46,7 +45,7 @@ class EmptyState extends StatelessWidget {
             message,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textMuted,
+                  color: context.palette.textMuted,
                   height: 1.4,
                 ),
           ),

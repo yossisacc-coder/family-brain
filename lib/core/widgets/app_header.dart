@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:family_brain/core/l10n/app_localizations.dart';
 
-import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/appearance.dart';
 import 'app_section_header.dart';
@@ -98,7 +97,7 @@ class AppHeader extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textMuted,
+                color: context.palette.textMuted,
                 height: 1.35,
               ),
         ),
@@ -131,7 +130,7 @@ class _HeaderIcon extends StatelessWidget {
           IconButton(
             tooltip: tooltip,
             onPressed: onPressed,
-            icon: Icon(icon, color: AppColors.text, size: 24),
+            icon: Icon(icon, color: context.palette.text, size: 24),
           ),
           if (badge > 0)
             Positioned.directional(

@@ -67,7 +67,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
               Text(
                 l10n.welcomeSubtitle,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textMuted,
+                      color: context.palette.textMuted,
                       height: 1.45,
                     ),
               ),
@@ -85,7 +85,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 l10n.orDivider,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textMuted,
+                      color: context.palette.textMuted,
                     ),
               ),
               const SizedBox(height: 16),
@@ -157,7 +157,7 @@ class _DemoLoginCard extends StatelessWidget {
           Text(
             l10n.demoHint,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textMuted,
+                  color: context.palette.textMuted,
                   height: 1.4,
                 ),
           ),
@@ -166,7 +166,7 @@ class _DemoLoginCard extends StatelessWidget {
             Text(
               l10n.demoModeSettings,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textMuted,
+                    color: context.palette.textMuted,
                     height: 1.35,
                   ),
             ),

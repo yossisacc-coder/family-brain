@@ -3,6 +3,7 @@ import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/appearance.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../data/providers.dart';
 
@@ -84,14 +85,14 @@ class _FamilySetupScreenState extends ConsumerState<FamilySetupScreen> {
           Text(
             l10n.familySetupSubtitle,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textMuted,
+                  color: context.palette.textMuted,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
             l10n.workspaceHint,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textMuted,
+                  color: context.palette.textMuted,
                 ),
           ),
           const SizedBox(height: 20),

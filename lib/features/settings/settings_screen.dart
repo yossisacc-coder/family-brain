@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/config/app_config.dart';
 import '../../core/theme/app_accent.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/appearance.dart';
 import '../../data/providers.dart';
 import 'accent_controller.dart';
@@ -20,6 +19,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final palette = context.palette;
     final locale = ref.watch(localeControllerProvider);
     final appearance = ref.watch(appearanceControllerProvider);
     final accent = ref.watch(accentControllerProvider);
@@ -105,7 +105,7 @@ class SettingsScreen extends ConsumerWidget {
           Text(
             l10n.appearanceHint,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textMuted,
+                  color: palette.textMuted,
                 ),
           ),
           const SizedBox(height: 10),
@@ -133,7 +133,7 @@ class SettingsScreen extends ConsumerWidget {
                 ? l10n.appearanceProfessionalHint
                 : l10n.appearanceColorfulHint,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textMuted,
+                  color: palette.textMuted,
                 ),
           ),
           const SizedBox(height: 24),
@@ -145,7 +145,7 @@ class SettingsScreen extends ConsumerWidget {
           Text(
             l10n.appColorHint,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textMuted,
+                  color: palette.textMuted,
                 ),
           ),
           const SizedBox(height: 12),
@@ -184,7 +184,7 @@ class SettingsScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.actionSoft,
+                color: palette.primarySoft,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
@@ -198,7 +198,7 @@ class SettingsScreen extends ConsumerWidget {
                   Text(
                     l10n.demoModeSettings,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textMuted,
+                          color: palette.textMuted,
                           height: 1.4,
                         ),
                   ),
@@ -215,14 +215,14 @@ class SettingsScreen extends ConsumerWidget {
           Text(
             l10n.aboutApp,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textMuted,
+                  color: palette.textMuted,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
             l10n.version(AppConfig.version),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textMuted,
+                  color: palette.textMuted,
                 ),
           ),
         ],
@@ -265,7 +265,7 @@ class _AppColorSwatch extends StatelessWidget {
                 color: accent.color,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: selected ? AppColors.text : Colors.white,
+                  color: selected ? context.palette.text : Colors.white,
                   width: selected ? 3 : 2,
                 ),
                 boxShadow: [

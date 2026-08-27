@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
 import 'primary_button.dart';
 
 class ErrorView extends StatelessWidget {
@@ -22,7 +21,7 @@ class ErrorView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.wifi_off_rounded, size: 36, color: AppColors.urgent),
+          Icon(Icons.wifi_off_rounded, size: 36, color: Theme.of(context).colorScheme.error),
           const SizedBox(height: 12),
           Text(
             message,

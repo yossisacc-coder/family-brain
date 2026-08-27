@@ -593,7 +593,7 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get appearanceHint =>
-      'Family Brain משתמש בערכת נושא לבנה ונקייה עם הדגשות סגולות בטלפונים ובווב.';
+      'בחרו ערכת נושא. רקעים, כרטיסים וכפתורים משתנים יחד. צבע האפליקציה עדיין צובע פעולות ראשיות.';
 
   @override
   String get appearanceProfessional => 'מקצועי';
@@ -602,10 +602,12 @@ class AppLocalizationsHe extends AppLocalizations {
   String get appearanceColorful => 'צבעוני';
 
   @override
-  String get appearanceProfessionalHint => 'פסטלים בוגרים, מעט כהים יותר.';
+  String get appearanceProfessionalHint =>
+      'פסטלים בוגרים, מעט כהים יותר, כולל רקע, כרטיסים וכפתורים.';
 
   @override
-  String get appearanceColorfulHint => 'הדגשות פסטל עדינות של המותג.';
+  String get appearanceColorfulHint =>
+      'פסטלים מתואמים לרקע, כרטיסים וכפתורים.';
 
   @override
   String get calendarItemsForDay => 'פריטים ליום זה';
