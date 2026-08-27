@@ -9,7 +9,7 @@ import 'appearance.dart';
 class AppTheme {
   static ThemeData light(
     Locale locale, {
-    AppearanceMode appearance = AppearanceMode.colorful,
+    AppearanceMode appearance = AppearanceMode.soft,
     AppAccent accent = AppAccent.purple,
   }) {
     final isHebrew = locale.languageCode == 'he';

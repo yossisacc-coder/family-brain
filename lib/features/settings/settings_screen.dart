@@ -10,6 +10,7 @@ import '../../data/providers.dart';
 import 'accent_controller.dart';
 import 'appearance_controller.dart';
 import 'locale_controller.dart';
+import 'reminder_settings_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key, this.publicMode = false});
@@ -109,32 +110,44 @@ class SettingsScreen extends ConsumerWidget {
                 ),
           ),
           const SizedBox(height: 10),
-          SegmentedButton<AppearanceMode>(
-            segments: [
-              ButtonSegment(
-                value: AppearanceMode.professional,
-                label: Text(l10n.appearanceProfessional),
-              ),
-              ButtonSegment(
-                value: AppearanceMode.colorful,
-                label: Text(l10n.appearanceColorful),
-              ),
-            ],
-            selected: {appearance},
-            onSelectionChanged: (value) {
-              ref
-                  .read(appearanceControllerProvider.notifier)
-                  .setMode(value.first);
-            },
+          _AppearanceChoice(
+            mode: AppearanceMode.soft,
+            selected: appearance,
+            label: l10n.appearanceSoft,
+            hint: l10n.appearanceSoftHint,
+            onSelect: (mode) => ref
+                .read(appearanceControllerProvider.notifier)
+                .setMode(mode),
           ),
-          const SizedBox(height: 6),
-          Text(
-            appearance == AppearanceMode.professional
-                ? l10n.appearanceProfessionalHint
-                : l10n.appearanceColorfulHint,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: palette.textMuted,
-                ),
+          _AppearanceChoice(
+            mode: AppearanceMode.professional,
+            selected: appearance,
+            label: l10n.appearanceProfessional,
+            hint: l10n.appearanceProfessionalHint,
+            onSelect: (mode) => ref
+                .read(appearanceControllerProvider.notifier)
+                .setMode(mode),
+          ),
+          _AppearanceChoice(
+            mode: AppearanceMode.colorful,
+            selected: appearance,
+            label: l10n.appearanceColorful,
+            hint: l10n.appearanceColorfulHint,
+            onSelect: (mode) => ref
+                .read(appearanceControllerProvider.notifier)
+                .setMode(mode),
+          ),
+          const SizedBox(height: 24),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.reminderNotifications),
+            subtitle: Text(l10n.reminderNotificationsHint),
+            value: ref.watch(reminderSettingsControllerProvider),
+            onChanged: (value) {
+              ref
+                  .read(reminderSettingsControllerProvider.notifier)
+                  .setEnabled(value);
+            },
           ),
           const SizedBox(height: 24),
           Text(
@@ -226,6 +239,72 @@ class SettingsScreen extends ConsumerWidget {
                 ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AppearanceChoice extends StatelessWidget {
+  const _AppearanceChoice({
+    required this.mode,
+    required this.selected,
+    required this.label,
+    required this.hint,
+    required this.onSelect,
+  });
+
+  final AppearanceMode mode;
+  final AppearanceMode selected;
+  final String label;
+  final String hint;
+  final ValueChanged<AppearanceMode> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final isSelected = mode == selected;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        color: isSelected ? palette.primarySoft : palette.card,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          key: Key('appearance-${mode.name}'),
+          onTap: () => onSelect(mode),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+            child: Row(
+              children: [
+                Icon(
+                  isSelected
+                      ? Icons.radio_button_checked_rounded
+                      : Icons.radio_button_off_rounded,
+                  color: isSelected ? palette.primary : palette.textMuted,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        hint,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: palette.textMuted,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

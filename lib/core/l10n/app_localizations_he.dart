@@ -596,18 +596,32 @@ class AppLocalizationsHe extends AppLocalizations {
       'בחרו ערכת נושא. רקעים, כרטיסים וכפתורים משתנים יחד. צבע האפליקציה עדיין צובע פעולות ראשיות.';
 
   @override
+  String get appearanceSoft => 'רך';
+
+  @override
   String get appearanceProfessional => 'מקצועי';
 
   @override
   String get appearanceColorful => 'צבעוני';
 
   @override
+  String get appearanceSoftHint => 'רקע לבן עם הדגשות פסטל שקטות.';
+
+  @override
   String get appearanceProfessionalHint =>
       'פסטלים בוגרים, מעט כהים יותר, כולל רקע, כרטיסים וכפתורים.';
 
   @override
-  String get appearanceColorfulHint =>
-      'פסטלים מתואמים לרקע, כרטיסים וכפתורים.';
+  String get appearanceColorfulHint => 'פסטלים מתואמים לרקע, כרטיסים וכפתורים.';
+
+  @override
+  String get reminderNotifications => 'התראות תזכורת';
+
+  @override
+  String get reminderNotificationsHint => 'התראת מכשיר תופיע בזמן התזכורת.';
+
+  @override
+  String get addPhoto => 'הוספת תמונה';
 
   @override
   String get calendarItemsForDay => 'פריטים ליום זה';

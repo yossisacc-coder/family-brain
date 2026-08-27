@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'app_accent.dart';
 import 'app_colors.dart';
 
-enum AppearanceMode { professional, colorful }
+enum AppearanceMode { soft, professional, colorful }
 
 /// Central Family Brain surfaces. Add a new [AppearanceMode] + palette here
 /// to introduce another full visual theme without per-widget colors.
@@ -52,7 +52,31 @@ class FamilyBrainPalette extends ThemeExtension<FamilyBrainPalette> {
   final Color homeFamily;
   final Color homeFamilySoft;
 
-  /// Coordinated pastel theme: lavender wash, tinted cards, vivid actions.
+  /// White/light pastel dashboard: calm surfaces, purple primary, supporting tints.
+  static const soft = FamilyBrainPalette(
+    mode: AppearanceMode.soft,
+    background: Color(0xFFFBFBFD),
+    surface: Color(0xFFF4F3F8),
+    card: Color(0xFFFFFFFF),
+    text: Color(0xFF1B1D29),
+    textMuted: Color(0xFF6A6680),
+    border: Color(0xFFE6E2EE),
+    nav: Color(0xFFFFFFFF),
+    desktopBackdrop: Color(0xFFECEEF4),
+    primary: AppColors.primary,
+    primaryDark: AppColors.primaryDark,
+    primarySoft: AppColors.primarySoft,
+    homeEvents: AppColors.homeEvents,
+    homeEventsSoft: AppColors.homeEventsSoft,
+    homeTasks: AppColors.homeTasks,
+    homeTasksSoft: AppColors.homeTasksSoft,
+    homeReminders: AppColors.homeReminders,
+    homeRemindersSoft: AppColors.homeRemindersSoft,
+    homeFamily: AppColors.homeFamily,
+    homeFamilySoft: AppColors.homeFamilySoft,
+  );
+
+  /// Coordinated colorful theme: lavender wash, tinted cards, vivid actions.
   static const colorful = FamilyBrainPalette(
     mode: AppearanceMode.colorful,
     background: Color(0xFFF3EDFF),
@@ -104,7 +128,11 @@ class FamilyBrainPalette extends ThemeExtension<FamilyBrainPalette> {
     AppearanceMode mode, {
     AppAccent accent = AppAccent.purple,
   }) {
-    final base = mode == AppearanceMode.professional ? professional : colorful;
+    final base = switch (mode) {
+      AppearanceMode.professional => professional,
+      AppearanceMode.colorful => colorful,
+      AppearanceMode.soft => soft,
+    };
     final primary = mode == AppearanceMode.professional
         ? Color.lerp(accent.color, const Color(0xFF2A2733), 0.22)!
         : accent.color;
@@ -201,7 +229,7 @@ class FamilyBrainPalette extends ThemeExtension<FamilyBrainPalette> {
 extension FamilyBrainPaletteContext on BuildContext {
   FamilyBrainPalette get palette =>
       Theme.of(this).extension<FamilyBrainPalette>() ??
-      FamilyBrainPalette.colorful;
+      FamilyBrainPalette.soft;
 
   ColorScheme get appColors => Theme.of(this).colorScheme;
 }

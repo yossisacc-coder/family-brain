@@ -321,8 +321,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(l10n.appColor), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('app-color-teal')),
+      240,
+    );
+    await tester.pumpAndSettle();
     expect(find.byKey(const Key('app-color-teal')), findsOneWidget);
-    await tester.ensureVisible(find.byKey(const Key('app-color-teal')));
     await tester.tap(find.byKey(const Key('app-color-teal')));
     await tester.pumpAndSettle();
     final prefs = await SharedPreferences.getInstance();

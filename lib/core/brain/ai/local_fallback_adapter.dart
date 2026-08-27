@@ -1,4 +1,5 @@
 import '../../../domain/models/app_user.dart';
+import '../brain_session.dart';
 import '../family_brain_parser.dart';
 import 'ai_provider.dart';
 import 'family_brain_ai_schema.dart';
@@ -30,6 +31,10 @@ class LocalFallbackAdapter implements AiProvider {
           ),
       ],
       imagePath: input.imagePath,
+      language: context.language,
+      previousDrafts: BrainSession.lastDrafts,
+      previousEventAt: DateTime.tryParse(context.lastEvent?.dueDate ?? ''),
+      previousEventTitle: context.lastEvent?.title,
     );
     return FamilyBrainAiResponse.fromDrafts(
       drafts,
