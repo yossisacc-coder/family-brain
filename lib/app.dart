@@ -14,6 +14,7 @@ import 'data/providers.dart';
 import 'features/settings/accent_controller.dart';
 import 'features/settings/appearance_controller.dart';
 import 'features/settings/locale_controller.dart';
+import 'features/settings/reminder_settings_controller.dart';
 
 class FamilyBrainApp extends ConsumerWidget {
   const FamilyBrainApp({super.key});
@@ -32,6 +33,12 @@ class FamilyBrainApp extends ConsumerWidget {
     });
     ref.listen(familyTasksProvider, (previous, next) {
       final tasks = next.valueOrNull;
+      if (tasks != null) {
+        unawaited(LocalReminderScheduler.syncAll(tasks));
+      }
+    });
+    ref.listen(reminderSettingsControllerProvider, (previous, next) {
+      final tasks = ref.read(familyTasksProvider).valueOrNull;
       if (tasks != null) {
         unawaited(LocalReminderScheduler.syncAll(tasks));
       }

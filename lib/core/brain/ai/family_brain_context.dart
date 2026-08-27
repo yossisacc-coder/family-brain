@@ -60,6 +60,8 @@ class FamilyBrainContext {
     this.events = const [],
     this.reminders = const [],
     this.lists = const [],
+    this.recentUserTexts = const [],
+    this.lastEvent,
   });
 
   final DateTime now;
@@ -69,12 +71,16 @@ class FamilyBrainContext {
   final List<FamilyBrainItemRef> events;
   final List<FamilyBrainItemRef> reminders;
   final List<FamilyBrainItemRef> lists;
+  final List<String> recentUserTexts;
+  final FamilyBrainItemRef? lastEvent;
 
   factory FamilyBrainContext.fromApp({
     required DateTime now,
     String language = 'en',
     List<AppUser> members = const [],
     List<TaskItem> items = const [],
+    List<String> recentUserTexts = const [],
+    FamilyBrainItemRef? lastEvent,
   }) {
     return FamilyBrainContext(
       now: now,
@@ -96,6 +102,8 @@ class FamilyBrainContext {
         for (final item in items)
           if (item.kind == InformationKind.list) FamilyBrainItemRef.fromTask(item),
       ],
+      recentUserTexts: recentUserTexts,
+      lastEvent: lastEvent,
     );
   }
 
@@ -106,13 +114,15 @@ class FamilyBrainContext {
       'language': language,
       'members': [for (final member in members) member.toJson()],
       if (tasks.isNotEmpty)
-        'tasks': [for (final item in tasks) item.toJson()],
+        'tasks': [for (final item in tasks.take(8)) item.toJson()],
       if (events.isNotEmpty)
-        'events': [for (final item in events) item.toJson()],
+        'events': [for (final item in events.take(8)) item.toJson()],
       if (reminders.isNotEmpty)
-        'reminders': [for (final item in reminders) item.toJson()],
+        'reminders': [for (final item in reminders.take(8)) item.toJson()],
       if (lists.isNotEmpty)
-        'lists': [for (final item in lists) item.toJson()],
+        'lists': [for (final item in lists.take(8)) item.toJson()],
+      if (recentUserTexts.isNotEmpty) 'recent': recentUserTexts,
+      if (lastEvent != null) 'lastEvent': lastEvent!.toJson(),
     };
   }
 }

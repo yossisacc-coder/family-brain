@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -16,11 +17,15 @@ class GeminiAiAdapter implements AiProvider {
     required this.origin,
     this._client,
     this.timeout = const Duration(seconds: 12),
+    this.maxAttempts = 2,
   });
 
   final String origin;
   final http.Client? _client;
   final Duration timeout;
+
+  /// Initial try plus at most one retry. Never retries indefinitely.
+  final int maxAttempts;
 
   @override
   String get id => 'gemini';
@@ -32,28 +37,45 @@ class GeminiAiAdapter implements AiProvider {
   }) async {
     final httpClient = _client ?? http.Client();
     final owned = _client == null;
+    Object? lastError;
     try {
-      final response = await httpClient
-          .post(
-            Uri.parse('$origin/understand'),
-            headers: const {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'text': input.text,
-              ...context.toProviderPayload(),
-              if (input.imageBase64 != null) 'imageBase64': input.imageBase64,
-              if (input.mimeType != null) 'mimeType': input.mimeType,
-            }),
-          )
-          .timeout(timeout);
-      if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw HttpException('AI ${response.statusCode}');
+      final attempts = maxAttempts < 1 ? 1 : (maxAttempts > 2 ? 2 : maxAttempts);
+      for (var attempt = 0; attempt < attempts; attempt++) {
+        try {
+          final response = await httpClient
+              .post(
+                Uri.parse('$origin/understand'),
+                headers: const {'Content-Type': 'application/json'},
+                body: jsonEncode({
+                  'text': input.text,
+                  ...context.toProviderPayload(),
+                  if (input.imageBase64 != null) 'imageBase64': input.imageBase64,
+                  if (input.mimeType != null) 'mimeType': input.mimeType,
+                }),
+              )
+              .timeout(timeout);
+          if (response.statusCode >= 500 && attempt < attempts - 1) {
+            lastError = HttpException('AI ${response.statusCode}');
+            continue;
+          }
+          if (response.statusCode < 200 || response.statusCode >= 300) {
+            throw HttpException('AI ${response.statusCode}');
+          }
+          final decoded = jsonDecode(response.body);
+          if (decoded is! Map) throw const FormatException('invalid ai json');
+          return mapGatewayPayload(
+            decoded,
+            sourceText: input.text,
+          );
+        } on SocketException catch (error) {
+          lastError = error;
+          if (attempt >= attempts - 1) rethrow;
+        } on TimeoutException catch (error) {
+          lastError = error;
+          if (attempt >= attempts - 1) rethrow;
+        }
       }
-      final decoded = jsonDecode(response.body);
-      if (decoded is! Map) throw const FormatException('invalid ai json');
-      return mapGatewayPayload(
-        decoded,
-        sourceText: input.text,
-      );
+      throw lastError ?? const HttpException('AI unavailable');
     } finally {
       if (owned) httpClient.close();
     }

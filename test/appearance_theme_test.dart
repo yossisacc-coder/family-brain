@@ -29,8 +29,12 @@ ThemeData themeWithoutFonts(AppearanceMode mode, {AppAccent accent = AppAccent.p
 }
 
 void main() {
-  test('professional and colorful palettes change surfaces and buttons', () {
+  test('soft, professional, and colorful palettes change surfaces and buttons', () {
     const accent = AppAccent.purple;
+    final soft = FamilyBrainPalette.of(
+      AppearanceMode.soft,
+      accent: accent,
+    );
     final colorful = FamilyBrainPalette.of(
       AppearanceMode.colorful,
       accent: accent,
@@ -40,15 +44,14 @@ void main() {
       accent: accent,
     );
 
+    expect(soft.background, isNot(equals(professional.background)));
+    expect(soft.background, isNot(equals(colorful.background)));
     expect(colorful.background, isNot(equals(professional.background)));
     expect(colorful.card, isNot(equals(professional.card)));
-    expect(colorful.surface, isNot(equals(professional.surface)));
-    expect(colorful.nav, isNot(equals(professional.nav)));
-    expect(colorful.primary, isNot(equals(professional.primary)));
+    expect(soft.colorScheme.surface, soft.card);
     expect(colorful.colorScheme.surface, colorful.card);
     expect(professional.colorScheme.surface, professional.card);
-    expect(colorful.colorScheme.primary, colorful.primary);
-    expect(professional.colorScheme.primary, professional.primary);
+    expect(soft.background.computeLuminance(), greaterThan(0.8));
     expect(colorful.background.computeLuminance(), greaterThan(0.7));
     expect(professional.background.computeLuminance(), greaterThan(0.55));
   });

@@ -30,6 +30,8 @@ class LocalReminderScheduler {
   static var _askedPermissions = false;
   static final Map<String, int> _ids = {};
   static bool? _exactAllowed;
+  static bool notificationsEnabled = true;
+  static String? _lastFingerprint;
 
   static Future<void> initialize() async {
     if (_ready) return;
@@ -121,6 +123,7 @@ class LocalReminderScheduler {
   }
 
   static bool shouldSchedule(TaskItem task, [DateTime? now]) {
+    if (!notificationsEnabled) return false;
     if (!task.isOpen) return false;
     final when = scheduledTime(task);
     if (!isValidScheduleTime(when)) return false;
@@ -205,6 +208,8 @@ class LocalReminderScheduler {
   static Future<void> syncAll(List<TaskItem> tasks) async {
     await ensureReady();
     if (!_ready) return;
+    final fingerprint = _fingerprint(tasks);
+    if (fingerprint == _lastFingerprint) return;
     final seen = <String>{};
     for (final task in tasks) {
       seen.add(task.id);
@@ -218,6 +223,20 @@ class LocalReminderScheduler {
       }
     }
     await _persistIds();
+    _lastFingerprint = fingerprint;
+  }
+
+  static String _fingerprint(List<TaskItem> tasks) {
+    final parts = <String>[
+      notificationsEnabled ? 'on' : 'off',
+      for (final task in tasks)
+        '${task.id}|${scheduledTime(task)}|${task.status.name}|${task.deletedAt}|${task.title}',
+    ];
+    return parts.join(';');
+  }
+
+  static void invalidateSyncCache() {
+    _lastFingerprint = null;
   }
 
   static Future<void> _loadIds() async {
@@ -253,6 +272,8 @@ class LocalReminderScheduler {
     _ready = false;
     _askedPermissions = false;
     _exactAllowed = null;
+    notificationsEnabled = true;
+    _lastFingerprint = null;
   }
 
   @visibleForTesting

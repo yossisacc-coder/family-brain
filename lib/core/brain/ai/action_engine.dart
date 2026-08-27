@@ -53,6 +53,7 @@ class ActionEngine {
             now: stamp,
           );
           if (draft == null) continue;
+          if (_isDuplicate(draft, [...existing, ...created])) continue;
           final task = draft.toTaskItem(
             id: nextId(),
             familyId: familyId,
@@ -90,6 +91,37 @@ class ActionEngine {
     }
 
     return ActionEngineResult(created: created, updated: updated);
+  }
+
+  bool _isDuplicate(BrainDraft draft, List<TaskItem> existing) {
+    final title = draft.title.trim().toLowerCase();
+    if (title.isEmpty) return false;
+    for (final item in existing) {
+      if (!item.isOpen) continue;
+      if (item.kind != draft.kind) continue;
+      if (item.title.trim().toLowerCase() != title) continue;
+      if (!_sameWhen(item.dueDate, draft.dueDate, draft.hasDueTime) &&
+          !_sameWhen(item.reminderAt, draft.reminderAt, true)) {
+        continue;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  bool _sameWhen(DateTime? left, DateTime? right, bool hasTime) {
+    if (left == null && right == null) return true;
+    if (left == null || right == null) return false;
+    if (hasTime) {
+      return left.year == right.year &&
+          left.month == right.month &&
+          left.day == right.day &&
+          left.hour == right.hour &&
+          left.minute == right.minute;
+    }
+    return left.year == right.year &&
+        left.month == right.month &&
+        left.day == right.day;
   }
 
   Future<ActionEngineResult> applyDrafts({

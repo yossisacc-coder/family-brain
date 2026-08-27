@@ -24,7 +24,7 @@ class StatCard extends StatelessWidget {
   final IconData? icon;
   final String? subtitle;
 
-  static const double height = 96;
+  static const double height = 88;
 
   @override
   Widget build(BuildContext context) {

@@ -79,63 +79,44 @@ class TaskCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Wrap(
-                      spacing: 6,
+                      spacing: 10,
                       runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        _MetaChip(
+                        if (assignee != null)
+                          Text(
+                            assignee.name.split(' ').first,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: palette.textMuted,
+                                ),
+                          ),
+                        if (dueLabel != null)
+                          Text(
+                            dueLabel,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: task.isOverdue()
+                                      ? AppColors.urgent
+                                      : palette.textMuted,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        _StatusBadge(
                           label: TaskSemantics.statusLabel(l10n, task.status),
-                          icon: TaskSemantics.statusIcon(task.status),
                           color: TaskSemantics.statusColor(
                             task.status,
                             muted: palette.textMuted,
                           ),
                         ),
-                        _MetaChip(
+                        _StatusBadge(
                           label: TaskSemantics.priorityLabel(l10n, task.priority),
-                          icon: TaskSemantics.priorityIcon(task.priority),
                           color: TaskSemantics.priorityColor(
                             task.priority,
                             primary: palette.primary,
                             muted: palette.textMuted,
                           ),
                         ),
-                        if (dueLabel != null)
-                          _MetaChip(
-                            label: dueLabel,
-                            icon: Icons.event_outlined,
-                            color: task.isOverdue() ? AppColors.urgent : palette.textMuted,
-                          ),
-                        if (task.kind != InformationKind.task)
-                          _MetaChip(
-                            label: _kindLabel(l10n, task.kind),
-                            icon: switch (task.kind) {
-                              InformationKind.event => Icons.event_outlined,
-                              InformationKind.reminder => Icons.alarm_outlined,
-                              InformationKind.list => Icons.list_alt_rounded,
-                              InformationKind.information =>
-                                Icons.info_outline_rounded,
-                              InformationKind.task => Icons.task_alt_rounded,
-                            },
-                          ),
-                        if (assignee != null)
-                          _MetaChip(
-                            label: assignee.name,
-                            icon: Icons.person_outline,
-                          ),
-                        if (!compact)
-                          _MetaChip(
-                            label: task.type == TaskType.personal
-                                ? l10n.personal
-                                : l10n.familyType,
-                            icon: task.type == TaskType.personal
-                                ? Icons.person_outline
-                                : Icons.groups_outlined,
-                          ),
-                        if (task.hasReminder)
-                          _MetaChip(
-                            label: l10n.reminder,
-                            icon: Icons.alarm_outlined,
-                          ),
                       ],
                     ),
                   ],
@@ -170,54 +151,39 @@ class TaskCard extends StatelessWidget {
     final now = DateTime.now();
     final due = DateTime(task.dueDate!.year, task.dueDate!.month, task.dueDate!.day);
     final today = DateTime(now.year, now.month, now.day);
-    if (due == today) return l10n.today;
+    if (due == today) {
+      if (task.hasDueTime) {
+        final local = task.dueDate!.toLocal();
+        return '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+      }
+      return l10n.today;
+    }
     if (due == today.add(const Duration(days: 1))) return l10n.dueTomorrow;
     return '${due.day}/${due.month}';
   }
-
-  String _kindLabel(AppLocalizations l10n, InformationKind kind) {
-    return switch (kind) {
-      InformationKind.task => l10n.kindTask,
-      InformationKind.event => l10n.kindEvent,
-      InformationKind.reminder => l10n.kindReminder,
-      InformationKind.list => l10n.kindList,
-      InformationKind.information => l10n.kindInformation,
-    };
-  }
 }
 
-class _MetaChip extends StatelessWidget {
-  const _MetaChip({
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({
     required this.label,
-    this.icon,
     this.color,
   });
 
   final String label;
-  final IconData? icon;
   final Color? color;
 
   @override
   Widget build(BuildContext context) {
     final fg = color ?? context.palette.textMuted;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: fg.withValues(alpha: 0.10),
         borderRadius: AppRadii.chip,
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 13, color: fg),
-            const SizedBox(width: 4),
-          ],
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(color: fg),
-          ),
-        ],
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: fg),
       ),
     );
   }

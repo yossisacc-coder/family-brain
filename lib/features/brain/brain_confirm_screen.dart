@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/brain/ai/action_engine.dart';
 import '../../core/brain/brain_activity.dart';
+import '../../core/brain/brain_session.dart';
 import '../../core/brain/family_brain_parser.dart';
 import '../../core/notifications/local_reminder_scheduler.dart';
 import '../../core/theme/app_spacing.dart';
@@ -381,6 +382,7 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
         drafts: _drafts,
         familyId: user.familyId!,
         creatorId: user.id,
+        existing: ref.read(familyTasksProvider).valueOrNull ?? const [],
       );
       for (final task in written.written) {
         await LocalReminderScheduler.sync(task);
@@ -389,6 +391,7 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
         _drafts.first.originalText,
         [for (final draft in _drafts) draft.kind.name],
       );
+      BrainSession.rememberSaved(written.written);
       if (!mounted) return;
       ref.read(pendingBrainDraftsProvider.notifier).state = const [];
       context.go('/app/home');

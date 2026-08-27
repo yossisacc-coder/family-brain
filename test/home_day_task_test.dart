@@ -108,5 +108,7 @@ void main() {
     expect(find.text('Urgent'), findsOneWidget);
     expect(find.text('In progress'), findsOneWidget);
     expect(find.text('David'), findsOneWidget);
+    expect(find.text('Bring water bottles'), findsNothing);
+    expect(find.text('Reminder'), findsNothing);
   });
 }

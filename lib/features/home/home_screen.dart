@@ -353,14 +353,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       elevation: 8,
       items: [
         _menuItem(
-          _ComposerAction.camera,
-          Icons.photo_camera_outlined,
-          l10n.photoFromCamera,
-        ),
-        _menuItem(
-          _ComposerAction.gallery,
-          Icons.photo_outlined,
-          l10n.photoFromGallery,
+          _ComposerAction.photo,
+          Icons.add_photo_alternate_outlined,
+          l10n.addPhoto,
         ),
         _menuItem(
           _ComposerAction.voice,
@@ -376,10 +371,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
     if (!mounted || selected == null) return;
     switch (selected) {
-      case _ComposerAction.camera:
-        await _pickImage(l10n, ImageSource.camera);
-      case _ComposerAction.gallery:
-        await _pickImage(l10n, ImageSource.gallery);
+      case _ComposerAction.photo:
+        if (!buttonContext.mounted) return;
+        await _pickPhoto(buttonContext, l10n);
       case _ComposerAction.voice:
         await _toggleVoice(l10n);
       case _ComposerAction.askAi:
@@ -387,8 +381,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  PopupMenuItem<_ComposerAction> _menuItem(
-    _ComposerAction value,
+  PopupMenuItem<T> _menuItem<T>(
+    T value,
     IconData icon,
     String label,
   ) {
@@ -416,6 +410,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _pickPhoto(BuildContext buttonContext, AppLocalizations l10n) async {
+    final box = buttonContext.findRenderObject() as RenderBox?;
+    final overlay =
+        Navigator.of(buttonContext).overlay?.context.findRenderObject() as RenderBox?;
+    ImageSource? source;
+    if (box != null && overlay != null) {
+      final origin = box.localToGlobal(Offset.zero, ancestor: overlay);
+      source = await showMenu<ImageSource>(
+        context: buttonContext,
+        position: RelativeRect.fromRect(
+          Rect.fromLTWH(origin.dx, origin.dy, box.size.width, box.size.height),
+          Offset.zero & overlay.size,
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        color: context.palette.card,
+        elevation: 8,
+        items: [
+          _menuItem(
+            ImageSource.camera,
+            Icons.photo_camera_outlined,
+            l10n.photoFromCamera,
+          ),
+          _menuItem(
+            ImageSource.gallery,
+            Icons.photo_outlined,
+            l10n.photoFromGallery,
+          ),
+        ],
+      );
+    }
+    if (!mounted || source == null) return;
+    await _pickImage(l10n, source);
   }
 
   Future<void> _pickImage(AppLocalizations l10n, ImageSource source) async {
@@ -680,6 +708,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         text: text,
         now: DateTime.now(),
         members: members,
+        items: (ref.read(familyTasksProvider).valueOrNull ?? const [])
+            .where((task) => task.isOpen)
+            .toList(),
         imagePath: imagePath,
         imageBase64: imageBase64,
         mimeType: 'image/jpeg',
@@ -719,7 +750,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-enum _ComposerAction { camera, gallery, voice, askAi }
+enum _ComposerAction { photo, voice, askAi }
 
 class _ComposerCard extends StatefulWidget {
   const _ComposerCard({

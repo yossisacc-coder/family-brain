@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 
 import '../../domain/models/app_user.dart';
+import '../../domain/models/task_item.dart';
 import '../config/app_config.dart';
 import 'ai/ai_provider.dart';
 import 'ai/family_brain_ai_schema.dart';
@@ -8,6 +9,7 @@ import 'ai/family_brain_ai_service.dart';
 import 'ai/family_brain_context.dart';
 import 'ai/gemini_ai_adapter.dart';
 import 'ai/local_fallback_adapter.dart';
+import 'brain_session.dart';
 import 'family_brain_parser.dart';
 
 class BrainUnderstandResult {
@@ -55,6 +57,7 @@ class FamilyBrainAi {
     required String text,
     required DateTime now,
     List<AppUser> members = const [],
+    List<TaskItem> items = const [],
     String? imagePath,
     String? imageBase64,
     String? mimeType,
@@ -63,6 +66,10 @@ class FamilyBrainAi {
     Duration timeout = const Duration(seconds: 12),
     String? backendUrl,
   }) async {
+    final compactItems = items
+        .where((item) => item.isOpen)
+        .take(12)
+        .toList();
     final understood = await service(
       client: client,
       timeout: timeout,
@@ -78,10 +85,15 @@ class FamilyBrainAi {
         now: now,
         language: language,
         members: members,
+        items: compactItems,
+        recentUserTexts: BrainSession.recentForProvider(),
+        lastEvent: BrainSession.lastEvent,
       ),
     );
+    final drafts = understood.response.toDrafts(originalText: text, now: now);
+    BrainSession.remember(text: text, drafts: drafts);
     return BrainUnderstandResult(
-      drafts: understood.response.toDrafts(originalText: text, now: now),
+      drafts: drafts,
       originalText: text,
       usedCloud: understood.usedCloud,
       usedFallback: understood.usedFallback,

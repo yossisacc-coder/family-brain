@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme/appearance.dart';
 
 class AppearanceController extends StateNotifier<AppearanceMode> {
-  AppearanceController() : super(AppearanceMode.colorful) {
+  AppearanceController() : super(AppearanceMode.soft) {
     _load();
   }
 
@@ -13,10 +13,11 @@ class AppearanceController extends StateNotifier<AppearanceMode> {
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     final stored = prefs.getString(key);
-    if (stored == AppearanceMode.professional.name) {
-      state = AppearanceMode.professional;
-    } else if (stored == AppearanceMode.colorful.name) {
-      state = AppearanceMode.colorful;
+    for (final mode in AppearanceMode.values) {
+      if (stored == mode.name) {
+        state = mode;
+        return;
+      }
     }
   }
 

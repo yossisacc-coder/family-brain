@@ -600,10 +600,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Choose a visual theme. Backgrounds, cards, and buttons all follow it. App Color still tints primary actions.';
 
   @override
+  String get appearanceSoft => 'Soft';
+
+  @override
   String get appearanceProfessional => 'Professional';
 
   @override
   String get appearanceColorful => 'Colorful';
+
+  @override
+  String get appearanceSoftHint => 'White surfaces with calm pastel accents.';
 
   @override
   String get appearanceProfessionalHint =>
@@ -612,6 +618,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get appearanceColorfulHint =>
       'Coordinated pastel surfaces, cards, and buttons.';
+
+  @override
+  String get reminderNotifications => 'Reminder notifications';
+
+  @override
+  String get reminderNotificationsHint =>
+      'Play a device notification when a reminder is due.';
+
+  @override
+  String get addPhoto => 'Add photo';
 
   @override
   String get calendarItemsForDay => 'Items for this day';

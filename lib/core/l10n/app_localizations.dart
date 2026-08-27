@@ -1211,8 +1211,14 @@ abstract class AppLocalizations {
   /// No description provided for @appearanceHint.
   ///
   /// In en, this message translates to:
-  /// **'Family Brain uses a clean white theme with purple brand accents on phones and in the browser.'**
+  /// **'Choose a visual theme. Backgrounds, cards, and buttons all follow it. App Color still tints primary actions.'**
   String get appearanceHint;
+
+  /// No description provided for @appearanceSoft.
+  ///
+  /// In en, this message translates to:
+  /// **'Soft'**
+  String get appearanceSoft;
 
   /// No description provided for @appearanceProfessional.
   ///
@@ -1226,17 +1232,41 @@ abstract class AppLocalizations {
   /// **'Colorful'**
   String get appearanceColorful;
 
+  /// No description provided for @appearanceSoftHint.
+  ///
+  /// In en, this message translates to:
+  /// **'White surfaces with calm pastel accents.'**
+  String get appearanceSoftHint;
+
   /// No description provided for @appearanceProfessionalHint.
   ///
   /// In en, this message translates to:
-  /// **'Slightly darker, mature pastels.'**
+  /// **'Mature, slightly darker surfaces, cards, and buttons.'**
   String get appearanceProfessionalHint;
 
   /// No description provided for @appearanceColorfulHint.
   ///
   /// In en, this message translates to:
-  /// **'Soft pastel brand accents.'**
+  /// **'Coordinated pastel surfaces, cards, and buttons.'**
   String get appearanceColorfulHint;
+
+  /// No description provided for @reminderNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder notifications'**
+  String get reminderNotifications;
+
+  /// No description provided for @reminderNotificationsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Play a device notification when a reminder is due.'**
+  String get reminderNotificationsHint;
+
+  /// No description provided for @addPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get addPhoto;
 
   /// No description provided for @calendarItemsForDay.
   ///

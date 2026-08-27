@@ -24,13 +24,13 @@ class PriorityFromLanguage {
 
   static final _urgent = RegExp(
     r"\b(urgent|asap|immediately|right now|emergency)\b|"
-    r'ממש דחוף|זה דחוף|דחוף מאוד|\bדחוף\b|מיד\b|עכשיו ממש',
+    r'ממש דחוף|זה דחוף|דחוף מאוד|(?<!לא )דחוף|מיד\b|עכשיו ממש',
     unicode: true,
   );
 
   static final _high = RegExp(
     r"\b(important|high priority|need(s)? to (be )?today|make sure)\b|"
-    r'חשוב ש|זה חשוב|\bחשוב\b|בהקדם',
+    r'חשוב ש|זה חשוב|\bחשוב\b|חשוב|בהקדם',
     unicode: true,
   );
 
