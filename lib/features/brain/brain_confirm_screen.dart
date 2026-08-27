@@ -8,7 +8,6 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/brain/ai/action_engine.dart';
-import '../../core/brain/brain_activity.dart';
 import '../../core/brain/family_brain_parser.dart';
 import '../../core/notifications/local_reminder_scheduler.dart';
 import '../../core/theme/app_spacing.dart';
@@ -20,7 +19,9 @@ import '../../core/widgets/primary_button.dart';
 import '../../core/widgets/secondary_button.dart';
 import '../../data/providers.dart';
 import '../../domain/models/app_user.dart';
+import '../../domain/models/family_activity.dart';
 import '../../domain/models/task_item.dart';
+import '../activity/record_activity.dart';
 
 class BrainConfirmScreen extends ConsumerStatefulWidget {
   const BrainConfirmScreen({super.key});
@@ -215,6 +216,9 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
     if (draft.listItems.isNotEmpty) {
       rows.add((l10n.listItems, draft.listItems.join(', ')));
     }
+    if (draft.originalText.trim().isNotEmpty) {
+      rows.add((l10n.shareOriginalContent, draft.originalText.trim()));
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -384,11 +388,14 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
       );
       for (final task in written.written) {
         await LocalReminderScheduler.sync(task);
+        await recordFamilyActivity(
+          ref,
+          type: ActivityType.aiCreated,
+          summary: task.title,
+          detail: _drafts.first.originalText,
+          task: task,
+        );
       }
-      BrainActivityLog.record(
-        _drafts.first.originalText,
-        [for (final draft in _drafts) draft.kind.name],
-      );
       if (!mounted) return;
       ref.read(pendingBrainDraftsProvider.notifier).state = const [];
       context.go('/app/home');

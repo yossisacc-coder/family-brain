@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/routing/app_router.dart';
 import 'core/routing/root_keys.dart';
+import 'core/share/share_intake_controller.dart';
 import 'core/theme/app_theme.dart';
 import 'core/notifications/local_reminder_scheduler.dart';
 import 'core/widgets/phone_shell.dart';
@@ -15,11 +16,24 @@ import 'features/settings/accent_controller.dart';
 import 'features/settings/appearance_controller.dart';
 import 'features/settings/locale_controller.dart';
 
-class FamilyBrainApp extends ConsumerWidget {
+class FamilyBrainApp extends ConsumerStatefulWidget {
   const FamilyBrainApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FamilyBrainApp> createState() => _FamilyBrainAppState();
+}
+
+class _FamilyBrainAppState extends ConsumerState<FamilyBrainApp> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(ref.read(shareIntakeControllerProvider.notifier).bind());
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final locale = ref.watch(localeControllerProvider);
     final appearance = ref.watch(appearanceControllerProvider);
     final accent = ref.watch(accentControllerProvider);
@@ -35,6 +49,14 @@ class FamilyBrainApp extends ConsumerWidget {
       if (tasks != null) {
         unawaited(LocalReminderScheduler.syncAll(tasks));
       }
+    });
+    ref.listen(shareIntakeControllerProvider, (previous, share) {
+      if (share == null) return;
+      final user = ref.read(currentUserProvider).valueOrNull;
+      if (user?.hasFamily != true) return;
+      final path = router.routeInformationProvider.value.uri.path;
+      if (path == '/brain/confirm' || path == '/app/home') return;
+      router.go('/app/home');
     });
 
     return MaterialApp.router(

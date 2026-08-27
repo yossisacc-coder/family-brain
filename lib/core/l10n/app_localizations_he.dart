@@ -918,4 +918,89 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get colorCoral => 'אלמוג';
+
+  @override
+  String get activityTitle => 'פעילות';
+
+  @override
+  String get activitySeeAll => 'לכל הפעילות';
+
+  @override
+  String get activityEmptyTitle => 'אין פעילות עדיין';
+
+  @override
+  String get activityEmptyBody => 'משימות, תזכורות ותוכן משותף יופיעו כאן.';
+
+  @override
+  String get activityClear => 'ניקוי פעילות';
+
+  @override
+  String get activityClearTitle => 'לנקות את הפעילות?';
+
+  @override
+  String get activityClearBody =>
+      'פעולה זו מוחקת רק את היסטוריית הפעילות. משימות, אירועים ונתוני המשפחה לא יימחקו.';
+
+  @override
+  String get activityClearConfirm => 'ניקוי';
+
+  @override
+  String get activityCleared => 'הפעילות נוקתה';
+
+  @override
+  String get activityDelete => 'מחיקה';
+
+  @override
+  String get activityDeleteSelected => 'מחיקת נבחרים';
+
+  @override
+  String get activityDeleteSelectedTitle => 'למחוק את הפעילות שנבחרה?';
+
+  @override
+  String get activityDeleteSelectedBody =>
+      'יימחקו רק רשומות הפעילות שנבחרו, לא המשימות עצמן.';
+
+  @override
+  String get activityTypeCreated => 'משימה נוצרה';
+
+  @override
+  String get activityTypeCompleted => 'משימה הושלמה';
+
+  @override
+  String get activityTypeEdited => 'משימה נערכה';
+
+  @override
+  String get activityTypeDeleted => 'משימה נמחקה';
+
+  @override
+  String get activityTypeRestored => 'משימה שוחזרה';
+
+  @override
+  String get activityTypeAssigned => 'משימה שויכה';
+
+  @override
+  String get activityTypeAi => 'נוצר עם AI';
+
+  @override
+  String get activityTypeShare => 'התקבל תוכן משותף';
+
+  @override
+  String get activityTypeReminder => 'נקבעה תזכורת';
+
+  @override
+  String get shareReceivedTitle => 'שותף מאפליקציה אחרת';
+
+  @override
+  String get shareReceivedBody =>
+      'Family Brain קיבל את התוכן ויהפוך אותו למשימה, אירוע או תזכורת כשאפשר.';
+
+  @override
+  String get shareOriginalContent => 'התוכן המקורי ששותף';
+
+  @override
+  String get accessPlan => 'גישה';
+
+  @override
+  String get accessPlanBetaHint =>
+      'אתם בגרסת בטא של Family Brain. כל המוצר זמין בלי תשלום. אפשר להוסיף תוכנית Premium בעתיד בלי לבנות מחדש את האפליקציה.';
 }

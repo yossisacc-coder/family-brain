@@ -43,6 +43,26 @@ class SettingsScreen extends ConsumerWidget {
               ),
               onTap: () => context.push('/notifications'),
             ),
+          if (!publicMode && user != null)
+            ListTile(
+              key: const Key('settings-activity'),
+              leading: const Icon(Icons.timeline_outlined),
+              title: Text(l10n.activityTitle),
+              subtitle: Text(l10n.activityEmptyBody),
+              trailing: const Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 16,
+              ),
+              onTap: () => context.push('/activity'),
+            ),
+          if (!publicMode && user != null) ...[
+            const SizedBox(height: 8),
+            ListTile(
+              leading: const Icon(Icons.verified_user_outlined),
+              title: Text(l10n.accessPlan),
+              subtitle: Text(l10n.accessPlanBetaHint),
+            ),
+          ],
           const SizedBox(height: 8),
           Text(
             l10n.language,

@@ -12,7 +12,9 @@ import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
 import '../../data/providers.dart';
+import '../../domain/models/family_activity.dart';
 import '../../domain/models/task_item.dart';
+import '../activity/record_activity.dart';
 
 class TrashScreen extends ConsumerWidget {
   const TrashScreen({super.key});
@@ -105,6 +107,12 @@ class TrashScreen extends ConsumerWidget {
   ) async {
     await ref.read(taskRepositoryProvider).restoreTask(task);
     await LocalReminderScheduler.sync(task.copyWith(clearDeleted: true));
+    await recordFamilyActivity(
+      ref,
+      type: ActivityType.taskRestored,
+      summary: task.title,
+      task: task,
+    );
     if (!context.mounted) return;
     AppNotice.show(context, l10n.taskRestored);
   }

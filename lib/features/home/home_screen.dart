@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,6 +13,8 @@ import 'package:speech_to_text/speech_to_text.dart';
 import '../../core/brain/family_brain_ai.dart';
 import '../../core/brain/speech_locale.dart';
 import '../../core/brain/voice_listen_patience.dart';
+import '../../core/share/incoming_share.dart';
+import '../../core/share/share_intake_controller.dart';
 import '../settings/locale_controller.dart';
 import '../../core/theme/appearance.dart';
 import '../../core/theme/app_radii.dart';
@@ -28,7 +29,9 @@ import '../../core/widgets/stat_card.dart';
 import 'home_day_task.dart';
 import '../../data/providers.dart';
 import '../../domain/models/app_user.dart';
+import '../../domain/models/family_activity.dart';
 import '../../domain/models/task_item.dart';
+import '../activity/record_activity.dart';
 import '../tasks/calendar_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -55,38 +58,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   DateTime? _voiceStartedAt;
   BrainStatusKind? _brainStatus;
   String? _brainStatusMessage;
+  IncomingShare? _sharePreview;
+  String? _shareSource;
+  String? _handledShareId;
 
   static const _maxImageBytes = 8 * 1024 * 1024;
-
-  @override
-  void initState() {
-    super.initState();
-    _listenForShares();
-  }
-
-  Future<void> _listenForShares() async {
-    const channel = MethodChannel('family_brain/share');
-    try {
-      final initial = await channel.invokeMethod<Map<dynamic, dynamic>>('getInitial');
-      if (initial != null) _applyShare(initial);
-      channel.setMethodCallHandler((call) async {
-        if (call.method == 'onShare' && call.arguments is Map) {
-          _applyShare(Map<dynamic, dynamic>.from(call.arguments as Map));
-        }
-        return null;
-      });
-    } catch (_) {}
-  }
-
-  void _applyShare(Map<dynamic, dynamic> payload) {
-    final text = payload['text']?.toString();
-    final path = payload['imagePath']?.toString();
-    if (!mounted) return;
-    setState(() {
-      if (text != null && text.isNotEmpty) _composer.text = text;
-      if (path != null && path.isNotEmpty) _imagePath = path;
-    });
-  }
 
   @override
   void dispose() {
@@ -103,6 +79,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final tasksAsync = ref.watch(familyTasksProvider);
     final membersAsync = ref.watch(familyMembersProvider);
     final unread = ref.watch(unreadCountProvider);
+    final incomingShare = ref.watch(shareIntakeControllerProvider);
+    final recentActivity =
+        (ref.watch(familyActivityProvider).valueOrNull ?? const []).take(3).toList();
 
     return userAsync.when(
       loading: () => LoadingView(label: l10n.loading),
@@ -130,6 +109,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             final events = open.where((task) => task.dueDate != null).toList();
             final today = _todayItems(open);
             final palette = context.palette;
+            if (incomingShare != null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                unawaited(
+                  _consumeIncomingShare(
+                    incomingShare,
+                    l10n,
+                    members,
+                    user,
+                    open,
+                  ),
+                );
+              });
+            }
 
             return SafeArea(
               child: ListView(
@@ -241,6 +233,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
+                  if (_sharePreview != null) ...[
+                    _ShareReceivedCard(
+                      share: _sharePreview!,
+                      onDismiss: () => setState(() => _sharePreview = null),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   _ComposerCard(
                     controller: _composer,
                     sending: _sending,
@@ -286,6 +285,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         isFirst: i == 0,
                         isLast: i == today.length - 1,
                         onTap: () => context.push('/tasks/${today[i].id}'),
+                      ),
+                  const SizedBox(height: 12),
+                  AppSectionHeader(
+                    title: l10n.activityTitle,
+                    actionLabel: l10n.activitySeeAll,
+                    onAction: () => context.push('/activity'),
+                  ),
+                  if (recentActivity.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        l10n.activityEmptyTitle,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: palette.textMuted,
+                            ),
+                      ),
+                    )
+                  else
+                    for (final item in recentActivity)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          dense: true,
+                          leading: Icon(
+                            Icons.timeline_rounded,
+                            color: palette.primary,
+                          ),
+                          title: Text(item.summary),
+                          subtitle: Text(
+                            '${item.actorName} · ${_activityWhen(item.createdAt)}',
+                          ),
+                          onTap: () => context.push('/activity'),
+                        ),
                       ),
                   const SizedBox(height: AppSpacing.md),
                   _FamilyMembersRow(
@@ -692,8 +725,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         currentUser: user,
         imagePath: imagePath,
         imageBase64: imageBase64,
-        mimeType: 'image/jpeg',
+        mimeType: imagePath == null
+            ? null
+            : (_sharePreview?.imageMime ?? IncomingShare.mimeFromPath(imagePath)),
         language: language,
+        source: _shareSource,
       );
       if (!mounted) return;
       if (!result.isOk) {
@@ -708,7 +744,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         _setBrainStatus(BrainStatusKind.success, l10n.brainStatusSuccess);
       }
       _composer.clear();
-      setState(() => _imagePath = null);
+      setState(() {
+        _imagePath = null;
+        _sharePreview = null;
+        _shareSource = null;
+      });
       ref.read(pendingBrainDraftsProvider.notifier).state = result.drafts;
       if (!context.mounted) return;
       context.push('/brain/confirm');
@@ -721,11 +761,103 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
+  Future<void> _consumeIncomingShare(
+    IncomingShare share,
+    AppLocalizations l10n,
+    List<AppUser> members,
+    AppUser user,
+    List<TaskItem> openItems,
+  ) async {
+    if (_handledShareId == share.id || _sending) return;
+    _handledShareId = share.id;
+    if (!mounted) return;
+    setState(() {
+      _sharePreview = share;
+      _shareSource = share.source;
+      if (share.composerText.isNotEmpty) {
+        _composer.text = share.composerText;
+      }
+      if (share.hasImage) _imagePath = share.imagePath;
+    });
+    unawaited(
+      recordFamilyActivity(
+        ref,
+        type: ActivityType.shareReceived,
+        summary: l10n.shareReceivedTitle,
+        detail: share.displayText,
+      ),
+    );
+    ref.read(shareIntakeControllerProvider.notifier).clear();
+    if (!mounted) return;
+    await _submitComposer(context, l10n, members, user, openItems);
+  }
+
+  String _activityWhen(DateTime at) {
+    final local = at.toLocal();
+    final hh = local.hour.toString().padLeft(2, '0');
+    final mm = local.minute.toString().padLeft(2, '0');
+    return '$hh:$mm';
+  }
+
   String _greeting(AppLocalizations l10n, String name) {
     final hour = DateTime.now().hour;
     if (hour < 12) return l10n.greetingMorning(name);
     if (hour < 17) return l10n.greetingAfternoon(name);
     return l10n.greetingEvening(name);
+  }
+}
+
+class _ShareReceivedCard extends StatelessWidget {
+  const _ShareReceivedCard({required this.share, required this.onDismiss});
+
+  final IncomingShare share;
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final palette = context.palette;
+    return Material(
+      color: palette.primarySoft,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.ios_share_rounded, color: palette.primary),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.shareReceivedTitle,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    share.displayText.isEmpty
+                        ? l10n.shareReceivedBody
+                        : share.displayText,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              tooltip: l10n.removePhoto,
+              onPressed: onDismiss,
+              icon: const Icon(Icons.close_rounded),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

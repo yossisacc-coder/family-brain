@@ -64,7 +64,9 @@ class AppBackNavigation {
     if (path == '/tasks/new' || RegExp(r'^/tasks/[^/]+$').hasMatch(path)) {
       return '/app/tasks';
     }
-    if (path == '/notifications' || path == '/settings-public') {
+    if (path == '/notifications' ||
+        path == '/settings-public' ||
+        path == '/activity') {
       return '/app/home';
     }
     if (path == '/otp') {

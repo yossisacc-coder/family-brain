@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import '../../core/access/access_entitlement.dart';
 import '../../core/config/app_config.dart';
 import '../../domain/models/family.dart';
 import '../../domain/repositories/family_repository.dart';
@@ -43,7 +44,9 @@ class LocalFamilyRepository implements FamilyRepository {
     await _store.commit();
     final user = await _users.getUser(creatorId);
     if (user != null) {
-      await _users.saveUser(user.copyWith(familyId: id));
+      await _users.saveUser(
+        user.copyWith(familyId: id, familyRole: FamilyRole.owner),
+      );
     }
     return family;
   }
@@ -68,7 +71,9 @@ class LocalFamilyRepository implements FamilyRepository {
     await _store.commit();
     final user = await _users.getUser(userId);
     if (user != null) {
-      await _users.saveUser(user.copyWith(familyId: family.id));
+      await _users.saveUser(
+        user.copyWith(familyId: family.id, familyRole: FamilyRole.member),
+      );
     }
     return updated;
   }

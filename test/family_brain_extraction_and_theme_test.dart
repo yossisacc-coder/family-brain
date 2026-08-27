@@ -196,6 +196,31 @@ void main() {
       expect(result.response.hasCreateActions, isTrue);
     });
   });
+
+  group('shared content extraction', () {
+    test('shared message keeps named assignment and stated time', () {
+      final draft = FamilyBrainParser.parse(
+        'Maya: Please pick up the kids tomorrow at 5 PM',
+        now: now,
+        members: [maya, david],
+        currentUser: david,
+      ).draft!;
+      expect(draft.assigneeId, 'maya');
+      expect(draft.dueDate, DateTime(2026, 8, 27, 17, 0));
+      expect(draft.originalText, contains('pick up the kids'));
+    });
+
+    test('android share source is included in the AI payload', () {
+      final payload = FamilyBrainContext.fromApp(
+        now: now,
+        members: [maya, david],
+        currentUser: david,
+        source: 'android_share',
+      ).toProviderPayload();
+      expect(payload['source'], 'android_share');
+      expect(payload['currentUser'], isNotNull);
+    });
+  });
 }
 
 class _FailingProvider implements AiProvider {

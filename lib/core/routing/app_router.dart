@@ -6,6 +6,7 @@ import '../../data/providers.dart';
 import '../widgets/app_notice.dart';
 import 'app_back_button_binder.dart';
 import 'root_keys.dart';
+import '../../features/activity/activity_screen.dart';
 import '../../features/brain/brain_ask_screen.dart';
 import '../../features/brain/brain_confirm_screen.dart';
 import '../../features/auth/otp_screen.dart';
@@ -89,6 +90,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/notifications',
         builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: '/activity',
+        builder: (context, state) => const ActivityScreen(),
       ),
       GoRoute(
         path: '/brain/confirm',

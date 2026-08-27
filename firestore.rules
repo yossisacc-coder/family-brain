@@ -41,5 +41,27 @@ service cloud.firestore {
       allow read, update: if signedIn() && resource.data.userId == request.auth.uid;
       allow create: if signedIn();
     }
+
+    function ownerOrAdmin(familyId) {
+      return sameFamily(familyId) &&
+        (userDoc(request.auth.uid).familyRole in ['owner', 'admin'] ||
+         get(/databases/$(database)/documents/families/$(familyId)).data.createdBy == request.auth.uid);
+    }
+
+    match /activity/{activityId} {
+      allow read: if signedIn() &&
+        sameFamily(resource.data.familyId) &&
+        (resource.data.personal != true ||
+         resource.data.actorId == request.auth.uid ||
+         resource.data.assigneeId == request.auth.uid);
+      allow create: if signedIn() &&
+        request.resource.data.familyId != null &&
+        sameFamily(request.resource.data.familyId);
+      allow delete: if signedIn() &&
+        sameFamily(resource.data.familyId) &&
+        (resource.data.actorId == request.auth.uid ||
+         ownerOrAdmin(resource.data.familyId));
+      allow update: if false;
+    }
   }
 }

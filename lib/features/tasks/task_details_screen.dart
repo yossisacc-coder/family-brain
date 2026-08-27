@@ -14,7 +14,9 @@ import '../../core/widgets/loading_view.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../core/widgets/task_trash.dart';
 import '../../data/providers.dart';
+import '../../domain/models/family_activity.dart';
 import '../../domain/models/task_item.dart';
+import '../activity/record_activity.dart';
 
 class TaskDetailsScreen extends ConsumerWidget {
   const TaskDetailsScreen({super.key, required this.taskId});
@@ -304,6 +306,12 @@ class TaskDetailsScreen extends ConsumerWidget {
             message: updated.title,
           );
     }
+    await recordFamilyActivity(
+      ref,
+      type: ActivityType.taskCompleted,
+      summary: updated.title,
+      task: updated,
+    );
     if (!context.mounted) return;
     context.pop();
     AppNotice.showAfterNavigation(l10n.taskCompleted);
@@ -350,6 +358,12 @@ class TaskDetailsScreen extends ConsumerWidget {
     AppLocalizations l10n,
   ) async {
     await ref.read(taskRepositoryProvider).restoreTask(task);
+    await recordFamilyActivity(
+      ref,
+      type: ActivityType.taskRestored,
+      summary: task.title,
+      task: task,
+    );
     if (!context.mounted) return;
     context.pop();
     AppNotice.showAfterNavigation(l10n.taskRestored);

@@ -24,6 +24,7 @@ class LocalJsonStore {
   final Map<String, Map<String, dynamic>> families = {};
   final Map<String, Map<String, dynamic>> tasks = {};
   final Map<String, Map<String, dynamic>> notifications = {};
+  final Map<String, Map<String, dynamic>> activity = {};
 
   Stream<void> get changes => _changes.stream;
 
@@ -47,6 +48,9 @@ class LocalJsonStore {
     notifications
       ..clear()
       ..addAll(_asDocMap(data['notifications']));
+    activity
+      ..clear()
+      ..addAll(_asDocMap(data['activity']));
   }
 
   Future<void> _write = Future.value();
@@ -68,6 +72,7 @@ class LocalJsonStore {
       'families': families,
       'tasks': tasks,
       'notifications': notifications,
+      'activity': activity,
     };
   }
 

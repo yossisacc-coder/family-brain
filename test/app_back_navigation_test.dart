@@ -40,6 +40,10 @@ void main() {
         '/app/home',
       );
       expect(
+        AppBackNavigation.fallbackLocation('/activity'),
+        '/app/home',
+      );
+      expect(
         AppBackNavigation.fallbackLocation('/tasks/new'),
         '/app/tasks',
       );

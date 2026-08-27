@@ -62,6 +62,7 @@ class FamilyBrainContext {
     this.events = const [],
     this.reminders = const [],
     this.lists = const [],
+    this.source,
   });
 
   final DateTime now;
@@ -72,6 +73,7 @@ class FamilyBrainContext {
   final List<FamilyBrainItemRef> events;
   final List<FamilyBrainItemRef> reminders;
   final List<FamilyBrainItemRef> lists;
+  final String? source;
 
   factory FamilyBrainContext.fromApp({
     required DateTime now,
@@ -79,6 +81,7 @@ class FamilyBrainContext {
     List<AppUser> members = const [],
     List<TaskItem> items = const [],
     AppUser? currentUser,
+    String? source,
   }) {
     final open = items.where((item) => item.isOpen).take(24).toList();
     return FamilyBrainContext(
@@ -106,6 +109,7 @@ class FamilyBrainContext {
         for (final item in open)
           if (item.kind == InformationKind.list) FamilyBrainItemRef.fromTask(item),
       ],
+      source: source,
     );
   }
 
@@ -123,6 +127,7 @@ class FamilyBrainContext {
       if (reminders.isNotEmpty)
         'reminders': [for (final item in reminders) item.toJson()],
       if (lists.isNotEmpty) 'lists': [for (final item in lists) item.toJson()],
+      if (source != null && source!.isNotEmpty) 'source': source,
     };
   }
 }

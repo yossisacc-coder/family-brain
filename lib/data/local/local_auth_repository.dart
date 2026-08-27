@@ -1,5 +1,6 @@
 import 'package:uuid/uuid.dart';
 
+import '../../core/access/access_entitlement.dart';
 import '../../core/config/app_config.dart';
 import '../../domain/models/app_notification.dart';
 import '../../domain/models/app_user.dart';
@@ -102,6 +103,8 @@ class LocalAuthRepository implements AuthRepository {
       language: language,
       createdAt: now,
       familyId: AppConfig.demoFamilyId,
+      plan: AccessPlan.beta,
+      familyRole: FamilyRole.owner,
     );
     final maya = AppUser(
       id: AppConfig.demoPartnerId,
@@ -110,6 +113,8 @@ class LocalAuthRepository implements AuthRepository {
       language: language,
       createdAt: now,
       familyId: AppConfig.demoFamilyId,
+      plan: AccessPlan.beta,
+      familyRole: FamilyRole.member,
     );
     final family = Family(
       id: AppConfig.demoFamilyId,

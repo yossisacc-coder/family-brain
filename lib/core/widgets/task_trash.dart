@@ -7,9 +7,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/notifications/local_reminder_scheduler.dart';
 import '../../data/providers.dart';
+import '../../domain/models/family_activity.dart';
 import '../../domain/models/task_item.dart';
 import '../../domain/repositories/task_repository.dart';
 import '../routing/root_keys.dart';
+import '../../features/activity/record_activity.dart';
 
 class TrashUndoRequest {
   const TrashUndoRequest({required this.task, required this.repo, this.onUndo});
@@ -165,6 +167,14 @@ class TaskTrash {
     final repo = ref.read(taskRepositoryProvider);
     await repo.moveToTrash(task);
     unawaited(LocalReminderScheduler.cancel(task.id));
+    unawaited(
+      recordFamilyActivity(
+        ref,
+        type: ActivityType.taskDeleted,
+        summary: task.title,
+        task: task,
+      ),
+    );
     if (!context.mounted) return;
     if (popAfter && context.canPop()) {
       context.pop();

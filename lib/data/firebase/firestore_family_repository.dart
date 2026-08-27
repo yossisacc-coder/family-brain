@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../core/access/access_entitlement.dart';
 import '../../core/config/app_config.dart';
 import '../../domain/models/family.dart';
 import '../../domain/repositories/family_repository.dart';
@@ -47,7 +48,9 @@ class FirestoreFamilyRepository implements FamilyRepository {
     await _col.doc(id).set(family.toMap());
     final user = await _users.getUser(creatorId);
     if (user != null) {
-      await _users.saveUser(user.copyWith(familyId: id));
+      await _users.saveUser(
+        user.copyWith(familyId: id, familyRole: FamilyRole.owner),
+      );
     }
     return family;
   }
@@ -70,7 +73,9 @@ class FirestoreFamilyRepository implements FamilyRepository {
     await _col.doc(family.id).set(updated.toMap(), SetOptions(merge: true));
     final user = await _users.getUser(userId);
     if (user != null) {
-      await _users.saveUser(user.copyWith(familyId: family.id));
+      await _users.saveUser(
+        user.copyWith(familyId: family.id, familyRole: FamilyRole.member),
+      );
     }
     return updated;
   }

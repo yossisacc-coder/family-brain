@@ -84,6 +84,7 @@ class FamilyBrainAi {
     String? imageBase64,
     String? mimeType,
     String language = 'en',
+    String? source,
     http.Client? client,
     Duration timeout = const Duration(seconds: 12),
     String? backendUrl,
@@ -105,6 +106,7 @@ class FamilyBrainAi {
         members: members,
         items: items,
         currentUser: currentUser,
+        source: source,
       ),
     );
     return BrainUnderstandResult(

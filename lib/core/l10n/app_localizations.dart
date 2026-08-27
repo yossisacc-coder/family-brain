@@ -1211,7 +1211,7 @@ abstract class AppLocalizations {
   /// No description provided for @appearanceHint.
   ///
   /// In en, this message translates to:
-  /// **'Family Brain uses a clean white theme with purple brand accents on phones and in the browser.'**
+  /// **'Choose Personal or Professional. The selected app color tints the whole interface.'**
   String get appearanceHint;
 
   /// No description provided for @appearanceProfessional.
@@ -1223,19 +1223,19 @@ abstract class AppLocalizations {
   /// No description provided for @appearanceColorful.
   ///
   /// In en, this message translates to:
-  /// **'Colorful'**
+  /// **'Personal'**
   String get appearanceColorful;
 
   /// No description provided for @appearanceProfessionalHint.
   ///
   /// In en, this message translates to:
-  /// **'Slightly darker, mature pastels.'**
+  /// **'Darker, higher-contrast workspace using the same color family.'**
   String get appearanceProfessionalHint;
 
   /// No description provided for @appearanceColorfulHint.
   ///
   /// In en, this message translates to:
-  /// **'Soft pastel brand accents.'**
+  /// **'Friendly Family Brain look with a clean white base and the selected color throughout.'**
   String get appearanceColorfulHint;
 
   /// No description provided for @calendarItemsForDay.
@@ -1837,6 +1837,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Coral'**
   String get colorCoral;
+
+  /// No description provided for @activityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get activityTitle;
+
+  /// No description provided for @activitySeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get activitySeeAll;
+
+  /// No description provided for @activityEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No activity yet'**
+  String get activityEmptyTitle;
+
+  /// No description provided for @activityEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent tasks, reminders, and shared content will appear here.'**
+  String get activityEmptyBody;
+
+  /// No description provided for @activityClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear activity'**
+  String get activityClear;
+
+  /// No description provided for @activityClearTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear activity?'**
+  String get activityClearTitle;
+
+  /// No description provided for @activityClearBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes activity history only. Tasks, events, and family data are not deleted.'**
+  String get activityClearBody;
+
+  /// No description provided for @activityClearConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get activityClearConfirm;
+
+  /// No description provided for @activityCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity cleared'**
+  String get activityCleared;
+
+  /// No description provided for @activityDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get activityDelete;
+
+  /// No description provided for @activityDeleteSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete selected'**
+  String get activityDeleteSelected;
+
+  /// No description provided for @activityDeleteSelectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete selected activity?'**
+  String get activityDeleteSelectedTitle;
+
+  /// No description provided for @activityDeleteSelectedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes only the selected activity records, not the related tasks.'**
+  String get activityDeleteSelectedBody;
+
+  /// No description provided for @activityTypeCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Task created'**
+  String get activityTypeCreated;
+
+  /// No description provided for @activityTypeCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Task completed'**
+  String get activityTypeCompleted;
+
+  /// No description provided for @activityTypeEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'Task edited'**
+  String get activityTypeEdited;
+
+  /// No description provided for @activityTypeDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Task deleted'**
+  String get activityTypeDeleted;
+
+  /// No description provided for @activityTypeRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Task restored'**
+  String get activityTypeRestored;
+
+  /// No description provided for @activityTypeAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Task assigned'**
+  String get activityTypeAssigned;
+
+  /// No description provided for @activityTypeAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Created with AI'**
+  String get activityTypeAi;
+
+  /// No description provided for @activityTypeShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared content received'**
+  String get activityTypeShare;
+
+  /// No description provided for @activityTypeReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder set'**
+  String get activityTypeReminder;
+
+  /// No description provided for @shareReceivedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared from another app'**
+  String get shareReceivedTitle;
+
+  /// No description provided for @shareReceivedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Brain received this and will turn it into a task, event, or reminder when it can.'**
+  String get shareReceivedBody;
+
+  /// No description provided for @shareOriginalContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Original shared content'**
+  String get shareOriginalContent;
+
+  /// No description provided for @accessPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Access'**
+  String get accessPlan;
+
+  /// No description provided for @accessPlanBetaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You are on Family Brain Beta. The full product is available with no payment. A Premium plan can be added later without rebuilding the app.'**
+  String get accessPlanBetaHint;
 }
 
 class _AppLocalizationsDelegate

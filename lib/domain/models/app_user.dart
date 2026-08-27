@@ -1,3 +1,5 @@
+import '../../core/access/access_entitlement.dart';
+
 class AppUser {
   const AppUser({
     required this.id,
@@ -8,6 +10,8 @@ class AppUser {
     this.familyId,
     this.fcmToken,
     this.sharePhone = false,
+    this.plan = AccessPlan.beta,
+    this.familyRole = FamilyRole.member,
   });
 
   final String id;
@@ -18,8 +22,15 @@ class AppUser {
   final String? familyId;
   final String? fcmToken;
   final bool sharePhone;
+  final AccessPlan plan;
+  final FamilyRole familyRole;
 
   bool get hasFamily => familyId != null && familyId!.isNotEmpty;
+
+  AccessEntitlement entitlementFor({String? familyCreatedBy}) {
+    final role = familyCreatedBy == id ? FamilyRole.owner : familyRole;
+    return AccessEntitlement(plan: plan, role: role);
+  }
 
   /// Phone is only shown for calling/contact when the member chose to share it,
   /// or when viewing your own profile.
@@ -31,6 +42,8 @@ class AppUser {
     String? familyId,
     String? fcmToken,
     bool? sharePhone,
+    AccessPlan? plan,
+    FamilyRole? familyRole,
     bool clearFamily = false,
   }) {
     return AppUser(
@@ -42,6 +55,8 @@ class AppUser {
       familyId: clearFamily ? null : (familyId ?? this.familyId),
       fcmToken: fcmToken ?? this.fcmToken,
       sharePhone: sharePhone ?? this.sharePhone,
+      plan: plan ?? this.plan,
+      familyRole: familyRole ?? this.familyRole,
     );
   }
 
@@ -55,6 +70,8 @@ class AppUser {
       'familyId': familyId,
       'fcmToken': fcmToken,
       'sharePhone': sharePhone,
+      'plan': plan.name,
+      'familyRole': familyRole.name,
     };
   }
 
@@ -69,6 +86,8 @@ class AppUser {
       familyId: map['familyId'] as String?,
       fcmToken: map['fcmToken'] as String?,
       sharePhone: map['sharePhone'] as bool? ?? false,
+      plan: AccessEntitlement.planFromName(map['plan'] as String?),
+      familyRole: AccessEntitlement.roleFromName(map['familyRole'] as String?),
     );
   }
 }

@@ -926,4 +926,90 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get colorCoral => 'Coral';
+
+  @override
+  String get activityTitle => 'Activity';
+
+  @override
+  String get activitySeeAll => 'See all';
+
+  @override
+  String get activityEmptyTitle => 'No activity yet';
+
+  @override
+  String get activityEmptyBody =>
+      'Recent tasks, reminders, and shared content will appear here.';
+
+  @override
+  String get activityClear => 'Clear activity';
+
+  @override
+  String get activityClearTitle => 'Clear activity?';
+
+  @override
+  String get activityClearBody =>
+      'This removes activity history only. Tasks, events, and family data are not deleted.';
+
+  @override
+  String get activityClearConfirm => 'Clear';
+
+  @override
+  String get activityCleared => 'Activity cleared';
+
+  @override
+  String get activityDelete => 'Delete';
+
+  @override
+  String get activityDeleteSelected => 'Delete selected';
+
+  @override
+  String get activityDeleteSelectedTitle => 'Delete selected activity?';
+
+  @override
+  String get activityDeleteSelectedBody =>
+      'This removes only the selected activity records, not the related tasks.';
+
+  @override
+  String get activityTypeCreated => 'Task created';
+
+  @override
+  String get activityTypeCompleted => 'Task completed';
+
+  @override
+  String get activityTypeEdited => 'Task edited';
+
+  @override
+  String get activityTypeDeleted => 'Task deleted';
+
+  @override
+  String get activityTypeRestored => 'Task restored';
+
+  @override
+  String get activityTypeAssigned => 'Task assigned';
+
+  @override
+  String get activityTypeAi => 'Created with AI';
+
+  @override
+  String get activityTypeShare => 'Shared content received';
+
+  @override
+  String get activityTypeReminder => 'Reminder set';
+
+  @override
+  String get shareReceivedTitle => 'Shared from another app';
+
+  @override
+  String get shareReceivedBody =>
+      'Family Brain received this and will turn it into a task, event, or reminder when it can.';
+
+  @override
+  String get shareOriginalContent => 'Original shared content';
+
+  @override
+  String get accessPlan => 'Access';
+
+  @override
+  String get accessPlanBetaHint =>
+      'You are on Family Brain Beta. The full product is available with no payment. A Premium plan can be added later without rebuilding the app.';
 }

@@ -2,21 +2,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' hide Family;
 
 import '../core/brain/family_brain_parser.dart';
 import '../core/config/app_config.dart';
+import '../domain/activity/activity_recorder.dart';
 import '../domain/models/app_notification.dart';
 import '../domain/models/app_user.dart';
 import '../domain/models/family.dart';
+import '../domain/models/family_activity.dart';
 import '../domain/models/task_item.dart';
+import '../domain/repositories/activity_repository.dart';
 import '../domain/repositories/auth_repository.dart';
 import '../domain/repositories/family_repository.dart';
 import '../domain/repositories/notification_repository.dart';
 import '../domain/repositories/task_repository.dart';
 import '../domain/repositories/user_repository.dart';
 import 'firebase/firebase_auth_repository.dart';
+import 'firebase/firestore_activity_repository.dart';
 import 'firebase/firestore_family_repository.dart';
 import 'firebase/firestore_notification_repository.dart';
 import 'firebase/firestore_task_repository.dart';
 import 'firebase/firestore_user_repository.dart';
 import 'firebase/notification_service.dart';
+import 'local/local_activity_repository.dart';
 import 'local/local_auth_repository.dart';
 import 'local/local_family_repository.dart';
 import 'local/local_json_store.dart';
@@ -64,6 +69,17 @@ final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
     return LocalNotificationRepository(ref.watch(localStoreProvider));
   }
   return FirestoreNotificationRepository();
+});
+
+final activityRepositoryProvider = Provider<ActivityRepository>((ref) {
+  if (AppConfig.useLocalDemo) {
+    return LocalActivityRepository(ref.watch(localStoreProvider));
+  }
+  return FirestoreActivityRepository();
+});
+
+final activityRecorderProvider = Provider<ActivityRecorder>((ref) {
+  return ActivityRecorder(ref.watch(activityRepositoryProvider));
 });
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {
@@ -119,6 +135,16 @@ final userNotificationsProvider = StreamProvider<List<AppNotification>>((ref) {
 final unreadCountProvider = Provider<int>((ref) {
   final notifications = ref.watch(userNotificationsProvider).valueOrNull ?? [];
   return notifications.where((item) => !item.read).length;
+});
+
+final familyActivityProvider = StreamProvider<List<FamilyActivity>>((ref) {
+  final user = ref.watch(currentUserProvider).valueOrNull;
+  final family = ref.watch(currentFamilyProvider).valueOrNull;
+  if (user == null || family == null) return Stream.value(const []);
+  return ref.watch(activityRepositoryProvider).watchFamilyActivity(
+        familyId: family.id,
+        viewerId: user.id,
+      );
 });
 
 final pendingBrainDraftsProvider = StateProvider<List<BrainDraft>>(

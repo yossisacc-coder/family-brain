@@ -10,7 +10,9 @@ import '../../core/theme/task_semantics.dart';
 import '../../core/widgets/app_notice.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../data/providers.dart';
+import '../../domain/models/family_activity.dart';
 import '../../domain/models/task_item.dart';
+import '../activity/record_activity.dart';
 
 class TaskFormScreen extends ConsumerStatefulWidget {
   const TaskFormScreen({super.key, this.taskId, this.initialTitle});
@@ -203,6 +205,37 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
           actor: user,
           title: l10n.newTaskAssigned,
           message: saved.title,
+        );
+      }
+      if (existing == null) {
+        await recordFamilyActivity(
+          ref,
+          type: ActivityType.taskCreated,
+          summary: saved.title,
+          task: saved,
+        );
+      } else {
+        await recordFamilyActivity(
+          ref,
+          type: ActivityType.taskEdited,
+          summary: saved.title,
+          task: saved,
+        );
+        if (existing.assigneeId != saved.assigneeId) {
+          await recordFamilyActivity(
+            ref,
+            type: ActivityType.taskAssigned,
+            summary: saved.title,
+            task: saved,
+          );
+        }
+      }
+      if (saved.reminderAt != null && saved.reminderAt != existing?.reminderAt) {
+        await recordFamilyActivity(
+          ref,
+          type: ActivityType.reminderSet,
+          summary: saved.title,
+          task: saved,
         );
       }
       if (saved.isDueSoon()) {
