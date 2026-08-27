@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../data/providers.dart';
 import '../widgets/app_notice.dart';
-import '../widgets/task_trash.dart';
 import 'app_back_button_binder.dart';
 import 'root_keys.dart';
 import '../../features/brain/brain_ask_screen.dart';
@@ -19,7 +18,6 @@ import '../../features/home/home_screen.dart';
 import '../../features/notifications/notifications_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/shell/app_shell.dart';
-import '../../features/tasks/agenda_screen.dart';
 import '../../features/tasks/calendar_screen.dart';
 import '../../features/tasks/space_screen.dart';
 import '../../features/tasks/task_details_screen.dart';
@@ -111,17 +109,21 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/tasks/calendar',
-        builder: (context, state) => const CalendarScreen(),
+        builder: (context, state) {
+          final extra = state.extra;
+          final focus = extra is CalendarFocus ? extra : CalendarFocus.all;
+          return CalendarScreen(focus: focus);
+        },
       ),
       GoRoute(
         path: '/tasks/events',
         builder: (context, state) =>
-            const AgendaScreen(kind: AgendaKind.events),
+            const CalendarScreen(focus: CalendarFocus.events),
       ),
       GoRoute(
         path: '/tasks/reminders',
         builder: (context, state) =>
-            const AgendaScreen(kind: AgendaKind.reminders),
+            const CalendarScreen(focus: CalendarFocus.reminders),
       ),
       GoRoute(
         path: '/tasks/trash',
@@ -193,7 +195,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       router.routerDelegate.currentConfiguration.uri.toString(),
     );
   });
-  AppNotice.onDismissedForNavigation = TaskTrash.dismiss;
   return router;
 });
 

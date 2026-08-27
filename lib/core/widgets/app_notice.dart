@@ -4,6 +4,8 @@ import '../routing/root_keys.dart';
 
 /// Short-lived status messages. Always 2 seconds, and always cleared when the
 /// route changes so they cannot stick to the app shell.
+/// Trash Undo is separate ([TaskTrash.undoDuration], ~3 seconds) and is not
+/// cleared by navigation — it auto-dismisses on its own timer.
 class AppNotice {
   static const duration = Duration(seconds: 2);
 

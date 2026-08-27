@@ -596,6 +596,24 @@ class AppLocalizationsHe extends AppLocalizations {
       'Family Brain משתמש בערכת נושא לבנה ונקייה עם הדגשות סגולות בטלפונים ובווב.';
 
   @override
+  String get appearanceProfessional => 'מקצועי';
+
+  @override
+  String get appearanceColorful => 'צבעוני';
+
+  @override
+  String get appearanceProfessionalHint => 'פסטלים בוגרים, מעט כהים יותר.';
+
+  @override
+  String get appearanceColorfulHint => 'הדגשות פסטל עדינות של המותג.';
+
+  @override
+  String get calendarItemsForDay => 'פריטים ליום זה';
+
+  @override
+  String get brainStatusSuccess => 'מוכן לסקירה';
+
+  @override
   String get notificationsHint =>
       'התראות הן אירועים מידעיים. תזכורות שייכות למשימות ואינן נמחקות כשמוחקים התראה.';
 

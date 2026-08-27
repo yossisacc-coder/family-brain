@@ -1,10 +1,11 @@
 import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:family_brain/core/widgets/quick_action_card.dart';
+import 'package:family_brain/core/widgets/stat_card.dart';
+import 'package:family_brain/features/tasks/calendar_screen.dart';
 import 'package:family_brain/data/providers.dart';
 import 'package:family_brain/domain/models/app_user.dart';
 import 'package:family_brain/domain/models/task_item.dart';
 import 'package:family_brain/features/home/home_screen.dart';
-import 'package:family_brain/features/tasks/agenda_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -155,7 +156,7 @@ void main() {
     expect(find.text(l10n.quickAccessMySpace), findsOneWidget);
     expect(find.text(l10n.quickAccessFamilySpace), findsOneWidget);
     expect(find.text(l10n.seeAllTasks), findsOneWidget);
-    expect(find.text(l10n.sendToFamilyBrain), findsOneWidget);
+    expect(find.text(l10n.tellFamilyBrain), findsOneWidget);
     expect(find.text(l10n.statEventsToday), findsOneWidget);
     expect(find.text(l10n.statPendingTasks), findsOneWidget);
     expect(find.text(l10n.todayActivity), findsOneWidget);
@@ -182,7 +183,7 @@ void main() {
     expect(find.text(l10n.quickAccessMySpace), findsOneWidget);
     expect(find.text(l10n.quickAccessFamilySpace), findsOneWidget);
     expect(find.text(l10n.seeAllTasks), findsOneWidget);
-    expect(find.text(l10n.sendToFamilyBrain), findsOneWidget);
+    expect(find.text(l10n.tellFamilyBrain), findsOneWidget);
     expect(find.text('Calendar'), findsNothing);
     expect(find.text('My Space'), findsNothing);
     expect(find.text('Family Space'), findsNothing);
@@ -217,12 +218,17 @@ void main() {
     tester,
   ) async {
     SharedPreferences.setMockInitialValues({});
+    tester.view.physicalSize = const Size(400, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     final router = GoRouter(
       initialLocation: '/tasks/events',
       routes: [
         GoRoute(
           path: '/tasks/events',
-          builder: (context, state) => const AgendaScreen(kind: AgendaKind.events),
+          builder: (context, state) =>
+              const CalendarScreen(focus: CalendarFocus.events),
         ),
         GoRoute(
           path: '/tasks/:id',
@@ -258,13 +264,17 @@ void main() {
     tester,
   ) async {
     SharedPreferences.setMockInitialValues({});
+    tester.view.physicalSize = const Size(400, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     final router = GoRouter(
       initialLocation: '/tasks/reminders',
       routes: [
         GoRoute(
           path: '/tasks/reminders',
           builder: (context, state) =>
-              const AgendaScreen(kind: AgendaKind.reminders),
+              const CalendarScreen(focus: CalendarFocus.reminders),
         ),
         GoRoute(
           path: '/tasks/:id',
@@ -293,5 +303,41 @@ void main() {
     await tester.tap(find.byKey(const Key('open-related-task-reminder-1')));
     await tester.pumpAndSettle();
     expect(find.text('Task details reminder-1'), findsOneWidget);
+  });
+
+  testWidgets('Home AI composer accepts Hebrew and English typing', (
+    tester,
+  ) async {
+    await pumpHome(tester, locale: const Locale('en'));
+    final field = find.byKey(const Key('home-ai-input'));
+    expect(field, findsOneWidget);
+    await tester.tap(field);
+    await tester.enterText(field, 'שלום hello');
+    await tester.pump();
+    expect(find.text('שלום hello'), findsOneWidget);
+    await tester.enterText(field, 'Buy milk');
+    await tester.pump();
+    expect(find.text('Buy milk'), findsOneWidget);
+  });
+
+  testWidgets('Hebrew Home AI composer still accepts typing', (tester) async {
+    await pumpHome(tester, locale: const Locale('he'));
+    final field = find.byKey(const Key('home-ai-input'));
+    await tester.tap(field);
+    await tester.enterText(field, 'לקנות חלב');
+    await tester.pump();
+    expect(find.text('לקנות חלב'), findsOneWidget);
+  });
+
+  testWidgets('Home stat cards share the same height', (tester) async {
+    await pumpHome(tester, locale: const Locale('en'));
+    final sizes = tester
+        .renderObjectList<RenderBox>(find.byType(StatCard))
+        .map((box) => box.size)
+        .toList();
+    expect(sizes.length, 4);
+    for (final size in sizes) {
+      expect(size.height, StatCard.height);
+    }
   });
 }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/notifications/local_reminder_scheduler.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/task_semantics.dart';
 import '../../core/widgets/app_notice.dart';
@@ -250,6 +251,7 @@ class TaskDetailsScreen extends ConsumerWidget {
     final updated = await ref.read(taskRepositoryProvider).updateTask(
           task.copyWith(status: TaskStatus.completed, updatedAt: DateTime.now()),
         );
+    await LocalReminderScheduler.sync(updated);
     if (user != null && family != null) {
       await ref.read(notificationServiceProvider).notifyTaskCompleted(
             task: updated,
@@ -276,6 +278,9 @@ class TaskDetailsScreen extends ConsumerWidget {
             updatedAt: DateTime.now(),
           ),
         );
+    await LocalReminderScheduler.sync(
+      task.copyWith(status: TaskStatus.pending, updatedAt: DateTime.now()),
+    );
     if (!context.mounted) return;
     AppNotice.show(context, l10n.taskReopened);
   }
@@ -331,6 +336,7 @@ class TaskDetailsScreen extends ConsumerWidget {
       ),
     );
     if (confirmed != true || !context.mounted) return;
+    await LocalReminderScheduler.cancel(task.id);
     await ref.read(taskRepositoryProvider).permanentlyDelete(task.id);
     if (!context.mounted) return;
     context.pop();

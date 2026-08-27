@@ -111,47 +111,26 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.tasks),
-        actions: pendingUndo
-            ? [
-                TextButton(
-                  key: const Key('task-trash-undo-appbar'),
-                  onPressed: () => TaskTrash.undo(ref),
-                  child: Text(
-                    l10n.undo,
-                    style: const TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ]
-            : [
-                IconButton(
-                  tooltip: l10n.calendar,
-                  onPressed: () => context.push('/tasks/calendar'),
-                  icon: const Icon(Icons.calendar_today_outlined),
-                ),
-                IconButton(
-                  tooltip: l10n.trash,
-                  onPressed: () => context.push('/tasks/trash'),
-                  icon: const Icon(Icons.delete_outline),
-                ),
-                IconButton(
-                  tooltip: l10n.addTask,
-                  onPressed: () => context.push('/tasks/new'),
-                  icon: const Icon(Icons.add_rounded),
-                ),
-              ],
+        actions: [
+          IconButton(
+            tooltip: l10n.calendar,
+            onPressed: () => context.push('/tasks/calendar'),
+            icon: const Icon(Icons.calendar_today_outlined),
+          ),
+          IconButton(
+            tooltip: l10n.trash,
+            onPressed: () => context.push('/tasks/trash'),
+            icon: const Icon(Icons.delete_outline),
+          ),
+          IconButton(
+            tooltip: l10n.addTask,
+            onPressed: () => context.push('/tasks/new'),
+            icon: const Icon(Icons.add_rounded),
+          ),
+        ],
       ),
       body: Column(
         children: [
-          if (occupyUndoSlot)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-              child: pendingUndo
-                  ? const TrashUndoBar()
-                  : const SizedBox(height: 52),
-            ),
           Expanded(
             child: AbsorbPointer(
               absorbing: occupyUndoSlot,

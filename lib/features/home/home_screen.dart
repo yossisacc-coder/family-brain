@@ -15,19 +15,21 @@ import '../../core/brain/family_brain_ai.dart';
 import '../../core/brain/speech_locale.dart';
 import '../settings/locale_controller.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/appearance.dart';
 import '../../core/theme/app_radii.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/app_header.dart';
 import '../../core/widgets/app_section_header.dart';
+import '../../core/widgets/brain_status_strip.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
 import '../../core/widgets/quick_action_card.dart';
 import '../../core/widgets/stat_card.dart';
-import '../../core/widgets/app_notice.dart';
 import 'home_day_task.dart';
 import '../../data/providers.dart';
 import '../../domain/models/app_user.dart';
 import '../../domain/models/task_item.dart';
+import '../tasks/calendar_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -47,6 +49,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   List<String?> _localeAttempts = const [null];
   String? _imagePath;
   Timer? _listenWatchdog;
+  BrainStatusKind? _brainStatus;
+  String? _brainStatusMessage;
 
   static const _maxImageBytes = 8 * 1024 * 1024;
 
@@ -120,6 +124,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 open.where((task) => task.hasReminder).toList();
             final events = open.where((task) => task.dueDate != null).toList();
             final today = _todayItems(open);
+            final palette = context.palette;
 
             return SafeArea(
               child: ListView(
@@ -139,13 +144,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(height: 12),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       StatCard(
                         label: l10n.statEventsToday,
                         value: events.length,
                         icon: Icons.calendar_today_rounded,
-                        color: AppColors.homeEvents,
-                        background: AppColors.homeEventsSoft,
+                        color: palette.homeEvents,
+                        background: palette.homeEventsSoft,
                         onTap: () => context.push('/tasks/events'),
                       ),
                       const SizedBox(width: AppSpacing.sm),
@@ -153,17 +159,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         label: l10n.statPendingTasks,
                         value: open.length,
                         icon: Icons.check_circle_outline_rounded,
-                        color: AppColors.homeTasks,
-                        background: AppColors.homeTasksSoft,
-                        onTap: () => context.go('/app/tasks'),
+                        color: palette.homeTasks,
+                        background: palette.homeTasksSoft,
+                        onTap: () => context.push(
+                          '/tasks/calendar',
+                          extra: CalendarFocus.tasks,
+                        ),
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       StatCard(
                         label: l10n.statImportantReminders,
                         value: reminders.length,
                         icon: Icons.notifications_none_rounded,
-                        color: AppColors.homeReminders,
-                        background: AppColors.homeRemindersSoft,
+                        color: palette.homeReminders,
+                        background: palette.homeRemindersSoft,
                         onTap: () => context.push('/tasks/reminders'),
                       ),
                       const SizedBox(width: AppSpacing.sm),
@@ -171,8 +180,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         label: l10n.statFamilyConnected,
                         value: members.length,
                         icon: Icons.groups_rounded,
-                        color: AppColors.homeFamily,
-                        background: AppColors.homeFamilySoft,
+                        color: palette.homeFamily,
+                        background: palette.homeFamilySoft,
                         onTap: () => context.go('/app/family'),
                       ),
                     ],
@@ -185,8 +194,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: QuickActionCard(
                           icon: Icons.calendar_today_rounded,
                           label: l10n.quickAccessCalendar,
-                          iconColor: AppColors.homeEvents,
-                          iconBackground: AppColors.homeEventsSoft,
+                          iconColor: palette.homeEvents,
+                          iconBackground: palette.homeEventsSoft,
                           onTap: () => context.push('/tasks/calendar'),
                         ),
                       ),
@@ -195,8 +204,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: QuickActionCard(
                           icon: Icons.check_circle_outline_rounded,
                           label: l10n.quickAccessTasks,
-                          iconColor: AppColors.homeTasks,
-                          iconBackground: AppColors.homeTasksSoft,
+                          iconColor: palette.homeTasks,
+                          iconBackground: palette.homeTasksSoft,
                           onTap: () => context.go('/app/tasks'),
                         ),
                       ),
@@ -209,8 +218,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: QuickActionCard(
                           icon: Icons.person_rounded,
                           label: l10n.quickAccessMySpace,
-                          iconColor: AppColors.homeFamily,
-                          iconBackground: AppColors.homeFamilySoft,
+                          iconColor: palette.homeFamily,
+                          iconBackground: palette.homeFamilySoft,
                           onTap: () => context.push('/space/personal'),
                         ),
                       ),
@@ -219,8 +228,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: QuickActionCard(
                           icon: Icons.groups_rounded,
                           label: l10n.quickAccessFamilySpace,
-                          iconColor: AppColors.homeReminders,
-                          iconBackground: AppColors.homeRemindersSoft,
+                          iconColor: palette.homeReminders,
+                          iconBackground: palette.homeRemindersSoft,
                           onTap: () => context.push('/space/family'),
                         ),
                       ),
@@ -232,11 +241,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     sending: _sending,
                     listening: _listening,
                     imagePath: _imagePath,
+                    statusKind: _brainStatus,
+                    statusMessage: _brainStatusMessage,
                     onSubmit: () => _submitComposer(context, l10n, members),
                     onAdd: (buttonContext) => _showInputMenu(
                       buttonContext,
                       l10n,
                     ),
+                    onMic: () => _toggleVoice(l10n),
                     onRemoveImage: () => setState(() => _imagePath = null),
                   ),
                   const SizedBox(height: 12),
@@ -411,17 +423,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       final bytes = await file.length();
       if (!mounted) return;
       if (bytes <= 0) {
-        AppNotice.show(context, l10n.imageFailed);
+        _setBrainStatus(BrainStatusKind.error, l10n.imageFailed);
         return;
       }
       if (bytes > _maxImageBytes) {
-        AppNotice.show(context, l10n.imageTooLarge);
+        _setBrainStatus(BrainStatusKind.error, l10n.imageTooLarge);
         return;
       }
       setState(() => _imagePath = file.path);
     } catch (_) {
-      if (mounted) AppNotice.show(context, l10n.imageFailed);
+      if (mounted) _setBrainStatus(BrainStatusKind.error, l10n.imageFailed);
     }
+  }
+
+  void _setBrainStatus(BrainStatusKind? kind, [String? message]) {
+    if (!mounted) return;
+    setState(() {
+      _brainStatus = kind;
+      _brainStatusMessage = message;
+    });
   }
 
   void _sttLog(String message) {
@@ -448,11 +468,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           }
           setState(() => _listening = false);
           if (msg.contains('permission')) {
-            AppNotice.show(context, l10n.voiceDenied);
+            _setBrainStatus(BrainStatusKind.error, l10n.voiceDenied);
           } else if (msg.contains('no_match') || msg.contains('speech_timeout')) {
-            AppNotice.show(context, l10n.voiceEmpty);
+            _setBrainStatus(BrainStatusKind.error, l10n.voiceEmpty);
           } else {
-            AppNotice.show(context, l10n.voiceFailed);
+            _setBrainStatus(BrainStatusKind.error, l10n.voiceFailed);
           }
         },
         onStatus: (status) {
@@ -465,7 +485,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
       _sttLog('initialize ready=$ready');
       if (!ready) {
-        if (mounted) AppNotice.show(context, l10n.voiceUnavailable);
+        if (mounted) _setBrainStatus(BrainStatusKind.error, l10n.voiceUnavailable);
         return;
       }
       final appLang = ref.read(localeControllerProvider).languageCode;
@@ -478,7 +498,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _sttLog('toggle failed $error');
       if (mounted) {
         setState(() => _listening = false);
-        AppNotice.show(context, l10n.voiceUnavailable);
+        _setBrainStatus(BrainStatusKind.error, l10n.voiceUnavailable);
       }
     }
   }
@@ -489,6 +509,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     setState(() {
       _listening = true;
       _heardSpeech = false;
+      _brainStatus = BrainStatusKind.listening;
+      _brainStatusMessage = l10n.listening;
     });
     _listenWatchdog?.cancel();
     _listenWatchdog = Timer(const Duration(seconds: 8), () {
@@ -534,7 +556,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
       if (mounted) {
         setState(() => _listening = false);
-        AppNotice.show(context, l10n.voiceUnavailable);
+        _setBrainStatus(BrainStatusKind.error, l10n.voiceUnavailable);
       }
     }
   }
@@ -549,7 +571,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final empty = !_heardSpeech && _composer.text.trim().isEmpty;
     setState(() => _listening = false);
     if (empty && l10n != null) {
-      AppNotice.show(context, l10n.voiceEmpty);
+      _setBrainStatus(BrainStatusKind.error, l10n.voiceEmpty);
+    } else if (_brainStatus == BrainStatusKind.listening) {
+      _setBrainStatus(null);
     }
   }
 
@@ -562,12 +586,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final text = _composer.text.trim();
     final imagePath = _imagePath;
     if (text.isEmpty && imagePath == null) {
-      AppNotice.show(context, l10n.emptyBrainInput);
+      _setBrainStatus(BrainStatusKind.error, l10n.emptyBrainInput);
       return;
     }
     FocusManager.instance.primaryFocus?.unfocus();
     final language = Localizations.localeOf(context).languageCode;
-    setState(() => _sending = true);
+    setState(() {
+      _sending = true;
+      _brainStatus = BrainStatusKind.sending;
+      _brainStatusMessage = l10n.brainProcessing;
+    });
     try {
       String? imageBase64;
       if (imagePath != null && !kIsWeb) {
@@ -585,21 +613,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         language: language,
       );
       if (!mounted) return;
-      if (result.usedFallback && result.error == 'offline') {
-        AppNotice.show(context, l10n.brainUsingOnDevice);
-      } else if (result.usedFallback) {
-        AppNotice.show(context, l10n.brainAiFailed);
-      }
       if (!result.isOk) {
-        AppNotice.show(context, l10n.brainUnclear);
+        _setBrainStatus(BrainStatusKind.error, l10n.brainUnclear);
         return;
+      }
+      if (result.usedFallback && result.error == 'offline') {
+        _setBrainStatus(BrainStatusKind.info, l10n.brainUsingOnDevice);
+      } else if (result.usedFallback) {
+        _setBrainStatus(BrainStatusKind.info, l10n.brainAiFailed);
+      } else {
+        _setBrainStatus(BrainStatusKind.success, l10n.brainStatusSuccess);
       }
       _composer.clear();
       setState(() => _imagePath = null);
       ref.read(pendingBrainDraftsProvider.notifier).state = result.drafts;
+      if (!context.mounted) return;
       context.push('/brain/confirm');
     } catch (_) {
-      if (mounted) AppNotice.show(context, l10n.errorUnavailable);
+      if (mounted) {
+        _setBrainStatus(BrainStatusKind.error, l10n.errorUnavailable);
+      }
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -620,19 +653,25 @@ class _ComposerCard extends StatefulWidget {
     required this.controller,
     required this.onSubmit,
     required this.onAdd,
+    required this.onMic,
     required this.onRemoveImage,
     this.sending = false,
     this.listening = false,
     this.imagePath,
+    this.statusKind,
+    this.statusMessage,
   });
 
   final TextEditingController controller;
   final VoidCallback onSubmit;
   final void Function(BuildContext buttonContext) onAdd;
+  final VoidCallback onMic;
   final VoidCallback onRemoveImage;
   final bool sending;
   final bool listening;
   final String? imagePath;
+  final BrainStatusKind? statusKind;
+  final String? statusMessage;
 
   @override
   State<_ComposerCard> createState() => _ComposerCardState();
@@ -671,8 +710,7 @@ class _ComposerCardState extends State<_ComposerCard> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final hasText = widget.controller.text.trim().isNotEmpty;
-    final showField = hasText || _focus.hasFocus || widget.listening;
+    final palette = context.palette;
     return Column(
       children: [
         if (widget.imagePath != null && !kIsWeb) ...[
@@ -683,125 +721,111 @@ class _ComposerCardState extends State<_ComposerCard> {
           ),
           const SizedBox(height: 8),
         ],
-        Container(
-          constraints: const BoxConstraints(minHeight: 52),
-          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-          decoration: BoxDecoration(
-            color: AppColors.primarySoft,
-            borderRadius: BorderRadius.circular(26),
-            border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.16),
+        Material(
+          color: palette.primarySoft,
+          borderRadius: BorderRadius.circular(26),
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 52),
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(26),
+              border: Border.all(
+                color: palette.primary.withValues(alpha: 0.16),
+              ),
+            ),
+            child: Row(
+                children: [
+                  Builder(
+                    builder: (buttonContext) {
+                      return _PillButton(
+                        tooltip: l10n.attachInformation,
+                        onPressed: widget.sending
+                            ? null
+                            : () => widget.onAdd(buttonContext),
+                        child: const Icon(
+                          Icons.add_rounded,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      );
+                    },
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: TextField(
+                        key: const Key('home-ai-input'),
+                        controller: widget.controller,
+                        focusNode: _focus,
+                        enabled: !widget.sending,
+                        readOnly: false,
+                        enableInteractiveSelection: true,
+                        keyboardType: TextInputType.text,
+                        textCapitalization: TextCapitalization.sentences,
+                        textInputAction: TextInputAction.send,
+                        minLines: 1,
+                        maxLines: 3,
+                        onTap: () => _focus.requestFocus(),
+                        onSubmitted:
+                            widget.sending ? null : (_) => widget.onSubmit(),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: palette.primaryDark,
+                              fontWeight: FontWeight.w600,
+                            ),
+                        decoration: InputDecoration(
+                          isDense: true,
+                          hintText: widget.listening
+                              ? l10n.listening
+                              : l10n.tellFamilyBrain,
+                          hintStyle: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: palette.textMuted),
+                          filled: false,
+                          fillColor: Colors.transparent,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 8,
+                          ),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: widget.listening ? l10n.listening : l10n.voiceInput,
+                    onPressed: widget.sending ? null : widget.onMic,
+                    icon: Icon(
+                      widget.listening
+                          ? Icons.stop_circle_outlined
+                          : Icons.mic_none_rounded,
+                      color: palette.primary,
+                    ),
+                  ),
+                  _PillButton(
+                    tooltip: l10n.sendToFamilyBrain,
+                    onPressed: widget.sending ? null : widget.onSubmit,
+                    child: Icon(
+                      Icons.auto_awesome_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          child: Row(
-            children: [
-              Builder(
-                builder: (buttonContext) {
-                  return _PillButton(
-                    tooltip: l10n.attachInformation,
-                    onPressed:
-                        widget.sending ? null : () => widget.onAdd(buttonContext),
-                    child: const Icon(
-                      Icons.add_rounded,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                  );
-                },
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: showField
-                      ? TextField(
-                          controller: widget.controller,
-                          focusNode: _focus,
-                          minLines: 1,
-                          maxLines: 2,
-                          textInputAction: TextInputAction.send,
-                          onSubmitted:
-                              widget.sending ? null : (_) => widget.onSubmit(),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.primaryDark,
-                                fontWeight: FontWeight.w600,
-                              ),
-                          decoration: InputDecoration(
-                            isDense: true,
-                            hintText: widget.listening
-                                ? l10n.listening
-                                : l10n.tellFamilyBrain,
-                            hintStyle: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(color: AppColors.textMuted),
-                            filled: false,
-                            fillColor: Colors.transparent,
-                            contentPadding: EdgeInsets.zero,
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                          ),
-                        )
-                      : GestureDetector(
-                          onTap: () => _focus.requestFocus(),
-                          behavior: HitTestBehavior.opaque,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  l10n.sendToFamilyBrain,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall
-                                      ?.copyWith(
-                                        color: AppColors.primary,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                ),
-                                Text(
-                                  l10n.addToFamilyBrainHint,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        color: AppColors.textMuted,
-                                        fontSize: 11,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                ),
-              ),
-              _PillButton(
-                tooltip: l10n.sendToFamilyBrain,
-                onPressed: widget.sending ? null : widget.onSubmit,
-                child: widget.sending
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(
-                        Icons.auto_awesome_rounded,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-              ),
-            ],
+        if (widget.statusKind != null &&
+            widget.statusMessage != null &&
+            widget.statusMessage!.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          BrainStatusStrip(
+            kind: widget.statusKind!,
+            message: widget.statusMessage!,
           ),
-        ),
+        ],
       ],
     );
   }

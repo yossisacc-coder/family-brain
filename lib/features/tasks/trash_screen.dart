@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/notifications/local_reminder_scheduler.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/app_notice.dart';
 import '../../core/widgets/empty_state.dart';
@@ -102,6 +103,7 @@ class TrashScreen extends ConsumerWidget {
     AppLocalizations l10n,
   ) async {
     await ref.read(taskRepositoryProvider).restoreTask(task);
+    await LocalReminderScheduler.sync(task.copyWith(clearDeleted: true));
     if (!context.mounted) return;
     AppNotice.show(context, l10n.taskRestored);
   }
@@ -130,6 +132,7 @@ class TrashScreen extends ConsumerWidget {
       ),
     );
     if (confirmed != true || !context.mounted) return;
+    await LocalReminderScheduler.cancel(task.id);
     await ref.read(taskRepositoryProvider).permanentlyDelete(task.id);
     if (!context.mounted) return;
     AppNotice.show(context, l10n.taskDeletedForever);
@@ -160,6 +163,10 @@ class TrashScreen extends ConsumerWidget {
       ),
     );
     if (confirmed != true || !context.mounted) return;
+    final tasks = ref.read(trashedTasksProvider).valueOrNull ?? const [];
+    for (final task in tasks) {
+      await LocalReminderScheduler.cancel(task.id);
+    }
     await ref.read(taskRepositoryProvider).emptyTrash(family.id);
     if (!context.mounted) return;
     AppNotice.show(context, l10n.trashEmptied);

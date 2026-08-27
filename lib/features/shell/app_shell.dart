@@ -11,7 +11,6 @@ class AppShell extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
 
   static const tasksTabIndex = 1;
-  static const undoFabKey = Key('task-trash-undo-fab');
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -28,17 +27,8 @@ class AppShell extends ConsumerWidget {
       },
       child: Scaffold(
         body: navigationShell,
-        floatingActionButton: !onTasks
+        floatingActionButton: !onTasks || pendingUndo
             ? null
-            : pendingUndo
-            ? FloatingActionButton.extended(
-                key: undoFabKey,
-                onPressed: () => TaskTrash.undo(ref),
-                backgroundColor: const Color(0xFF323232),
-                foregroundColor: Colors.white,
-                icon: const Icon(Icons.undo_rounded),
-                label: Text(l10n.undo),
-              )
             : FloatingActionButton.extended(
                 onPressed: () => context.push('/tasks/new'),
                 icon: const Icon(Icons.add_rounded),

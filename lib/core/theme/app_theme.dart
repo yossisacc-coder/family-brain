@@ -4,10 +4,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 import 'app_radii.dart';
 import 'app_spacing.dart';
+import 'appearance.dart';
 
 class AppTheme {
-  static ThemeData light(Locale locale) {
+  static ThemeData light(
+    Locale locale, {
+    AppearanceMode appearance = AppearanceMode.colorful,
+  }) {
     final isHebrew = locale.languageCode == 'he';
+    final palette = FamilyBrainPalette.of(appearance);
     final textTheme = _hierarchy(
       isHebrew
           ? GoogleFonts.heeboTextTheme()
@@ -17,27 +22,28 @@ class AppTheme {
     final base = ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      colorScheme: const ColorScheme.light(
-        primary: AppColors.primary,
+      colorScheme: ColorScheme.light(
+        primary: palette.primary,
         onPrimary: Colors.white,
         secondary: AppColors.action,
         onSecondary: Colors.white,
-        surface: AppColors.card,
-        onSurface: AppColors.text,
+        surface: palette.card,
+        onSurface: palette.text,
         error: AppColors.urgent,
-        outline: AppColors.border,
+        outline: palette.border,
       ),
+      extensions: [palette],
     );
 
     return base.copyWith(
-      scaffoldBackgroundColor: AppColors.background,
+      scaffoldBackgroundColor: palette.background,
       textTheme: textTheme.apply(
-        bodyColor: AppColors.text,
-        displayColor: AppColors.text,
+        bodyColor: palette.text,
+        displayColor: palette.text,
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.background,
-        foregroundColor: AppColors.text,
+        backgroundColor: palette.background,
+        foregroundColor: palette.text,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
@@ -46,34 +52,34 @@ class AppTheme {
         ),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.card,
+        color: palette.card,
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: AppRadii.card,
-          side: const BorderSide(color: AppColors.border),
+          side: BorderSide(color: palette.border),
         ),
       ),
-      dividerColor: AppColors.border,
+      dividerColor: palette.border,
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: palette.surface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.lg,
         ),
-        hintStyle: textTheme.bodyMedium?.copyWith(color: AppColors.textMuted),
+        hintStyle: textTheme.bodyMedium?.copyWith(color: palette.textMuted),
         border: OutlineInputBorder(
           borderRadius: AppRadii.input,
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: palette.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: AppRadii.input,
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: palette.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: AppRadii.input,
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.6),
+          borderSide: BorderSide(color: palette.primary, width: 1.6),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -109,9 +115,9 @@ class AppTheme {
         extendedPadding: EdgeInsets.symmetric(horizontal: 18),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: AppColors.surface,
-        selectedColor: AppColors.primarySoft,
-        disabledColor: AppColors.surface,
+        backgroundColor: palette.surface,
+        selectedColor: palette.primarySoft,
+        disabledColor: palette.surface,
         labelStyle: textTheme.labelMedium!,
         secondaryLabelStyle: textTheme.labelMedium!,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -125,8 +131,8 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: AppColors.nav,
-        indicatorColor: AppColors.primarySoft,
+        backgroundColor: palette.nav,
+        indicatorColor: palette.primarySoft,
         elevation: 0,
         height: 68,
         shadowColor: Colors.transparent,
@@ -135,14 +141,14 @@ class AppTheme {
           final selected = states.contains(WidgetState.selected);
           return IconThemeData(
             size: 22,
-            color: selected ? AppColors.primary : AppColors.textMuted,
+            color: selected ? palette.primary : palette.textMuted,
           );
         }),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return textTheme.labelMedium?.copyWith(
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-            color: selected ? AppColors.primary : AppColors.textMuted,
+            color: selected ? palette.primary : palette.textMuted,
           );
         }),
       ),

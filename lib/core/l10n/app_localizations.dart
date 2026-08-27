@@ -1214,6 +1214,42 @@ abstract class AppLocalizations {
   /// **'Family Brain uses a clean white theme with purple brand accents on phones and in the browser.'**
   String get appearanceHint;
 
+  /// No description provided for @appearanceProfessional.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional'**
+  String get appearanceProfessional;
+
+  /// No description provided for @appearanceColorful.
+  ///
+  /// In en, this message translates to:
+  /// **'Colorful'**
+  String get appearanceColorful;
+
+  /// No description provided for @appearanceProfessionalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Slightly darker, mature pastels.'**
+  String get appearanceProfessionalHint;
+
+  /// No description provided for @appearanceColorfulHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Soft pastel brand accents.'**
+  String get appearanceColorfulHint;
+
+  /// No description provided for @calendarItemsForDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Items for this day'**
+  String get calendarItemsForDay;
+
+  /// No description provided for @brainStatusSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to review'**
+  String get brainStatusSuccess;
+
   /// No description provided for @notificationsHint.
   ///
   /// In en, this message translates to:

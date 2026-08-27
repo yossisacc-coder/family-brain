@@ -5,11 +5,11 @@ import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/notifications/local_reminder_scheduler.dart';
 import '../../data/providers.dart';
 import '../../domain/models/task_item.dart';
 import '../../domain/repositories/task_repository.dart';
 import '../routing/root_keys.dart';
-import 'app_notice.dart';
 
 class TrashUndoRequest {
   const TrashUndoRequest({required this.task, required this.repo, this.onUndo});
@@ -25,7 +25,7 @@ final trashUndoRequestProvider = StateProvider<TrashUndoRequest?>(
 
 /// Shared trash/undo behavior for task list and details.
 class TaskTrash {
-  static const undoDuration = Duration(seconds: 2);
+  static const undoDuration = Duration(seconds: 3);
   static const slotHold = Duration(milliseconds: 50);
   static const undoButtonKey = Key('task-trash-undo');
 
@@ -136,6 +136,9 @@ class TaskTrash {
       if (viaRef != null && !identical(viaRef, request.repo)) {
         await viaRef.restoreTask(request.task.copyWith(clearDeleted: true));
       }
+      await LocalReminderScheduler.sync(
+        request.task.copyWith(clearDeleted: true),
+      );
       ref?.invalidate(familyTasksProvider);
       ref?.invalidate(trashedTasksProvider);
     } catch (error) {
@@ -161,25 +164,14 @@ class TaskTrash {
   }) async {
     final repo = ref.read(taskRepositoryProvider);
     await repo.moveToTrash(task);
+    unawaited(LocalReminderScheduler.cancel(task.id));
     if (!context.mounted) return;
-    if (popAfter) {
-      if (context.canPop()) {
-        context.pop();
-      }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showUndo(ref: ref, task: task, repo: repo, onUndo: onUndo);
-        AppNotice.show(
-          null,
-          l10n.taskMovedToTrash,
-          action: SnackBarAction(
-            label: l10n.undo,
-            onPressed: () => undo(ref),
-          ),
-        );
-      });
-      return;
+    if (popAfter && context.canPop()) {
+      context.pop();
     }
-    showUndo(ref: ref, task: task, repo: repo, onUndo: onUndo);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showUndo(ref: ref, task: task, repo: repo, onUndo: onUndo);
+    });
   }
 
   static Future<void> confirmAndMove({

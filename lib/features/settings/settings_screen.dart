@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/config/app_config.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/appearance.dart';
 import '../../data/providers.dart';
+import 'appearance_controller.dart';
 import 'locale_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -17,6 +19,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final locale = ref.watch(localeControllerProvider);
+    final appearance = ref.watch(appearanceControllerProvider);
     final user = ref.watch(currentUserProvider).valueOrNull;
     final family = ref.watch(currentFamilyProvider).valueOrNull;
 
@@ -94,9 +97,37 @@ class SettingsScreen extends ConsumerWidget {
             l10n.appearance,
             style: Theme.of(context).textTheme.titleMedium,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             l10n.appearanceHint,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textMuted,
+                ),
+          ),
+          const SizedBox(height: 10),
+          SegmentedButton<AppearanceMode>(
+            segments: [
+              ButtonSegment(
+                value: AppearanceMode.professional,
+                label: Text(l10n.appearanceProfessional),
+              ),
+              ButtonSegment(
+                value: AppearanceMode.colorful,
+                label: Text(l10n.appearanceColorful),
+              ),
+            ],
+            selected: {appearance},
+            onSelectionChanged: (value) {
+              ref
+                  .read(appearanceControllerProvider.notifier)
+                  .setMode(value.first);
+            },
+          ),
+          const SizedBox(height: 6),
+          Text(
+            appearance == AppearanceMode.professional
+                ? l10n.appearanceProfessionalHint
+                : l10n.appearanceColorfulHint,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.textMuted,
                 ),

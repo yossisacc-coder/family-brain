@@ -600,6 +600,24 @@ class AppLocalizationsEn extends AppLocalizations {
       'Family Brain uses a clean white theme with purple brand accents on phones and in the browser.';
 
   @override
+  String get appearanceProfessional => 'Professional';
+
+  @override
+  String get appearanceColorful => 'Colorful';
+
+  @override
+  String get appearanceProfessionalHint => 'Slightly darker, mature pastels.';
+
+  @override
+  String get appearanceColorfulHint => 'Soft pastel brand accents.';
+
+  @override
+  String get calendarItemsForDay => 'Items for this day';
+
+  @override
+  String get brainStatusSuccess => 'Ready to review';
+
+  @override
   String get notificationsHint =>
       'Notifications are informational events. Reminders stay on tasks and are not removed when you delete a notification.';
 

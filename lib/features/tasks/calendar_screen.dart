@@ -8,9 +8,65 @@ import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
 import '../../core/widgets/task_card.dart';
 import '../../data/providers.dart';
+import '../../domain/models/task_item.dart';
+
+enum CalendarFocus { all, events, reminders, tasks }
+
+/// Items on the existing Family Brain calendar for a selected day.
+class CalendarDayQuery {
+  static DateTime dateOnly(DateTime value) =>
+      DateTime(value.year, value.month, value.day);
+
+  static bool onDay(TaskItem task, DateTime day) {
+    final selected = dateOnly(day);
+    if (task.dueDate != null && dateOnly(task.dueDate!) == selected) {
+      return true;
+    }
+    if (task.reminderAt != null && dateOnly(task.reminderAt!) == selected) {
+      return true;
+    }
+    return false;
+  }
+
+  static bool matchesFocus(TaskItem task, CalendarFocus focus) {
+    return switch (focus) {
+      CalendarFocus.all => task.dueDate != null || task.reminderAt != null,
+      CalendarFocus.events =>
+        task.kind == InformationKind.event || task.dueDate != null,
+      CalendarFocus.reminders =>
+        task.kind == InformationKind.reminder || task.hasReminder,
+      CalendarFocus.tasks =>
+        task.kind == InformationKind.task ||
+            (task.dueDate != null &&
+                task.kind != InformationKind.event &&
+                task.kind != InformationKind.reminder),
+    };
+  }
+
+  static List<TaskItem> itemsForDay({
+    required List<TaskItem> tasks,
+    required DateTime day,
+    required CalendarFocus focus,
+    String? userId,
+  }) {
+    return tasks
+        .where((task) => userId == null || task.isVisibleTo(userId))
+        .where((task) => !task.isTrashed)
+        .where((task) => matchesFocus(task, focus))
+        .where((task) => onDay(task, day))
+        .toList()
+      ..sort((a, b) {
+        final aTime = a.dueDate ?? a.reminderAt ?? a.createdAt;
+        final bTime = b.dueDate ?? b.reminderAt ?? b.createdAt;
+        return aTime.compareTo(bTime);
+      });
+  }
+}
 
 class CalendarScreen extends ConsumerStatefulWidget {
-  const CalendarScreen({super.key});
+  const CalendarScreen({super.key, this.focus = CalendarFocus.all});
+
+  final CalendarFocus focus;
 
   @override
   ConsumerState<CalendarScreen> createState() => _CalendarScreenState();
@@ -18,9 +74,6 @@ class CalendarScreen extends ConsumerStatefulWidget {
 
 class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   DateTime _selected = DateTime.now();
-
-  DateTime _dateOnly(DateTime value) =>
-      DateTime(value.year, value.month, value.day);
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +83,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     final members = ref.watch(familyMembersProvider).valueOrNull ?? const [];
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.calendar)),
+      appBar: AppBar(title: Text(_title(l10n))),
       body: tasksAsync.when(
         loading: () => LoadingView(label: l10n.loading),
         error: (_, _) => ErrorView(
@@ -39,13 +92,15 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           onRetry: () => ref.invalidate(familyTasksProvider),
         ),
         data: (all) {
-          final tasks = all
-              .where((task) => user == null || task.isVisibleTo(user.id))
-              .where((task) => task.dueDate != null)
-              .toList();
-          final selected = _dateOnly(_selected);
-          final forDay = tasks.where((task) {
-            return _dateOnly(task.dueDate!) == selected;
+          final forDay = CalendarDayQuery.itemsForDay(
+            tasks: all,
+            day: _selected,
+            focus: widget.focus,
+            userId: user?.id,
+          );
+          final dated = all.where((task) {
+            if (user != null && !task.isVisibleTo(user.id)) return false;
+            return CalendarDayQuery.matchesFocus(task, widget.focus);
           }).toList();
 
           return Column(
@@ -56,19 +111,29 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 lastDate: DateTime.now().add(const Duration(days: 365)),
                 onDateChanged: (value) => setState(() => _selected = value),
               ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    l10n.calendarItemsForDay,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+              ),
               Expanded(
-                child: tasks.isEmpty
+                child: dated.isEmpty
                     ? EmptyState(
-                        title: l10n.noCalendarTasks,
-                        message: l10n.noCalendarMessage,
+                        title: _emptyTitle(l10n),
+                        message: _emptyMessage(l10n),
                         actionLabel: l10n.addFirstTask,
                         onAction: () => context.push('/tasks/new'),
-                        icon: Icons.calendar_today_outlined,
+                        icon: _emptyIcon(),
                       )
                     : forDay.isEmpty
                         ? EmptyState(
-                            title: l10n.noCalendarTasks,
-                            message: l10n.noCalendarMessage,
+                            title: _emptyTitle(l10n),
+                            message: _emptyMessage(l10n),
                             icon: Icons.event_outlined,
                           )
                         : ListView.separated(
@@ -110,5 +175,41 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         },
       ),
     );
+  }
+
+  String _title(AppLocalizations l10n) {
+    return switch (widget.focus) {
+      CalendarFocus.events => l10n.events,
+      CalendarFocus.reminders => l10n.reminders,
+      CalendarFocus.tasks => l10n.tasks,
+      CalendarFocus.all => l10n.calendar,
+    };
+  }
+
+  String _emptyTitle(AppLocalizations l10n) {
+    return switch (widget.focus) {
+      CalendarFocus.events => l10n.noEvents,
+      CalendarFocus.reminders => l10n.noReminders,
+      CalendarFocus.tasks => l10n.noCalendarTasks,
+      CalendarFocus.all => l10n.noCalendarTasks,
+    };
+  }
+
+  String _emptyMessage(AppLocalizations l10n) {
+    return switch (widget.focus) {
+      CalendarFocus.events => l10n.noEventsMessage,
+      CalendarFocus.reminders => l10n.noRemindersMessage,
+      CalendarFocus.tasks => l10n.noCalendarMessage,
+      CalendarFocus.all => l10n.noCalendarMessage,
+    };
+  }
+
+  IconData _emptyIcon() {
+    return switch (widget.focus) {
+      CalendarFocus.reminders => Icons.notifications_none_rounded,
+      CalendarFocus.tasks => Icons.check_circle_outline_rounded,
+      CalendarFocus.events => Icons.event_outlined,
+      CalendarFocus.all => Icons.calendar_today_outlined,
+    };
   }
 }
