@@ -24,7 +24,7 @@ void main() {
       extensions: [palette],
     );
   }
-  testWidgets('Logo 02 mark paints a punched intersection at 40px', (
+  testWidgets('08E two-tone mark stays clear at 40px', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -38,7 +38,7 @@ void main() {
     expect(tester.getSize(find.byKey(const Key('family-brain-logo'))), const Size(40, 40));
   });
 
-  testWidgets('Logo 02 app icon is a square that stays clear at 40px', (
+  testWidgets('08E app icon is a square that stays clear at 40px', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -52,7 +52,7 @@ void main() {
     expect(tester.getSize(find.byKey(const Key('family-brain-app-icon'))), const Size(40, 40));
   });
 
-  testWidgets('Home places the Logo 02 lockup in the centered header', (
+  testWidgets('Home places the 08E lockup in the centered header', (
     tester,
   ) async {
     SharedPreferences.setMockInitialValues({});
@@ -97,7 +97,8 @@ void main() {
     final lockup = find.byKey(const Key('family-brain-logo-lockup'));
     expect(lockup, findsOneWidget);
     expect(find.byType(FamilyBrainLogoMark), findsWidgets);
-    expect(find.text('Family Brain'), findsWidgets);
+    expect(find.textContaining('Family', findRichText: true), findsWidgets);
+    expect(find.textContaining('Brain', findRichText: true), findsWidgets);
     expect(find.byType(AppHeader), findsOneWidget);
 
     final lockupCenter = tester.getCenter(lockup);
@@ -159,16 +160,18 @@ void main() {
     expect(find.byKey(const Key('family-brain-logo-lockup')), findsOneWidget);
   });
 
-  testWidgets('Logo 02 geometry keeps an intersection hole', (tester) async {
-    final shapes = FamilyBrainLogoPainter.geometry(const Size(40, 40));
-    expect(shapes.hole.getBounds().isEmpty, isFalse);
-    expect(
-      shapes.hole.getBounds().overlaps(shapes.left.getBounds()),
-      isTrue,
+  testWidgets('08E two-tone wordmark keeps navy Family and azure Brain', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(child: FamilyBrainLogoLockup(markSize: 40)),
+        ),
+      ),
     );
-    expect(
-      shapes.hole.getBounds().overlaps(shapes.right.getBounds()),
-      isTrue,
-    );
+    expect(find.byKey(const Key('family-brain-logo-lockup')), findsOneWidget);
+    expect(FamilyBrainLogoColors.navy, const Color(0xFF012557));
+    expect(FamilyBrainLogoColors.azure, const Color(0xFF0568CA));
   });
 }
