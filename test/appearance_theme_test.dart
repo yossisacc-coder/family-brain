@@ -93,6 +93,7 @@ void main() {
           MaterialApp(
             theme: theme,
             themeMode: ThemeMode.light,
+            themeAnimationDuration: Duration.zero,
             home: Scaffold(
               body: Column(
                 children: [
@@ -104,7 +105,7 @@ void main() {
             ),
           ),
         );
-        await tester.pump();
+        await tester.pumpAndSettle();
         final cardContext = tester.element(find.byKey(const Key('theme-card')));
         expect(cardContext.palette.card, palette.card);
         expect(cardContext.appColors.surface, palette.card);
@@ -158,6 +159,7 @@ void main() {
             return MaterialApp(
               locale: const Locale('en'),
               theme: themeWithoutFonts(appearance),
+              themeAnimationDuration: Duration.zero,
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
               home: const SettingsScreen(publicMode: true),
