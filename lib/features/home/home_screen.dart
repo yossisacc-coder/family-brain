@@ -11,23 +11,20 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
-import '../../core/brain/brain_activity.dart';
 import '../../core/brain/family_brain_ai.dart';
 import '../../core/brain/speech_locale.dart';
 import '../settings/locale_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radii.dart';
 import '../../core/theme/app_spacing.dart';
-import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_header.dart';
 import '../../core/widgets/app_section_header.dart';
-import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
 import '../../core/widgets/quick_action_card.dart';
 import '../../core/widgets/stat_card.dart';
-import '../../core/widgets/task_card.dart';
 import '../../core/widgets/app_notice.dart';
+import 'home_day_task.dart';
 import '../../data/providers.dart';
 import '../../domain/models/app_user.dart';
 import '../../domain/models/task_item.dart';
@@ -94,7 +91,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final userAsync = ref.watch(currentUserProvider);
-    final familyAsync = ref.watch(currentFamilyProvider);
     final tasksAsync = ref.watch(familyTasksProvider);
     final membersAsync = ref.watch(familyMembersProvider);
     final unread = ref.watch(unreadCountProvider);
@@ -116,7 +112,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onRetry: () => ref.invalidate(familyTasksProvider),
           ),
           data: (all) {
-            final family = familyAsync.valueOrNull;
             final members = membersAsync.valueOrNull ?? const [];
             final tasks =
                 all.where((task) => task.isVisibleTo(user.id)).toList();
@@ -137,7 +132,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 children: [
                   AppHeader(
                     title: _greeting(l10n, user.name),
-                    subtitle: l10n.appTitle,
+                    subtitle: l10n.greetingSubtitle,
                     unreadCount: unread,
                     onNotifications: () => context.push('/notifications'),
                     onSettings: () => context.go('/app/settings'),
@@ -146,43 +141,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   Row(
                     children: [
                       StatCard(
-                        label: l10n.membersLabel,
-                        value: members.length,
-                        icon: Icons.groups_outlined,
-                        color: AppColors.primary,
-                        background: AppColors.primarySoft,
-                        onTap: () => context.go('/app/family'),
+                        label: l10n.events,
+                        value: events.length,
+                        subtitle: l10n.today,
+                        icon: Icons.calendar_today_rounded,
+                        color: AppColors.homeEvents,
+                        background: AppColors.homeEventsSoft,
+                        onTap: () => context.push('/tasks/calendar'),
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       StatCard(
                         label: l10n.tasks,
                         value: open.length,
-                        icon: Icons.check_circle_outline,
-                        color: AppColors.action,
-                        background: AppColors.actionSoft,
+                        subtitle: l10n.statPending,
+                        icon: Icons.check_circle_outline_rounded,
+                        color: AppColors.homeTasks,
+                        background: AppColors.homeTasksSoft,
                         onTap: () => context.go('/app/tasks'),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Row(
-                    children: [
+                      const SizedBox(width: AppSpacing.sm),
                       StatCard(
                         label: l10n.reminders,
                         value: reminders.length,
-                        icon: Icons.alarm_outlined,
-                        color: AppColors.success,
-                        background: AppColors.successSoft,
+                        subtitle: l10n.statImportant,
+                        icon: Icons.notifications_none_rounded,
+                        color: AppColors.homeReminders,
+                        background: AppColors.homeRemindersSoft,
                         onTap: () => context.push('/tasks/calendar'),
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       StatCard(
-                        label: l10n.events,
-                        value: events.length,
-                        icon: Icons.event_outlined,
-                        color: AppColors.primaryDark,
-                        background: AppColors.surface,
-                        onTap: () => context.push('/tasks/calendar'),
+                        label: l10n.membersLabel,
+                        value: members.length,
+                        subtitle: l10n.statConnected,
+                        icon: Icons.groups_rounded,
+                        color: AppColors.homeFamily,
+                        background: AppColors.homeFamilySoft,
+                        onTap: () => context.go('/app/family'),
                       ),
                     ],
                   ),
@@ -192,32 +187,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     children: [
                       Expanded(
                         child: QuickActionCard(
-                          icon: Icons.calendar_today_outlined,
-                          label: l10n.calendar,
+                          icon: Icons.calendar_today_rounded,
+                          label: l10n.quickAccessCalendar,
+                          subtitle: l10n.calendar,
+                          iconColor: AppColors.homeEvents,
+                          iconBackground: AppColors.homeEventsSoft,
                           onTap: () => context.push('/tasks/calendar'),
                         ),
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: QuickActionCard(
-                          icon: Icons.checklist_rounded,
-                          label: l10n.tasks,
+                          icon: Icons.check_circle_outline_rounded,
+                          label: l10n.quickAccessTasks,
+                          subtitle: l10n.tasks,
+                          iconColor: AppColors.homeTasks,
+                          iconBackground: AppColors.homeTasksSoft,
                           onTap: () => context.go('/app/tasks'),
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.sm),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    children: [
                       Expanded(
                         child: QuickActionCard(
-                          icon: Icons.person_outline,
-                          label: l10n.mySpace,
+                          icon: Icons.person_rounded,
+                          label: l10n.quickAccessMySpace,
+                          subtitle: l10n.mySpace,
+                          iconColor: AppColors.homeFamily,
+                          iconBackground: AppColors.homeFamilySoft,
                           onTap: () => context.push('/space/personal'),
                         ),
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: QuickActionCard(
-                          icon: Icons.groups_outlined,
-                          label: l10n.familySpace,
+                          icon: Icons.groups_rounded,
+                          label: l10n.quickAccessFamilySpace,
+                          subtitle: l10n.familySpace,
+                          iconColor: AppColors.homeReminders,
+                          iconBackground: AppColors.homeRemindersSoft,
                           onTap: () => context.push('/space/family'),
                         ),
                       ),
@@ -230,38 +241,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     listening: _listening,
                     imagePath: _imagePath,
                     onSubmit: () => _submitComposer(context, l10n, members),
-                    onAskAi: () => context.push('/brain/ask'),
-                    onAttach: () => _pickImage(l10n),
-                    onMic: () => _toggleVoice(l10n),
+                    onAdd: (buttonContext) => _showInputMenu(
+                      buttonContext,
+                      l10n,
+                    ),
                     onRemoveImage: () => setState(() => _imagePath = null),
                   ),
-                  if (BrainActivityLog.entries.isNotEmpty) ...[
-                    const SizedBox(height: AppSpacing.section),
-                    AppSectionHeader(title: l10n.recentBrain),
-                    AppCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          for (final entry in BrainActivityLog.entries.take(3)) ...[
-                            Text(
-                              entry.originalText,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              entry.summary,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppColors.textMuted,
-                                  ),
-                            ),
-                            const SizedBox(height: AppSpacing.sm),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
                   const SizedBox(height: AppSpacing.section),
                   AppSectionHeader(
                     title: l10n.todayActivity,
@@ -269,30 +254,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     onAction: () => context.go('/app/tasks'),
                   ),
                   if (today.isEmpty)
-                    EmptyState(
-                      title: l10n.noUpcoming,
-                      message: l10n.emptyTasksMessage,
-                      actionLabel: l10n.addFirstTask,
-                      onAction: () => context.push('/tasks/new'),
-                      icon: Icons.wb_sunny_outlined,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        l10n.noUpcoming,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.textMuted,
+                            ),
+                      ),
                     )
                   else
-                    ...today.map(
-                      (task) => Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                        child: TaskCard(
-                          task: task,
-                          members: members,
-                          compact: true,
-                          onTap: () => context.push('/tasks/${task.id}'),
-                        ),
+                    for (var i = 0; i < today.length; i++)
+                      HomeDayTask(
+                        task: today[i],
+                        members: members,
+                        isFirst: i == 0,
+                        isLast: i == today.length - 1,
+                        onTap: () => context.push('/tasks/${today[i].id}'),
                       ),
-                    ),
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.lg),
                   _FamilyMembersRow(
                     members: members,
                     currentUserId: user.id,
-                    familyName: family?.name ?? l10n.currentFamily,
                     onViewFamily: () => context.go('/app/family'),
                     onAdd: () => context.go('/app/family'),
                   ),
@@ -338,27 +321,94 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       final bTime = b.dueDate ?? b.reminderAt ?? b.createdAt;
       return aTime.compareTo(bTime);
     });
-    return matches.take(4).toList();
+    return matches.take(3).toList();
   }
 
-  Future<void> _pickImage(AppLocalizations l10n) async {
-    final source = await showDialog<ImageSource>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.choosePhotoSource),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, ImageSource.gallery),
-            child: Text(l10n.photoFromGallery),
+  Future<void> _showInputMenu(
+    BuildContext buttonContext,
+    AppLocalizations l10n,
+  ) async {
+    final box = buttonContext.findRenderObject() as RenderBox?;
+    final overlay =
+        Navigator.of(buttonContext).overlay?.context.findRenderObject() as RenderBox?;
+    if (box == null || overlay == null) return;
+    final origin = box.localToGlobal(Offset.zero, ancestor: overlay);
+    final selected = await showMenu<_ComposerAction>(
+      context: buttonContext,
+      position: RelativeRect.fromRect(
+        Rect.fromLTWH(origin.dx, origin.dy, box.size.width, box.size.height),
+        Offset.zero & overlay.size,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: AppColors.card,
+      elevation: 8,
+      items: [
+        _menuItem(
+          _ComposerAction.camera,
+          Icons.photo_camera_outlined,
+          l10n.photoFromCamera,
+        ),
+        _menuItem(
+          _ComposerAction.gallery,
+          Icons.photo_outlined,
+          l10n.photoFromGallery,
+        ),
+        _menuItem(
+          _ComposerAction.voice,
+          _listening ? Icons.stop_circle_outlined : Icons.mic_none_rounded,
+          _listening ? l10n.listening : l10n.voiceInput,
+        ),
+        _menuItem(
+          _ComposerAction.askAi,
+          Icons.auto_awesome_rounded,
+          l10n.askAi,
+        ),
+      ],
+    );
+    if (!mounted || selected == null) return;
+    switch (selected) {
+      case _ComposerAction.camera:
+        await _pickImage(l10n, ImageSource.camera);
+      case _ComposerAction.gallery:
+        await _pickImage(l10n, ImageSource.gallery);
+      case _ComposerAction.voice:
+        await _toggleVoice(l10n);
+      case _ComposerAction.askAi:
+        context.push('/brain/ask');
+    }
+  }
+
+  PopupMenuItem<_ComposerAction> _menuItem(
+    _ComposerAction value,
+    IconData icon,
+    String label,
+  ) {
+    return PopupMenuItem(
+      value: value,
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppColors.primarySoft,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: AppColors.primary, size: 20),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, ImageSource.camera),
-            child: Text(l10n.photoFromCamera),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),
     );
-    if (source == null || !mounted) return;
+  }
+
+  Future<void> _pickImage(AppLocalizations l10n, ImageSource source) async {
     try {
       final file = await _picker.pickImage(
         source: source,
@@ -571,13 +621,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-class _ComposerCard extends StatelessWidget {
+enum _ComposerAction { camera, gallery, voice, askAi }
+
+class _ComposerCard extends StatefulWidget {
   const _ComposerCard({
     required this.controller,
     required this.onSubmit,
-    required this.onAskAi,
-    required this.onAttach,
-    required this.onMic,
+    required this.onAdd,
     required this.onRemoveImage,
     this.sending = false,
     this.listening = false,
@@ -586,117 +636,267 @@ class _ComposerCard extends StatelessWidget {
 
   final TextEditingController controller;
   final VoidCallback onSubmit;
-  final VoidCallback onAskAi;
-  final VoidCallback onAttach;
-  final VoidCallback onMic;
+  final void Function(BuildContext buttonContext) onAdd;
   final VoidCallback onRemoveImage;
   final bool sending;
   final bool listening;
   final String? imagePath;
 
   @override
+  State<_ComposerCard> createState() => _ComposerCardState();
+}
+
+class _ComposerCardState extends State<_ComposerCard> {
+  final _focus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_onChanged);
+    _focus.addListener(_onChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant _ComposerCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_onChanged);
+      widget.controller.addListener(_onChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onChanged);
+    _focus.dispose();
+    super.dispose();
+  }
+
+  void _onChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return AppCard(
-      color: AppColors.primarySoft,
-      borderColor: AppColors.primary.withValues(alpha: 0.18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    final hasText = widget.controller.text.trim().isNotEmpty;
+    final showField = hasText || _focus.hasFocus || widget.listening;
+    return Column(
+      children: [
+        if (widget.imagePath != null && !kIsWeb) ...[
+          _AttachedPhotoChip(
+            path: widget.imagePath!,
+            label: l10n.photoAttached,
+            onRemove: widget.onRemoveImage,
+          ),
+          const SizedBox(height: 8),
+        ],
+        Container(
+          constraints: const BoxConstraints(minHeight: 56),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppColors.primarySoft,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.16),
+            ),
+          ),
+          child: Row(
             children: [
-              const Icon(Icons.auto_awesome_rounded, color: AppColors.primary),
-              const SizedBox(width: 8),
+              Builder(
+                builder: (buttonContext) {
+                  return _PillButton(
+                    tooltip: l10n.attachInformation,
+                    onPressed:
+                        widget.sending ? null : () => widget.onAdd(buttonContext),
+                    child: const Icon(
+                      Icons.add_rounded,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  );
+                },
+              ),
               Expanded(
-                child: Text(
-                  l10n.sendToFamilyBrain,
-                  style: Theme.of(context).textTheme.titleMedium,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: showField
+                      ? TextField(
+                          controller: widget.controller,
+                          focusNode: _focus,
+                          minLines: 1,
+                          maxLines: 2,
+                          textInputAction: TextInputAction.send,
+                          onSubmitted:
+                              widget.sending ? null : (_) => widget.onSubmit(),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: AppColors.primaryDark,
+                                fontWeight: FontWeight.w600,
+                              ),
+                          decoration: InputDecoration(
+                            isDense: true,
+                            hintText: widget.listening
+                                ? l10n.listening
+                                : l10n.tellFamilyBrain,
+                            hintStyle: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: AppColors.textMuted),
+                            filled: false,
+                            fillColor: Colors.transparent,
+                            contentPadding: EdgeInsets.zero,
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                          ),
+                        )
+                      : GestureDetector(
+                          onTap: () => _focus.requestFocus(),
+                          behavior: HitTestBehavior.opaque,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  l10n.sendToFamilyBrain,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                ),
+                                Text(
+                                  l10n.addToFamilyBrainHint,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: AppColors.textMuted,
+                                        fontSize: 11,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.addToFamilyBrainHint,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textMuted,
-                ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          if (imagePath != null && !kIsWeb) ...[
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: AppRadii.card,
-                  child: Image.file(
-                    File(imagePath!),
-                    height: 140,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                  ),
-                ),
-                PositionedDirectional(
-                  top: 4,
-                  end: 4,
-                  child: IconButton.filled(
-                    tooltip: l10n.removePhoto,
-                    onPressed: onRemoveImage,
-                    icon: const Icon(Icons.close_rounded, size: 18),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-          ],
-          TextField(
-            controller: controller,
-            minLines: 1,
-            maxLines: 3,
-            textInputAction: TextInputAction.send,
-            onSubmitted: sending ? null : (_) => onSubmit(),
-            decoration: InputDecoration(
-              hintText: l10n.tellFamilyBrain,
-              filled: true,
-              fillColor: AppColors.card,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Row(
-            children: [
-              IconButton(
-                tooltip: l10n.attachInformation,
-                onPressed: sending ? null : onAttach,
-                icon: const Icon(Icons.attach_file_outlined),
-              ),
-              IconButton(
-                tooltip: listening ? l10n.listening : l10n.voiceInput,
-                onPressed: sending ? null : onMic,
-                icon: Icon(
-                  listening ? Icons.stop_circle_outlined : Icons.mic_none_rounded,
-                  color: listening ? AppColors.urgent : null,
-                ),
-              ),
-              IconButton(
-                tooltip: l10n.askAi,
-                onPressed: onAskAi,
-                icon: const Icon(Icons.auto_awesome_outlined),
-              ),
-              const Spacer(),
-              IconButton.filled(
+              _PillButton(
                 tooltip: l10n.sendToFamilyBrain,
-                onPressed: sending ? null : onSubmit,
-                icon: sending
+                onPressed: widget.sending ? null : widget.onSubmit,
+                child: widget.sending
                     ? const SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
                       )
-                    : const Icon(Icons.send_rounded),
+                    : const Icon(
+                        Icons.auto_awesome_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
               ),
             ],
           ),
-        ],
+        ),
+      ],
+    );
+  }
+}
+
+class _PillButton extends StatelessWidget {
+  const _PillButton({
+    required this.onPressed,
+    required this.child,
+    required this.tooltip,
+  });
+
+  final VoidCallback? onPressed;
+  final Widget child;
+  final String tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: AppColors.primary,
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onPressed,
+          child: SizedBox(
+            width: 44,
+            height: 44,
+            child: Center(child: child),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AttachedPhotoChip extends StatelessWidget {
+  const _AttachedPhotoChip({
+    required this.path,
+    required this.label,
+    required this.onRemove,
+  });
+
+  final String path;
+  final String label;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.primarySoft,
+      borderRadius: AppRadii.card,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 6, 4, 6),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.file(
+                File(path),
+                width: 40,
+                height: 40,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => const SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: Icon(Icons.image_outlined, color: AppColors.primary),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+            ),
+            IconButton(
+              tooltip: AppLocalizations.of(context).removePhoto,
+              onPressed: onRemove,
+              icon: const Icon(Icons.close_rounded, size: 18),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -706,87 +906,60 @@ class _FamilyMembersRow extends StatelessWidget {
   const _FamilyMembersRow({
     required this.members,
     required this.currentUserId,
-    required this.familyName,
     required this.onViewFamily,
     required this.onAdd,
   });
 
   final List<AppUser> members;
   final String currentUserId;
-  final String familyName;
   final VoidCallback onViewFamily;
   final VoidCallback onAdd;
+
+  static const _avatarColors = [
+    Color(0xFFE8D5F2),
+    Color(0xFFD6E4FF),
+    Color(0xFFFFE0D1),
+    Color(0xFFD4F0E2),
+    Color(0xFFFFE8B8),
+  ];
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return AppCard(
-      onTap: onViewFamily,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.family,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    Text(
-                      familyName,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textMuted,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                l10n.viewFamily,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: AppColors.action,
-                    ),
-              ),
-              Icon(
-                Directionality.of(context) == TextDirection.rtl
-                    ? Icons.chevron_left_rounded
-                    : Icons.chevron_right_rounded,
-                size: 18,
-                color: AppColors.action,
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          SizedBox(
-            height: 78,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: members.length + 1,
-              separatorBuilder: (_, _) => const SizedBox(width: 12),
-              itemBuilder: (context, index) {
-                if (index == members.length) {
-                  return _MemberAvatar(
-                    label: l10n.addFamilyMember,
-                    onTap: onAdd,
-                    isAdd: true,
-                  );
-                }
-                final member = members[index];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: onViewFamily,
+          child: AppSectionHeader(title: l10n.family),
+        ),
+        SizedBox(
+          height: 86,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: members.length + 1,
+            separatorBuilder: (_, _) => const SizedBox(width: 14),
+            itemBuilder: (context, index) {
+              if (index == members.length) {
                 return _MemberAvatar(
-                  label: member.id == currentUserId
-                      ? l10n.you
-                      : member.name.split(' ').first,
-                  initial: member.name,
-                  onTap: () => context.push('/family/members/${member.id}'),
+                  label: l10n.addFamilyMember,
+                  onTap: onAdd,
+                  isAdd: true,
                 );
-              },
-            ),
+              }
+              final member = members[index];
+              return _MemberAvatar(
+                label: member.id == currentUserId
+                    ? l10n.you
+                    : member.name.split(' ').first,
+                initial: member.name,
+                color: _avatarColors[index % _avatarColors.length],
+                onTap: () => context.push('/family/members/${member.id}'),
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -796,12 +969,14 @@ class _MemberAvatar extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.initial,
+    this.color,
     this.isAdd = false,
   });
 
   final String label;
   final VoidCallback onTap;
   final String? initial;
+  final Color? color;
   final bool isAdd;
 
   @override
@@ -811,20 +986,35 @@ class _MemberAvatar extends StatelessWidget {
         : initial!.characters.first.toUpperCase();
     return InkWell(
       onTap: onTap,
-      borderRadius: AppRadii.icon,
+      customBorder: const CircleBorder(),
       child: SizedBox(
-        width: 68,
+        width: 64,
         child: Column(
           children: [
-            CircleAvatar(
-              radius: 22,
-              backgroundColor:
-                  isAdd ? AppColors.card : AppColors.primarySoft,
-              foregroundColor: AppColors.primaryDark,
-              child: isAdd
-                  ? const Icon(Icons.add_rounded, color: AppColors.primary)
-                  : Text(letter),
-            ),
+            if (isAdd)
+              CustomPaint(
+                painter: _DashedCirclePainter(
+                  color: AppColors.primary.withValues(alpha: 0.45),
+                ),
+                child: const SizedBox(
+                  width: 56,
+                  height: 56,
+                  child: Icon(Icons.add_rounded, color: AppColors.primary),
+                ),
+              )
+            else
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: color ?? AppColors.primarySoft,
+                foregroundColor: AppColors.primaryDark,
+                child: Text(
+                  letter,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
             const SizedBox(height: 6),
             Text(
               label,
@@ -839,3 +1029,35 @@ class _MemberAvatar extends StatelessWidget {
     );
   }
 }
+
+class _DashedCirclePainter extends CustomPainter {
+  const _DashedCirclePainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6;
+    const dash = 4.0;
+    const gap = 3.0;
+    final rect = Rect.fromLTWH(1, 1, size.width - 2, size.height - 2);
+    final path = Path()..addOval(rect);
+    for (final metric in path.computeMetrics()) {
+      var distance = 0.0;
+      while (distance < metric.length) {
+        final next = (distance + dash).clamp(0, metric.length).toDouble();
+        canvas.drawPath(metric.extractPath(distance, next), paint);
+        distance += dash + gap;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedCirclePainter oldDelegate) {
+    return oldDelegate.color != color;
+  }
+}
+

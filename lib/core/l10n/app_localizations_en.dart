@@ -128,18 +128,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String greetingMorning(String name) {
-    return 'Good morning, $name';
+    return 'Good morning, $name! 👋';
   }
 
   @override
   String greetingAfternoon(String name) {
-    return 'Good afternoon, $name';
+    return 'Good afternoon, $name! 👋';
   }
 
   @override
   String greetingEvening(String name) {
-    return 'Good evening, $name';
+    return 'Good evening, $name! 👋';
   }
+
+  @override
+  String get greetingSubtitle =>
+      'Everything is organized, let\'s win the day together 💜';
 
   @override
   String get currentFamily => 'Your family';
@@ -577,7 +581,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noUpcoming => 'Nothing urgent right now. Enjoy the calm.';
 
   @override
-  String get seeAllTasks => 'See all tasks';
+  String get seeAllTasks => 'Show all';
 
   @override
   String get personalTasks => 'Personal';
@@ -628,6 +632,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendToFamilyBrain => 'Send to Family Brain';
 
   @override
+  String get statPending => 'Pending';
+
+  @override
+  String get statImportant => 'Important';
+
+  @override
+  String get statConnected => 'Connected';
+
+  @override
+  String get everyone => 'Everyone';
+
+  @override
+  String get quickAccessCalendar => 'Calendar';
+
+  @override
+  String get quickAccessTasks => 'Tasks';
+
+  @override
+  String get quickAccessMySpace => 'My Space';
+
+  @override
+  String get quickAccessFamilySpace => 'Family Space';
+
+  @override
   String get quickAccess => 'Quick access';
 
   @override
@@ -647,7 +675,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addToFamilyBrainHint =>
-      'Family Brain can turn this into tasks, events, reminders, and lists.';
+      'Send info and we\'ll turn it into tasks, events, and more…';
 
   @override
   String get tellFamilyBrain => 'Tell Family Brain…';
@@ -677,7 +705,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addFamilyMember => 'Add';
 
   @override
-  String get todayActivity => 'Today';
+  String get todayActivity => 'Your day';
 
   @override
   String get phoneNotShared => 'Phone number is not shared';

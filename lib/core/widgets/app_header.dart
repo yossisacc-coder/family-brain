@@ -26,50 +26,67 @@ class AppHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const AppBrandMark(),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                subtitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: AppColors.primary,
-                    ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ],
-          ),
-        ),
-        trailing ??
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _HeaderIcon(
-                  tooltip: AppLocalizations.of(context).notifications,
-                  onPressed: onNotifications,
-                  icon: Icons.notifications_none_rounded,
-                  badge: unreadCount,
-                ),
-                if (onSettings != null)
-                  _HeaderIcon(
-                    tooltip: AppLocalizations.of(context).settings,
-                    onPressed: onSettings!,
-                    icon: Icons.settings_outlined,
-                  ),
-              ],
+        Row(
+          children: [
+            _HeaderIcon(
+              tooltip: AppLocalizations.of(context).notifications,
+              onPressed: onNotifications,
+              icon: Icons.notifications_none_rounded,
+              badge: unreadCount,
             ),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const AppBrandMark(size: 28),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      AppLocalizations.of(context).appTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            trailing ??
+                (onSettings == null
+                    ? const SizedBox(width: AppSpacing.touch, height: AppSpacing.touch)
+                    : _HeaderIcon(
+                        tooltip: AppLocalizations.of(context).settings,
+                        onPressed: onSettings!,
+                        icon: Icons.settings_outlined,
+                      )),
+          ],
+        ),
+        const SizedBox(height: 18),
+        Text(
+          title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.4,
+              ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          subtitle,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textMuted,
+                height: 1.35,
+              ),
+        ),
       ],
     );
   }
@@ -99,28 +116,19 @@ class _HeaderIcon extends StatelessWidget {
           IconButton(
             tooltip: tooltip,
             onPressed: onPressed,
-            icon: Icon(icon, color: AppColors.text),
+            icon: Icon(icon, color: AppColors.text, size: 24),
           ),
           if (badge > 0)
             Positioned.directional(
               textDirection: Directionality.of(context),
-              end: 6,
-              top: 6,
+              end: 10,
+              top: 10,
               child: Container(
-                constraints: const BoxConstraints(minWidth: 16),
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                decoration: BoxDecoration(
-                  color: AppColors.urgent,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  badge > 9 ? '9+' : '$badge',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                  ),
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
                 ),
               ),
             ),

@@ -323,20 +323,26 @@ abstract class AppLocalizations {
   /// No description provided for @greetingMorning.
   ///
   /// In en, this message translates to:
-  /// **'Good morning, {name}'**
+  /// **'Good morning, {name}! 👋'**
   String greetingMorning(String name);
 
   /// No description provided for @greetingAfternoon.
   ///
   /// In en, this message translates to:
-  /// **'Good afternoon, {name}'**
+  /// **'Good afternoon, {name}! 👋'**
   String greetingAfternoon(String name);
 
   /// No description provided for @greetingEvening.
   ///
   /// In en, this message translates to:
-  /// **'Good evening, {name}'**
+  /// **'Good evening, {name}! 👋'**
   String greetingEvening(String name);
+
+  /// No description provided for @greetingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything is organized, let\'s win the day together 💜'**
+  String get greetingSubtitle;
 
   /// No description provided for @currentFamily.
   ///
@@ -1175,7 +1181,7 @@ abstract class AppLocalizations {
   /// No description provided for @seeAllTasks.
   ///
   /// In en, this message translates to:
-  /// **'See all tasks'**
+  /// **'Show all'**
   String get seeAllTasks;
 
   /// No description provided for @personalTasks.
@@ -1262,6 +1268,54 @@ abstract class AppLocalizations {
   /// **'Send to Family Brain'**
   String get sendToFamilyBrain;
 
+  /// No description provided for @statPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get statPending;
+
+  /// No description provided for @statImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Important'**
+  String get statImportant;
+
+  /// No description provided for @statConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get statConnected;
+
+  /// No description provided for @everyone.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone'**
+  String get everyone;
+
+  /// No description provided for @quickAccessCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get quickAccessCalendar;
+
+  /// No description provided for @quickAccessTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks'**
+  String get quickAccessTasks;
+
+  /// No description provided for @quickAccessMySpace.
+  ///
+  /// In en, this message translates to:
+  /// **'My Space'**
+  String get quickAccessMySpace;
+
+  /// No description provided for @quickAccessFamilySpace.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Space'**
+  String get quickAccessFamilySpace;
+
   /// No description provided for @quickAccess.
   ///
   /// In en, this message translates to:
@@ -1301,7 +1355,7 @@ abstract class AppLocalizations {
   /// No description provided for @addToFamilyBrainHint.
   ///
   /// In en, this message translates to:
-  /// **'Family Brain can turn this into tasks, events, reminders, and lists.'**
+  /// **'Send info and we\'ll turn it into tasks, events, and more…'**
   String get addToFamilyBrainHint;
 
   /// No description provided for @tellFamilyBrain.
@@ -1361,7 +1415,7 @@ abstract class AppLocalizations {
   /// No description provided for @todayActivity.
   ///
   /// In en, this message translates to:
-  /// **'Today'**
+  /// **'Your day'**
   String get todayActivity;
 
   /// No description provided for @phoneNotShared.

@@ -30,6 +30,16 @@ class AppColors {
   static const Color completed = Color(0xFF6E7A76);
   static const Color trash = Color(0xFF7A7F8A);
 
+  /// Pastel Home dashboard tints. Semantic task colors above stay unchanged.
+  static const Color homeEvents = Color(0xFF7B61FF);
+  static const Color homeEventsSoft = Color(0xFFF3EEFF);
+  static const Color homeTasks = Color(0xFF3BAE7A);
+  static const Color homeTasksSoft = Color(0xFFE7F7EE);
+  static const Color homeReminders = Color(0xFFE89A4A);
+  static const Color homeRemindersSoft = Color(0xFFFFF3E8);
+  static const Color homeFamily = Color(0xFF4C82F0);
+  static const Color homeFamilySoft = Color(0xFFEAF1FE);
+
   static const Color background = Color(0xFFFFFFFF);
   static const Color surface = Color(0xFFF6F7FB);
   static const Color card = Color(0xFFFFFFFF);

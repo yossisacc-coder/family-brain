@@ -128,18 +128,21 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String greetingMorning(String name) {
-    return 'בוקר טוב, $name';
+    return 'בוקר טוב, $name! 👋';
   }
 
   @override
   String greetingAfternoon(String name) {
-    return 'צהריים טובים, $name';
+    return 'צהריים טובים, $name! 👋';
   }
 
   @override
   String greetingEvening(String name) {
-    return 'ערב טוב, $name';
+    return 'ערב טוב, $name! 👋';
   }
+
+  @override
+  String get greetingSubtitle => 'הכל מסודר, בואו ננצח את היום יחד 💜';
 
   @override
   String get currentFamily => 'המשפחה שלך';
@@ -574,7 +577,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get noUpcoming => 'אין דברים דחופים כרגע. אפשר לנשום.';
 
   @override
-  String get seeAllTasks => 'כל המשימות';
+  String get seeAllTasks => 'הצג הכל';
 
   @override
   String get personalTasks => 'אישיות';
@@ -622,7 +625,31 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
-  String get sendToFamilyBrain => 'שליחה ל־Family Brain';
+  String get sendToFamilyBrain => 'Send to Family Brain';
+
+  @override
+  String get statPending => 'ממתינות';
+
+  @override
+  String get statImportant => 'חשובות';
+
+  @override
+  String get statConnected => 'מחוברים';
+
+  @override
+  String get everyone => 'כולם';
+
+  @override
+  String get quickAccessCalendar => 'Calendar';
+
+  @override
+  String get quickAccessTasks => 'Tasks';
+
+  @override
+  String get quickAccessMySpace => 'My Space';
+
+  @override
+  String get quickAccessFamilySpace => 'Family Space';
 
   @override
   String get quickAccess => 'גישה מהירה';
@@ -644,7 +671,7 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get addToFamilyBrainHint =>
-      'Family Brain יכול להפוך את זה למשימות, אירועים, תזכורות ורשימות.';
+      'שלחו מידע ונהפוך אותו למשימות, אירועים ועוד...';
 
   @override
   String get tellFamilyBrain => 'ספרו ל־Family Brain…';
@@ -674,7 +701,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get addFamilyMember => 'הוספה';
 
   @override
-  String get todayActivity => 'היום';
+  String get todayActivity => 'היום שלך';
 
   @override
   String get phoneNotShared => 'מספר הטלפון אינו משותף';

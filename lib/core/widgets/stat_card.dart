@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_radii.dart';
-import '../theme/app_spacing.dart';
+import '../theme/app_shadows.dart';
 
 class StatCard extends StatelessWidget {
   const StatCard({
@@ -13,6 +13,7 @@ class StatCard extends StatelessWidget {
     required this.background,
     required this.onTap,
     this.icon,
+    this.subtitle,
   });
 
   final String label;
@@ -21,6 +22,7 @@ class StatCard extends StatelessWidget {
   final Color background;
   final VoidCallback onTap;
   final IconData? icon;
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -28,34 +30,59 @@ class StatCard extends StatelessWidget {
       child: Material(
         color: background,
         borderRadius: AppRadii.card,
-        clipBehavior: Clip.antiAlias,
+        elevation: 0,
         child: InkWell(
           onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (icon != null)
-                  Icon(icon, size: 18, color: color),
-                if (icon != null) const SizedBox(height: AppSpacing.sm),
-                Text(
-                  '$value',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: color,
-                        fontSize: 22,
-                      ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: AppColors.textMuted,
-                      ),
-                ),
-              ],
+          borderRadius: AppRadii.card,
+          child: Ink(
+            decoration: BoxDecoration(
+              color: background,
+              borderRadius: AppRadii.card,
+              boxShadow: AppShadows.card,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (icon != null)
+                    Icon(icon, size: 18, color: color),
+                  if (icon != null) const SizedBox(height: 8),
+                  Text(
+                    '$value',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: color,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          height: 1.1,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.text,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 11,
+                        ),
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 1),
+                    Text(
+                      subtitle!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: AppColors.textMuted,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 10,
+                          ),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         ),
