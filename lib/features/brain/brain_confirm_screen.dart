@@ -6,8 +6,8 @@ import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:uuid/uuid.dart';
 
+import '../../core/brain/ai/action_engine.dart';
 import '../../core/brain/brain_activity.dart';
 import '../../core/brain/family_brain_parser.dart';
 import '../../core/notifications/local_reminder_scheduler.dart';
@@ -371,15 +371,14 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
       _error = null;
     });
     try {
-      final created = <TaskItem>[];
-      for (final draft in _drafts) {
-        final task = draft.toTaskItem(
-          id: const Uuid().v4(),
-          familyId: user.familyId!,
-          creatorId: user.id,
-        );
-        await ref.read(taskRepositoryProvider).createTask(task);
-        created.add(task);
+      final written = await ActionEngine(
+        repository: ref.read(taskRepositoryProvider),
+      ).applyDrafts(
+        drafts: _drafts,
+        familyId: user.familyId!,
+        creatorId: user.id,
+      );
+      for (final task in written.written) {
         await LocalReminderScheduler.sync(task);
       }
       BrainActivityLog.record(

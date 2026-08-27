@@ -27,3 +27,9 @@ input, and structured JSON output. Gemini 2.0 Flash was shut down on
 June 1, 2026 and must not be used.
 
 If the gateway is unreachable, Family Brain uses the on-device parser.
+
+Flutter maps gateway JSON into a provider-independent schema
+(`create_task`, `create_event`, `create_reminder`, `create_list_item`, …)
+before the Action Engine writes tasks. Replacing Gemini later means a new
+adapter only — not new task models, UI, or persistence.
+
