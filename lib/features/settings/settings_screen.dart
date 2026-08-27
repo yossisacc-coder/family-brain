@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/config/app_config.dart';
+import '../../core/theme/app_accent.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/appearance.dart';
 import '../../data/providers.dart';
+import 'accent_controller.dart';
 import 'appearance_controller.dart';
 import 'locale_controller.dart';
 
@@ -20,12 +22,14 @@ class SettingsScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final locale = ref.watch(localeControllerProvider);
     final appearance = ref.watch(appearanceControllerProvider);
+    final accent = ref.watch(accentControllerProvider);
     final user = ref.watch(currentUserProvider).valueOrNull;
     final family = ref.watch(currentFamilyProvider).valueOrNull;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settings)),
       body: ListView(
+        key: const Key('settings-list'),
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
         children: [
           if (!publicMode && user != null)
@@ -132,6 +136,36 @@ class SettingsScreen extends ConsumerWidget {
                   color: AppColors.textMuted,
                 ),
           ),
+          const SizedBox(height: 24),
+          Text(
+            l10n.appColor,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.appColorHint,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textMuted,
+                ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              for (final option in AppAccent.values)
+                _AppColorSwatch(
+                  accent: option,
+                  label: option.label(l10n),
+                  selected: option == accent,
+                  onTap: () {
+                    ref
+                        .read(accentControllerProvider.notifier)
+                        .setAccent(option);
+                  },
+                ),
+            ],
+          ),
           if (!publicMode) ...[
             const SizedBox(height: 16),
             ListTile(
@@ -192,6 +226,62 @@ class SettingsScreen extends ConsumerWidget {
                 ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AppColorSwatch extends StatelessWidget {
+  const _AppColorSwatch({
+    required this.accent,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final AppAccent accent;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: Tooltip(
+        message: label,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            key: Key('app-color-${accent.name}'),
+            onTap: onTap,
+            customBorder: const CircleBorder(),
+            child: Ink(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: accent.color,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: selected ? AppColors.text : Colors.white,
+                  width: selected ? 3 : 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: accent.color.withValues(alpha: 0.28),
+                    blurRadius: selected ? 8 : 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: selected
+                  ? const Icon(Icons.check_rounded, color: Colors.white, size: 20)
+                  : null,
+            ),
+          ),
+        ),
       ),
     );
   }

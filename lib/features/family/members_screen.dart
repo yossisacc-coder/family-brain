@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' hide Family;
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/appearance.dart';
 import '../../core/widgets/app_notice.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_view.dart';
@@ -107,7 +108,7 @@ class MembersScreen extends ConsumerWidget {
                     child: Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: AppColors.primarySoft,
+                        color: context.palette.primarySoft,
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Row(
@@ -134,7 +135,7 @@ class MembersScreen extends ConsumerWidget {
                               ],
                             ),
                           ),
-                          const Icon(Icons.copy_rounded, color: AppColors.primary),
+                          Icon(Icons.copy_rounded, color: context.palette.primary),
                         ],
                       ),
                     ),

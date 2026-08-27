@@ -13,6 +13,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 
 import '../../core/brain/family_brain_ai.dart';
 import '../../core/brain/speech_locale.dart';
+import '../../core/brain/voice_listen_patience.dart';
 import '../settings/locale_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/appearance.dart';
@@ -45,10 +46,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   var _sending = false;
   var _listening = false;
   var _heardSpeech = false;
+  var _voiceSession = false;
+  var _restartingListen = false;
   var _localeAttempt = 0;
   List<String?> _localeAttempts = const [null];
   String? _imagePath;
   Timer? _listenWatchdog;
+  Timer? _silenceTimer;
+  DateTime? _voiceStartedAt;
   BrainStatusKind? _brainStatus;
   String? _brainStatusMessage;
 
@@ -87,6 +92,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void dispose() {
     _listenWatchdog?.cancel();
+    _silenceTimer?.cancel();
     _composer.dispose();
     super.dispose();
   }
@@ -387,6 +393,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     IconData icon,
     String label,
   ) {
+    final palette = context.palette;
     return PopupMenuItem(
       value: value,
       child: Row(
@@ -395,10 +402,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.primarySoft,
+              color: palette.primarySoft,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: AppColors.primary, size: 20),
+            child: Icon(icon, color: palette.primary, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -449,11 +456,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _toggleVoice(AppLocalizations l10n) async {
-    if (_listening) {
+    if (_listening || _voiceSession) {
+      _voiceSession = false;
       await _stopVoice(l10n);
       return;
     }
     try {
+      _voiceSession = true;
+      _voiceStartedAt = DateTime.now();
       final ready = await _speech.initialize(
         debugLogging: true,
         onError: (error) {
@@ -470,8 +480,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           if (msg.contains('permission')) {
             _setBrainStatus(BrainStatusKind.error, l10n.voiceDenied);
           } else if (msg.contains('no_match') || msg.contains('speech_timeout')) {
+            if (_voiceSession && _withinListenBudget()) {
+              _listenCurrent(l10n, continuation: true);
+              return;
+            }
+            _voiceSession = false;
             _setBrainStatus(BrainStatusKind.error, l10n.voiceEmpty);
           } else {
+            _voiceSession = false;
             _setBrainStatus(BrainStatusKind.error, l10n.voiceFailed);
           }
         },
@@ -479,12 +495,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           _sttLog('status=$status');
           if (!mounted) return;
           if (status == 'notListening' || status == 'done') {
-            setState(() => _listening = false);
+            if (_voiceSession &&
+                _withinListenBudget() &&
+                !_restartingListen) {
+              _restartingListen = true;
+              Future<void>.delayed(const Duration(milliseconds: 400), () async {
+                _restartingListen = false;
+                if (!mounted || !_voiceSession || !_withinListenBudget()) {
+                  return;
+                }
+                if (_speech.isListening) return;
+                await _listenCurrent(l10n, continuation: true);
+              });
+              return;
+            }
+            if (!_voiceSession) {
+              setState(() => _listening = false);
+            }
           }
         },
       );
       _sttLog('initialize ready=$ready');
       if (!ready) {
+        _voiceSession = false;
         if (mounted) _setBrainStatus(BrainStatusKind.error, l10n.voiceUnavailable);
         return;
       }
@@ -493,9 +526,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _localeAttempt = 0;
       _sttLog('appLang=$appLang attempts=$_localeAttempts');
       if (!mounted) return;
+      _armSessionWatchdog(l10n);
       await _listenCurrent(l10n);
     } catch (error) {
       _sttLog('toggle failed $error');
+      _voiceSession = false;
       if (mounted) {
         setState(() => _listening = false);
         _setBrainStatus(BrainStatusKind.error, l10n.voiceUnavailable);
@@ -503,28 +538,57 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  Future<void> _listenCurrent(AppLocalizations l10n) async {
-    if (!mounted) return;
+  bool _withinListenBudget() {
+    final started = _voiceStartedAt;
+    if (!_voiceSession || started == null) return false;
+    return DateTime.now().difference(started) < VoiceListenPatience.listenFor;
+  }
+
+  void _armSessionWatchdog(AppLocalizations l10n) {
+    _listenWatchdog?.cancel();
+    _listenWatchdog = Timer(VoiceListenPatience.watchdog, () {
+      _voiceSession = false;
+      _stopVoice(l10n);
+    });
+  }
+
+  void _armSilenceTimer(AppLocalizations l10n) {
+    _silenceTimer?.cancel();
+    _silenceTimer = Timer(VoiceListenPatience.silenceTimeout, () {
+      _voiceSession = false;
+      _stopVoice(l10n);
+    });
+  }
+
+  void _noteContinuedSpeech(AppLocalizations l10n) {
+    if (!_voiceSession) return;
+    _armSilenceTimer(l10n);
+  }
+
+  Future<void> _listenCurrent(
+    AppLocalizations l10n, {
+    bool continuation = false,
+  }) async {
+    if (!mounted || !_voiceSession) return;
     final localeId = _localeAttempts[_localeAttempt];
     setState(() {
       _listening = true;
-      _heardSpeech = false;
+      if (!continuation) _heardSpeech = false;
       _brainStatus = BrainStatusKind.listening;
       _brainStatusMessage = l10n.listening;
     });
-    _listenWatchdog?.cancel();
-    _listenWatchdog = Timer(const Duration(seconds: 8), () {
-      _stopVoice(l10n);
-    });
-    _sttLog('listen locale=${localeId ?? 'device_default'}');
-    if (_localeAttempt > 0) {
+    if (!continuation) {
+      _armSilenceTimer(l10n);
+    }
+    _sttLog('listen locale=${localeId ?? 'device_default'} continuation=$continuation');
+    if (_localeAttempt > 0 || continuation) {
       try {
         await _speech.cancel();
       } catch (_) {}
     }
     final options = SpeechListenOptions(
-      listenFor: const Duration(seconds: 8),
-      pauseFor: const Duration(seconds: 2),
+      listenFor: VoiceListenPatience.listenFor,
+      pauseFor: VoiceListenPatience.pauseFor,
       partialResults: true,
       listenMode: ListenMode.dictation,
       cancelOnError: false,
@@ -533,18 +597,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     try {
       await _speech.listen(
         listenOptions: options,
+        onSoundLevelChange: (level) {
+          if (!mounted || !_voiceSession) return;
+          if (level >= VoiceListenPatience.speakingLevel) {
+            _heardSpeech = true;
+            _noteContinuedSpeech(l10n);
+          }
+        },
         onResult: (result) {
           if (!mounted) return;
           final text = result.recognizedWords.trim();
           if (text.isEmpty) return;
           _heardSpeech = true;
+          _noteContinuedSpeech(l10n);
           _composer.value = TextEditingValue(
             text: text,
             selection: TextSelection.collapsed(offset: text.length),
           );
-          if (result.finalResult) {
-            _stopVoice(l10n);
-          }
+          // Do not stop on finalResult. Short pauses must not start a response.
         },
       );
     } catch (error) {
@@ -555,6 +625,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return;
       }
       if (mounted) {
+        _voiceSession = false;
         setState(() => _listening = false);
         _setBrainStatus(BrainStatusKind.error, l10n.voiceUnavailable);
       }
@@ -564,6 +635,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _stopVoice([AppLocalizations? l10n]) async {
     _listenWatchdog?.cancel();
     _listenWatchdog = null;
+    _silenceTimer?.cancel();
+    _silenceTimer = null;
+    _voiceSession = false;
     try {
       await _speech.stop();
     } catch (_) {}
@@ -707,6 +781,11 @@ class _ComposerCardState extends State<_ComposerCard> {
     if (mounted) setState(() {});
   }
 
+  bool get _canSend {
+    return widget.controller.text.trim().isNotEmpty ||
+        (widget.imagePath != null && widget.imagePath!.isNotEmpty);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -725,12 +804,15 @@ class _ComposerCardState extends State<_ComposerCard> {
           color: palette.primarySoft,
           borderRadius: BorderRadius.circular(26),
           child: Container(
-            constraints: const BoxConstraints(minHeight: 52),
-            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+            constraints: const BoxConstraints(minHeight: 56),
+            padding: const EdgeInsetsDirectional.fromSTEB(5, 5, 5, 5),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(26),
               border: Border.all(
-                color: palette.primary.withValues(alpha: 0.16),
+                color: widget.listening
+                    ? palette.primary
+                    : palette.primary.withValues(alpha: 0.16),
+                width: widget.listening ? 2 : 1,
               ),
             ),
             child: Row(
@@ -750,6 +832,14 @@ class _ComposerCardState extends State<_ComposerCard> {
                       );
                     },
                   ),
+                  if (widget.listening)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(start: 4),
+                      child: _ListeningDot(
+                        key: const Key('home-listening-indicator'),
+                        tooltip: l10n.listening,
+                      ),
+                    ),
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -766,8 +856,9 @@ class _ComposerCardState extends State<_ComposerCard> {
                         minLines: 1,
                         maxLines: 3,
                         onTap: () => _focus.requestFocus(),
-                        onSubmitted:
-                            widget.sending ? null : (_) => widget.onSubmit(),
+                        onSubmitted: widget.sending || !_canSend
+                            ? null
+                            : (_) => widget.onSubmit(),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: palette.primaryDark,
                               fontWeight: FontWeight.w600,
@@ -797,21 +888,24 @@ class _ComposerCardState extends State<_ComposerCard> {
                   IconButton(
                     tooltip: widget.listening ? l10n.listening : l10n.voiceInput,
                     onPressed: widget.sending ? null : widget.onMic,
+                    constraints: const BoxConstraints(
+                      minWidth: 44,
+                      minHeight: 44,
+                    ),
                     icon: Icon(
                       widget.listening
                           ? Icons.stop_circle_outlined
                           : Icons.mic_none_rounded,
-                      color: palette.primary,
+                      color: widget.listening
+                          ? palette.primary
+                          : palette.primary,
                     ),
                   ),
-                  _PillButton(
+                  _ComposerSendButton(
+                    enabled: _canSend && !widget.sending,
+                    sending: widget.sending,
                     tooltip: l10n.sendToFamilyBrain,
-                    onPressed: widget.sending ? null : widget.onSubmit,
-                    child: Icon(
-                      Icons.auto_awesome_rounded,
-                      color: Colors.white,
-                      size: 20,
-                    ),
+                    onPressed: widget.onSubmit,
                   ),
                 ],
               ),
@@ -844,10 +938,11 @@ class _PillButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Tooltip(
       message: tooltip,
       child: Material(
-        color: AppColors.primary,
+        color: palette.primary,
         shape: const CircleBorder(),
         child: InkWell(
           customBorder: const CircleBorder(),
@@ -857,6 +952,86 @@ class _PillButton extends StatelessWidget {
             height: 40,
             child: Center(child: child),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ComposerSendButton extends StatelessWidget {
+  const _ComposerSendButton({
+    required this.enabled,
+    required this.sending,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  final bool enabled;
+  final bool sending;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  static const buttonKey = Key('home-ai-send');
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        key: buttonKey,
+        color: enabled ? palette.primary : palette.border,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          onTap: enabled ? onPressed : null,
+          borderRadius: BorderRadius.circular(14),
+          child: SizedBox(
+            width: 48,
+            height: 48,
+            child: Center(
+              child: sending
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Icon(
+                      Icons.send_rounded,
+                      color: enabled ? Colors.white : palette.textMuted,
+                      size: 22,
+                    ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ListeningDot extends StatelessWidget {
+  const _ListeningDot({super.key, required this.tooltip});
+
+  final String tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return Tooltip(
+      message: tooltip,
+      child: Container(
+        width: 28,
+        height: 28,
+        decoration: BoxDecoration(
+          color: palette.primary.withValues(alpha: 0.16),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          Icons.graphic_eq_rounded,
+          size: 16,
+          color: palette.primary,
         ),
       ),
     );
@@ -876,8 +1051,9 @@ class _AttachedPhotoChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Material(
-      color: AppColors.primarySoft,
+      color: palette.primarySoft,
       borderRadius: AppRadii.card,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(8, 6, 4, 6),
@@ -890,10 +1066,10 @@ class _AttachedPhotoChip extends StatelessWidget {
                 width: 40,
                 height: 40,
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => const SizedBox(
+                errorBuilder: (_, _, _) => SizedBox(
                   width: 40,
                   height: 40,
-                  child: Icon(Icons.image_outlined, color: AppColors.primary),
+                  child: Icon(Icons.image_outlined, color: palette.primary),
                 ),
               ),
             ),
@@ -1000,6 +1176,7 @@ class _MemberAvatar extends StatelessWidget {
     final letter = (initial == null || initial!.isEmpty)
         ? '+'
         : initial!.characters.first.toUpperCase();
+    final palette = context.palette;
     return InkWell(
       onTap: onTap,
       customBorder: const CircleBorder(),
@@ -1010,19 +1187,19 @@ class _MemberAvatar extends StatelessWidget {
             if (isAdd)
               CustomPaint(
                 painter: _DashedCirclePainter(
-                  color: AppColors.primary.withValues(alpha: 0.45),
+                  color: palette.primary.withValues(alpha: 0.45),
                 ),
-                child: const SizedBox(
+                child: SizedBox(
                   width: 56,
                   height: 56,
-                  child: Icon(Icons.add_rounded, color: AppColors.primary),
+                  child: Icon(Icons.add_rounded, color: palette.primary),
                 ),
               )
             else
               CircleAvatar(
                 radius: 28,
-                backgroundColor: color ?? AppColors.primarySoft,
-                foregroundColor: AppColors.primaryDark,
+                backgroundColor: color ?? palette.primarySoft,
+                foregroundColor: palette.primaryDark,
                 child: Text(
                   letter,
                   style: const TextStyle(

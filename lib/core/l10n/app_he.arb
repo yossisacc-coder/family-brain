@@ -282,5 +282,20 @@
   "voiceLanguageUnsupported": "זיהוי דיבור בעברית אינו זמין במכשיר זה.",
   "voiceEmpty": "לא נקלט דיבור. נסו שוב.",
   "imageFailed": "לא ניתן לפתוח את בוחר התמונות.",
-  "imageTooLarge": "התמונה גדולה מדי. בחרו תמונה קטנה יותר."
+  "imageTooLarge": "התמונה גדולה מדי. בחרו תמונה קטנה יותר.",
+  "send": "שליחה",
+  "moreDetails": "פרטים נוספים",
+  "appColor": "צבע האפליקציה",
+  "appColorHint": "בחרו צבע הדגשה לכפתורים, סמלים וקישורים. הרקע נשאר בהיר ונקי.",
+  "colorPurple": "סגול",
+  "colorBlue": "כחול",
+  "colorGreen": "ירוק",
+  "colorOrange": "כתום",
+  "colorRed": "אדום",
+  "colorPink": "ורוד",
+  "colorTeal": "טורקיז",
+  "colorIndigo": "אינדיגו",
+  "colorCyan": "ציאן",
+  "colorSlate": "אפור-כחלחל",
+  "colorCoral": "אלמוג"
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:family_brain/core/l10n/app_localizations.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/appearance.dart';
 import '../../domain/models/app_user.dart';
 import '../../domain/models/task_item.dart';
 
@@ -27,7 +28,7 @@ class HomeDayTask extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final assignee = members.where((m) => m.id == task.assigneeId).firstOrNull;
-    final accent = _accentFor(task);
+    final accent = _accentFor(context, task);
     final time = _timeLabel(task);
 
     return Material(
@@ -169,13 +170,13 @@ class HomeDayTask extends StatelessWidget {
     return '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
   }
 
-  static Color _accentFor(TaskItem task) {
+  static Color _accentFor(BuildContext context, TaskItem task) {
     return switch (task.kind) {
       InformationKind.event => AppColors.homeEvents,
       InformationKind.task => AppColors.homeTasks,
       InformationKind.reminder => AppColors.homeReminders,
       InformationKind.list => AppColors.homeFamily,
-      InformationKind.information => AppColors.primary,
+      InformationKind.information => context.palette.primary,
     };
   }
 
@@ -200,8 +201,8 @@ class _MiniAvatar extends StatelessWidget {
     final letter = name.isEmpty ? '?' : name.characters.first.toUpperCase();
     return CircleAvatar(
       radius: 8,
-      backgroundColor: AppColors.primarySoft,
-      foregroundColor: AppColors.primaryDark,
+      backgroundColor: context.palette.primarySoft,
+      foregroundColor: context.palette.primaryDark,
       child: Text(
         letter,
         style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700),

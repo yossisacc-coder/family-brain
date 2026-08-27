@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
+import '../theme/appearance.dart';
 
 class LoadingView extends StatelessWidget {
   const LoadingView({super.key, this.label});
@@ -13,7 +13,7 @@ class LoadingView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CircularProgressIndicator(color: AppColors.primary),
+          CircularProgressIndicator(color: context.palette.primary),
           if (label != null) ...[
             const SizedBox(height: 12),
             Text(label!, style: Theme.of(context).textTheme.bodyMedium),

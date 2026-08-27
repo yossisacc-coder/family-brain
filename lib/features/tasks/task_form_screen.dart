@@ -254,6 +254,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
         ),
       ),
       body: ListView(
+        key: const Key('task-edit-form'),
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
           TextField(
@@ -310,38 +311,36 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
             onChanged: (value) => setState(() => _assigneeId = value),
           ),
           const SizedBox(height: 16),
-          Text(l10n.changeStatus, style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: TaskStatus.values.map((status) {
-              return ChoiceChip(
-                avatar: Icon(TaskSemantics.statusIcon(status), size: 18),
-                label: Text(TaskSemantics.statusLabel(l10n, status)),
-                selected: _status == status,
-                onSelected: (_) => setState(() => _status = status),
-              );
-            }).toList(),
+          DropdownButtonFormField<TaskStatus>(
+            // ignore: deprecated_member_use
+            value: _status,
+            decoration: InputDecoration(labelText: l10n.changeStatus),
+            items: [
+              for (final status in TaskStatus.values)
+                DropdownMenuItem(
+                  value: status,
+                  child: Text(TaskSemantics.statusLabel(l10n, status)),
+                ),
+            ],
+            onChanged: (value) {
+              if (value != null) setState(() => _status = value);
+            },
           ),
           const SizedBox(height: 16),
-          Text(l10n.priority, style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: TaskPriority.values.map((priority) {
-              return ChoiceChip(
-                avatar: Icon(
-                  TaskSemantics.priorityIcon(priority),
-                  size: 18,
-                  color: TaskSemantics.priorityColor(priority),
+          DropdownButtonFormField<TaskPriority>(
+            // ignore: deprecated_member_use
+            value: _priority,
+            decoration: InputDecoration(labelText: l10n.priority),
+            items: [
+              for (final priority in TaskPriority.values)
+                DropdownMenuItem(
+                  value: priority,
+                  child: Text(TaskSemantics.priorityLabel(l10n, priority)),
                 ),
-                label: Text(TaskSemantics.priorityLabel(l10n, priority)),
-                selected: _priority == priority,
-                onSelected: (_) => setState(() => _priority = priority),
-              );
-            }).toList(),
+            ],
+            onChanged: (value) {
+              if (value != null) setState(() => _priority = value);
+            },
           ),
           const SizedBox(height: 8),
           ListTile(

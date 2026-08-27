@@ -6,7 +6,7 @@ import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/theme/app_colors.dart';
+import '../../core/theme/appearance.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
@@ -272,7 +272,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         label: Text(label),
         selected: selected,
         onSelected: (_) => onTap(),
-        selectedColor: AppColors.primarySoft,
+        selectedColor: context.palette.primarySoft,
         showCheckmark: false,
       ),
     );

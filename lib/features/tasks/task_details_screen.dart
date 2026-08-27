@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 
 import '../../core/notifications/local_reminder_scheduler.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radii.dart';
+import '../../core/theme/appearance.dart';
 import '../../core/theme/task_semantics.dart';
 import '../../core/widgets/app_notice.dart';
 import '../../core/widgets/error_view.dart';
@@ -56,6 +58,7 @@ class TaskDetailsScreen extends ConsumerWidget {
         members.where((member) => member.id == task.assigneeId).firstOrNull;
     final creator =
         members.where((member) => member.id == task.creatorId).firstOrNull;
+    final palette = context.palette;
 
     return Scaffold(
       appBar: AppBar(
@@ -70,10 +73,12 @@ class TaskDetailsScreen extends ConsumerWidget {
         ],
       ),
       body: ListView(
+        key: const Key('task-details-view'),
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
           Text(
             task.title,
+            key: const Key('task-details-title'),
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
@@ -84,81 +89,107 @@ class TaskDetailsScreen extends ConsumerWidget {
               task.notes!,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     height: 1.4,
+                    color: AppColors.textMuted,
                   ),
             ),
           ],
           const SizedBox(height: 18),
-          _labeledValue(
-            context,
-            l10n.brainType,
-            switch (task.kind) {
-              InformationKind.task => l10n.kindTask,
-              InformationKind.event => l10n.kindEvent,
-              InformationKind.reminder => l10n.kindReminder,
-              InformationKind.list => l10n.kindList,
-              InformationKind.information => l10n.kindInformation,
-            },
-            icon: switch (task.kind) {
-              InformationKind.event => Icons.event_outlined,
-              InformationKind.reminder => Icons.alarm_outlined,
-              InformationKind.list => Icons.list_alt_rounded,
-              InformationKind.information => Icons.info_outline_rounded,
-              InformationKind.task => Icons.task_alt_rounded,
-            },
+          _DetailsCard(
+            children: [
+              _labeledValue(
+                context,
+                l10n.changeStatus,
+                TaskSemantics.statusLabel(l10n, task.status),
+                icon: TaskSemantics.statusIcon(task.status),
+                color: TaskSemantics.statusColor(task.status),
+              ),
+              _labeledValue(
+                context,
+                l10n.priority,
+                TaskSemantics.priorityLabel(l10n, task.priority),
+                icon: TaskSemantics.priorityIcon(task.priority),
+                color: TaskSemantics.priorityColor(task.priority),
+              ),
+              _labeledValue(
+                context,
+                l10n.dueDate,
+                task.dueDate == null
+                    ? l10n.noDueDate
+                    : (task.hasDueTime
+                            ? DateFormat.yMMMd().add_jm()
+                            : DateFormat.yMMMd())
+                        .format(task.dueDate!.toLocal()),
+                icon: Icons.event_outlined,
+              ),
+              _labeledValue(
+                context,
+                l10n.assignee,
+                assignee?.name ?? l10n.unassigned,
+                icon: Icons.person_outline,
+              ),
+              _labeledValue(
+                context,
+                l10n.taskType,
+                task.type == TaskType.personal ? l10n.personal : l10n.familyType,
+                icon: task.type == TaskType.personal
+                    ? Icons.person_outline
+                    : Icons.groups_outlined,
+                last: true,
+              ),
+            ],
           ),
-          _labeledValue(
-            context,
-            l10n.changeStatus,
-            TaskSemantics.statusLabel(l10n, task.status),
-            icon: TaskSemantics.statusIcon(task.status),
-            color: TaskSemantics.statusColor(task.status),
+          const SizedBox(height: 8),
+          Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              key: const Key('task-details-more'),
+              tilePadding: EdgeInsets.zero,
+              childrenPadding: const EdgeInsets.only(bottom: 8),
+              iconColor: palette.primary,
+              collapsedIconColor: AppColors.textMuted,
+              title: Text(
+                l10n.moreDetails,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: palette.primary,
+                    ),
+              ),
+              children: [
+                _labeledValue(
+                  context,
+                  l10n.brainType,
+                  switch (task.kind) {
+                    InformationKind.task => l10n.kindTask,
+                    InformationKind.event => l10n.kindEvent,
+                    InformationKind.reminder => l10n.kindReminder,
+                    InformationKind.list => l10n.kindList,
+                    InformationKind.information => l10n.kindInformation,
+                  },
+                  icon: switch (task.kind) {
+                    InformationKind.event => Icons.event_outlined,
+                    InformationKind.reminder => Icons.alarm_outlined,
+                    InformationKind.list => Icons.list_alt_rounded,
+                    InformationKind.information => Icons.info_outline_rounded,
+                    InformationKind.task => Icons.task_alt_rounded,
+                  },
+                ),
+                _labeledValue(
+                  context,
+                  l10n.reminder,
+                  task.reminderAt == null
+                      ? l10n.noReminder
+                      : DateFormat.yMMMd().add_jm().format(task.reminderAt!),
+                  icon: Icons.alarm_outlined,
+                ),
+                _labeledValue(
+                  context,
+                  l10n.createdBy,
+                  '${creator?.name ?? l10n.unassigned} · ${DateFormat.yMMMd().format(task.createdAt)}',
+                  last: true,
+                ),
+              ],
+            ),
           ),
-          _labeledValue(
-            context,
-            l10n.priority,
-            TaskSemantics.priorityLabel(l10n, task.priority),
-            icon: TaskSemantics.priorityIcon(task.priority),
-            color: TaskSemantics.priorityColor(task.priority),
-          ),
-          _labeledValue(
-            context,
-            l10n.dueDate,
-            task.dueDate == null
-                ? l10n.noDueDate
-                : (task.hasDueTime
-                        ? DateFormat.yMMMd().add_jm()
-                        : DateFormat.yMMMd())
-                    .format(task.dueDate!.toLocal()),
-            icon: Icons.event_outlined,
-          ),
-          _labeledValue(
-            context,
-            l10n.assignee,
-            assignee?.name ?? l10n.unassigned,
-            icon: Icons.person_outline,
-          ),
-          _labeledValue(
-            context,
-            l10n.reminder,
-            task.reminderAt == null
-                ? l10n.noReminder
-                : DateFormat.yMMMd().add_jm().format(task.reminderAt!),
-            icon: Icons.alarm_outlined,
-          ),
-          _labeledValue(
-            context,
-            l10n.taskType,
-            task.type == TaskType.personal ? l10n.personal : l10n.familyType,
-            icon: task.type == TaskType.personal
-                ? Icons.person_outline
-                : Icons.groups_outlined,
-          ),
-          _labeledValue(
-            context,
-            l10n.createdBy,
-            '${creator?.name ?? l10n.unassigned} · ${DateFormat.yMMMd().format(task.createdAt)}',
-          ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           if (task.isTrashed) ...[
             PrimaryButton(
               label: l10n.restoreTask,
@@ -208,31 +239,37 @@ class TaskDetailsScreen extends ConsumerWidget {
     String value, {
     IconData? icon,
     Color? color,
+    bool last = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: last ? 0 : 14),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (icon != null) ...[
             Icon(icon, size: 18, color: color ?? AppColors.textMuted),
-            const SizedBox(width: 8),
+            const SizedBox(width: 10),
           ],
           Expanded(
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textMuted,
-                  ),
-            ),
-          ),
-          Flexible(
-            child: Text(
-              value,
-              textAlign: TextAlign.end,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: color,
-                  ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textMuted,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: color ?? AppColors.text,
+                      ),
+                ),
+              ],
             ),
           ),
         ],
@@ -341,5 +378,31 @@ class TaskDetailsScreen extends ConsumerWidget {
     if (!context.mounted) return;
     context.pop();
     AppNotice.showAfterNavigation(l10n.taskDeletedForever);
+  }
+}
+
+class _DetailsCard extends StatelessWidget {
+  const _DetailsCard({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.card,
+      borderRadius: AppRadii.card,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        decoration: BoxDecoration(
+          borderRadius: AppRadii.card,
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: children,
+        ),
+      ),
+    );
   }
 }

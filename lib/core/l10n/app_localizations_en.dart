@@ -878,4 +878,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get imageTooLarge => 'That photo is too large. Choose a smaller one.';
+
+  @override
+  String get send => 'Send';
+
+  @override
+  String get moreDetails => 'More details';
+
+  @override
+  String get appColor => 'App Color';
+
+  @override
+  String get appColorHint =>
+      'Choose an accent for buttons, icons, and highlights. The background stays white and clean.';
+
+  @override
+  String get colorPurple => 'Purple';
+
+  @override
+  String get colorBlue => 'Blue';
+
+  @override
+  String get colorGreen => 'Green';
+
+  @override
+  String get colorOrange => 'Orange';
+
+  @override
+  String get colorRed => 'Red';
+
+  @override
+  String get colorPink => 'Pink';
+
+  @override
+  String get colorTeal => 'Teal';
+
+  @override
+  String get colorIndigo => 'Indigo';
+
+  @override
+  String get colorCyan => 'Cyan';
+
+  @override
+  String get colorSlate => 'Slate';
+
+  @override
+  String get colorCoral => 'Coral';
 }

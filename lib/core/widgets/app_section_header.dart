@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
+import '../theme/appearance.dart';
 
 class AppSectionHeader extends StatelessWidget {
   const AppSectionHeader({
@@ -33,7 +33,7 @@ class AppSectionHeader extends StatelessWidget {
             TextButton(
               onPressed: onAction,
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.primary,
+                foregroundColor: context.palette.primary,
                 minimumSize: const Size(AppSpacing.touch, 40),
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -41,7 +41,7 @@ class AppSectionHeader extends StatelessWidget {
               child: Text(
                 actionLabel!,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: AppColors.primary,
+                      color: context.palette.primary,
                       fontWeight: FontWeight.w700,
                     ),
               ),
@@ -59,16 +59,17 @@ class AppBrandMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: AppColors.primarySoft,
+        color: palette.primarySoft,
         shape: BoxShape.circle,
       ),
       child: Icon(
         Icons.psychology_rounded,
-        color: AppColors.primary,
+        color: palette.primary,
         size: size * 0.62,
       ),
     );

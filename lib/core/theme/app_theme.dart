@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'app_accent.dart';
 import 'app_colors.dart';
 import 'app_radii.dart';
 import 'app_spacing.dart';
@@ -10,9 +11,10 @@ class AppTheme {
   static ThemeData light(
     Locale locale, {
     AppearanceMode appearance = AppearanceMode.colorful,
+    AppAccent accent = AppAccent.purple,
   }) {
     final isHebrew = locale.languageCode == 'he';
-    final palette = FamilyBrainPalette.of(appearance);
+    final palette = FamilyBrainPalette.of(appearance, accent: accent);
     final textTheme = _hierarchy(
       isHebrew
           ? GoogleFonts.heeboTextTheme()
@@ -84,7 +86,7 @@ class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.action,
+          backgroundColor: palette.primary,
           foregroundColor: Colors.white,
           minimumSize: const Size(AppSpacing.touch, 52),
           textStyle: textTheme.labelLarge,
@@ -103,16 +105,16 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.action,
+          foregroundColor: palette.primary,
           textStyle: textTheme.labelMedium,
           minimumSize: const Size(AppSpacing.touch, 40),
         ),
       ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.action,
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: palette.primary,
         foregroundColor: Colors.white,
         elevation: 2,
-        extendedPadding: EdgeInsets.symmetric(horizontal: 18),
+        extendedPadding: const EdgeInsets.symmetric(horizontal: 18),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: palette.surface,

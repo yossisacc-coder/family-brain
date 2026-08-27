@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'app_accent.dart';
 import 'app_colors.dart';
 
 enum AppearanceMode { professional, colorful }
@@ -97,8 +98,16 @@ class FamilyBrainPalette extends ThemeExtension<FamilyBrainPalette> {
     homeFamilySoft: Color(0xFFDCE6F6),
   );
 
-  static FamilyBrainPalette of(AppearanceMode mode) {
-    return mode == AppearanceMode.professional ? professional : colorful;
+  static FamilyBrainPalette of(
+    AppearanceMode mode, {
+    AppAccent accent = AppAccent.purple,
+  }) {
+    final base = mode == AppearanceMode.professional ? professional : colorful;
+    return base.copyWith(
+      primary: accent.color,
+      primaryDark: accent.dark,
+      primarySoft: accent.soft,
+    );
   }
 
   @override

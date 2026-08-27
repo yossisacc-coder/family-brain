@@ -5,6 +5,7 @@ import '../../domain/models/task_item.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_radii.dart';
 import '../theme/app_spacing.dart';
+import '../theme/appearance.dart';
 
 class FamilyMemberItem extends StatelessWidget {
   const FamilyMemberItem({
@@ -27,6 +28,7 @@ class FamilyMemberItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final initial = member.name.isEmpty ? '?' : member.name.characters.first;
+    final palette = context.palette;
     return Material(
       color: AppColors.card,
       borderRadius: AppRadii.card,
@@ -42,8 +44,8 @@ class FamilyMemberItem extends StatelessWidget {
           child: Row(
             children: [
               CircleAvatar(
-                backgroundColor: AppColors.primarySoft,
-                foregroundColor: AppColors.primaryDark,
+                backgroundColor: palette.primarySoft,
+                foregroundColor: palette.primaryDark,
                 child: Text(initial.toUpperCase()),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -70,7 +72,7 @@ class FamilyMemberItem extends StatelessWidget {
               Text(
                 '$openTaskCount',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.primary,
+                      color: palette.primary,
                     ),
               ),
               if (onTap != null) ...[

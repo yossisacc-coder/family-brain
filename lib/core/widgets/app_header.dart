@@ -4,6 +4,7 @@ import 'package:family_brain/core/l10n/app_localizations.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
+import '../theme/appearance.dart';
 import 'app_section_header.dart';
 
 class AppHeader extends StatelessWidget {
@@ -140,8 +141,8 @@ class _HeaderIcon extends StatelessWidget {
               child: Container(
                 width: 8,
                 height: 8,
-                decoration: const BoxDecoration(
-                  color: AppColors.primary,
+                decoration: BoxDecoration(
+                  color: context.palette.primary,
                   shape: BoxShape.circle,
                 ),
               ),

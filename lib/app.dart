@@ -11,6 +11,7 @@ import 'core/notifications/local_reminder_scheduler.dart';
 import 'core/widgets/phone_shell.dart';
 import 'core/widgets/undo_host.dart';
 import 'data/providers.dart';
+import 'features/settings/accent_controller.dart';
 import 'features/settings/appearance_controller.dart';
 import 'features/settings/locale_controller.dart';
 
@@ -21,6 +22,7 @@ class FamilyBrainApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = ref.watch(localeControllerProvider);
     final appearance = ref.watch(appearanceControllerProvider);
+    final accent = ref.watch(accentControllerProvider);
     final router = ref.watch(routerProvider);
     ref.listen(currentUserProvider, (previous, next) {
       final user = next.valueOrNull;
@@ -39,7 +41,7 @@ class FamilyBrainApp extends ConsumerWidget {
       title: 'Family Brain',
       debugShowCheckedModeBanner: false,
       locale: locale,
-      theme: AppTheme.light(locale, appearance: appearance),
+      theme: AppTheme.light(locale, appearance: appearance, accent: accent),
       scaffoldMessengerKey: rootScaffoldMessengerKey,
       routerConfig: router,
       localizationsDelegates: AppLocalizations.localizationsDelegates,

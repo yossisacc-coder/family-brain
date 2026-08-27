@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_radii.dart';
 import '../theme/app_shadows.dart';
+import '../theme/appearance.dart';
 
 class QuickActionCard extends StatelessWidget {
   const QuickActionCard({
@@ -26,8 +27,9 @@ class QuickActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fg = emphasized ? Colors.white : (iconColor ?? AppColors.primary);
-    final bg = emphasized ? AppColors.primary : AppColors.card;
+    final palette = context.palette;
+    final fg = emphasized ? Colors.white : (iconColor ?? palette.primary);
+    final bg = emphasized ? palette.primary : AppColors.card;
     final showSubtitle = subtitle != null && subtitle != label;
     return Material(
       color: bg,
@@ -40,7 +42,7 @@ class QuickActionCard extends StatelessWidget {
             color: bg,
             borderRadius: AppRadii.card,
             border: Border.all(
-              color: emphasized ? AppColors.primary : AppColors.border,
+              color: emphasized ? palette.primary : AppColors.border,
             ),
             boxShadow: emphasized ? null : AppShadows.card,
           ),
@@ -55,7 +57,7 @@ class QuickActionCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: emphasized
                         ? Colors.white.withValues(alpha: 0.18)
-                        : (iconBackground ?? AppColors.primarySoft),
+                        : (iconBackground ?? palette.primarySoft),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, color: fg, size: 20),

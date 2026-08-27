@@ -308,5 +308,20 @@
   "voiceLanguageUnsupported": "Hebrew speech recognition is not available on this device.",
   "voiceEmpty": "No speech was captured. Try again.",
   "imageFailed": "Could not open the photo picker.",
-  "imageTooLarge": "That photo is too large. Choose a smaller one."
+  "imageTooLarge": "That photo is too large. Choose a smaller one.",
+  "send": "Send",
+  "moreDetails": "More details",
+  "appColor": "App Color",
+  "appColorHint": "Choose an accent for buttons, icons, and highlights. The background stays white and clean.",
+  "colorPurple": "Purple",
+  "colorBlue": "Blue",
+  "colorGreen": "Green",
+  "colorOrange": "Orange",
+  "colorRed": "Red",
+  "colorPink": "Pink",
+  "colorTeal": "Teal",
+  "colorIndigo": "Indigo",
+  "colorCyan": "Cyan",
+  "colorSlate": "Slate",
+  "colorCoral": "Coral"
 }

@@ -870,4 +870,50 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get imageTooLarge => 'התמונה גדולה מדי. בחרו תמונה קטנה יותר.';
+
+  @override
+  String get send => 'שליחה';
+
+  @override
+  String get moreDetails => 'פרטים נוספים';
+
+  @override
+  String get appColor => 'צבע האפליקציה';
+
+  @override
+  String get appColorHint =>
+      'בחרו צבע הדגשה לכפתורים, סמלים וקישורים. הרקע נשאר בהיר ונקי.';
+
+  @override
+  String get colorPurple => 'סגול';
+
+  @override
+  String get colorBlue => 'כחול';
+
+  @override
+  String get colorGreen => 'ירוק';
+
+  @override
+  String get colorOrange => 'כתום';
+
+  @override
+  String get colorRed => 'אדום';
+
+  @override
+  String get colorPink => 'ורוד';
+
+  @override
+  String get colorTeal => 'טורקיז';
+
+  @override
+  String get colorIndigo => 'אינדיגו';
+
+  @override
+  String get colorCyan => 'ציאן';
+
+  @override
+  String get colorSlate => 'אפור-כחלחל';
+
+  @override
+  String get colorCoral => 'אלמוג';
 }
