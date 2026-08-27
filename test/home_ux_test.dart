@@ -211,12 +211,15 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: SizedBox(
-            width: 175,
-            child: QuickActionCard(
-              icon: Icons.calendar_today_rounded,
-              label: 'Calendar',
-              onTap: () {},
+          body: Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: 175,
+              child: QuickActionCard(
+                icon: Icons.calendar_today_rounded,
+                label: 'Calendar',
+                onTap: () {},
+              ),
             ),
           ),
         ),
