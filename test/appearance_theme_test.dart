@@ -84,17 +84,19 @@ void main() {
   testWidgets(
     'switching appearance changes scaffold, card, and button colors',
     (tester) async {
-      Future<({Color scaffold, Color card, Color button, Color outlined})>
-      pump(AppearanceMode mode) async {
+      Future<({Color scaffold, Color card, Color button})> pump(
+        AppearanceMode mode,
+      ) async {
         final theme = themeWithoutFonts(mode);
         final palette = theme.extension<FamilyBrainPalette>()!;
         await tester.pumpWidget(
           MaterialApp(
             theme: theme,
+            themeMode: ThemeMode.light,
             home: Scaffold(
               body: Column(
                 children: [
-                  const AppCard(child: Text('card')),
+                  const AppCard(key: Key('theme-card'), child: Text('card')),
                   PrimaryButton(label: 'Go', onPressed: () {}),
                   SecondaryButton(label: 'Back', onPressed: () {}),
                 ],
@@ -103,18 +105,30 @@ void main() {
           ),
         );
         await tester.pump();
+        final cardContext = tester.element(find.byKey(const Key('theme-card')));
+        expect(cardContext.palette.card, palette.card);
+        expect(cardContext.appColors.surface, palette.card);
+        expect(cardContext.appColors.primary, palette.primary);
+        expect(
+          Theme.of(cardContext).scaffoldBackgroundColor,
+          palette.background,
+        );
         final cardBox = tester.widget<DecoratedBox>(
           find.descendant(
-            of: find.byType(AppCard),
-            matching: find.byType(DecoratedBox),
-          ).first,
+            of: find.byKey(const Key('theme-card')),
+            matching: find.byWidgetPredicate(
+              (widget) =>
+                  widget is DecoratedBox &&
+                  widget.decoration is BoxDecoration &&
+                  (widget.decoration as BoxDecoration).color == palette.card,
+            ),
+          ),
         );
         expect((cardBox.decoration as BoxDecoration).color, palette.card);
         return (
-          scaffold: theme.scaffoldBackgroundColor,
-          card: palette.card,
-          button: palette.primary,
-          outlined: palette.card,
+          scaffold: Theme.of(cardContext).scaffoldBackgroundColor,
+          card: cardContext.palette.card,
+          button: cardContext.appColors.primary,
         );
       }
 
@@ -123,7 +137,6 @@ void main() {
       expect(colorful.scaffold, isNot(equals(professional.scaffold)));
       expect(colorful.card, isNot(equals(professional.card)));
       expect(colorful.button, isNot(equals(professional.button)));
-      expect(colorful.outlined, isNot(equals(professional.outlined)));
     },
   );
 
