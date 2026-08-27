@@ -41,7 +41,7 @@ class StatCard extends StatelessWidget {
               boxShadow: AppShadows.card,
             ),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
+              padding: const EdgeInsets.fromLTRB(8, 10, 8, 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

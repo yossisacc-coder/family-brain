@@ -127,7 +127,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   AppSpacing.page,
                   AppSpacing.md,
                   AppSpacing.page,
-                  AppSpacing.xxl,
+                  8,
                 ),
                 children: [
                   AppHeader(
@@ -137,7 +137,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     onNotifications: () => context.push('/notifications'),
                     onSettings: () => context.go('/app/settings'),
                   ),
-                  const SizedBox(height: AppSpacing.section),
+                  const SizedBox(height: 14),
                   Row(
                     children: [
                       StatCard(
@@ -181,7 +181,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.section),
+                  const SizedBox(height: 14),
                   AppSectionHeader(title: l10n.quickAccess),
                   Row(
                     children: [
@@ -234,7 +234,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.section),
+                  const SizedBox(height: 14),
                   _ComposerCard(
                     controller: _composer,
                     sending: _sending,
@@ -247,7 +247,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                     onRemoveImage: () => setState(() => _imagePath = null),
                   ),
-                  const SizedBox(height: AppSpacing.section),
+                  const SizedBox(height: 14),
                   AppSectionHeader(
                     title: l10n.todayActivity,
                     actionLabel: l10n.seeAllTasks,
@@ -934,7 +934,7 @@ class _FamilyMembersRow extends StatelessWidget {
           child: AppSectionHeader(title: l10n.family),
         ),
         SizedBox(
-          height: 86,
+          height: 82,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: members.length + 1,

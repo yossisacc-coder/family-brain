@@ -44,8 +44,8 @@ class QuickActionCard extends StatelessWidget {
             boxShadow: emphasized ? null : AppShadows.card,
           ),
           child: Container(
-            constraints: const BoxConstraints(minHeight: 88),
-            padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+            constraints: const BoxConstraints(minHeight: 80),
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
