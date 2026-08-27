@@ -29,6 +29,10 @@ class FamilyBrainAiService {
     required FamilyBrainInput input,
     required FamilyBrainContext context,
   }) async {
+    // Local parse starts immediately so fallback adds no extra wait after
+    // a failed or empty cloud response.
+    final fallbackFuture = _fallback(input, context);
+
     if (provider != null) {
       try {
         final cloud = FamilyBrainAiValidator.resolve(
@@ -36,7 +40,8 @@ class FamilyBrainAiService {
           context: context,
           originalText: input.text,
         );
-        if (cloud.hasCreateActions) {
+        if (cloud.hasCreateActions ||
+            (cloud.clarification ?? '').trim().isNotEmpty) {
           return FamilyBrainUnderstand(
             response: cloud,
             usedCloud: provider!.id != fallback.id,
@@ -45,14 +50,14 @@ class FamilyBrainAiService {
         }
       } on SocketException {
         return FamilyBrainUnderstand(
-          response: await _fallback(input, context),
+          response: await fallbackFuture,
           usedCloud: false,
           usedFallback: true,
           error: 'offline',
         );
       } catch (_) {
         return FamilyBrainUnderstand(
-          response: await _fallback(input, context),
+          response: await fallbackFuture,
           usedCloud: false,
           usedFallback: true,
           error: 'ai_failed',
@@ -61,9 +66,9 @@ class FamilyBrainAiService {
     }
 
     return FamilyBrainUnderstand(
-      response: await _fallback(input, context),
+      response: await fallbackFuture,
       usedCloud: false,
-      usedFallback: false,
+      usedFallback: provider != null,
     );
   }
 

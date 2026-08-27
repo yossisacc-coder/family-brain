@@ -597,21 +597,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appearanceHint =>
-      'Choose a visual theme. Backgrounds, cards, and buttons all follow it. App Color still tints primary actions.';
+      'Choose Personal or Professional. The selected app color tints the whole interface.';
 
   @override
   String get appearanceProfessional => 'Professional';
 
   @override
-  String get appearanceColorful => 'Colorful';
+  String get appearanceColorful => 'Personal';
 
   @override
   String get appearanceProfessionalHint =>
-      'Mature, slightly darker surfaces, cards, and buttons.';
+      'Darker, higher-contrast workspace using the same color family.';
 
   @override
   String get appearanceColorfulHint =>
-      'Coordinated pastel surfaces, cards, and buttons.';
+      'Friendly Family Brain look with a clean white base and the selected color throughout.';
 
   @override
   String get calendarItemsForDay => 'Items for this day';

@@ -1,4 +1,7 @@
+import '../../../domain/models/app_user.dart';
 import '../../../domain/models/task_item.dart';
+import '../assignment_resolver.dart';
+import '../civil_datetime.dart';
 import '../family_brain_parser.dart';
 import '../priority_from_language.dart';
 import 'family_brain_context.dart';
@@ -143,6 +146,7 @@ class FamilyBrainAiAction {
   FamilyBrainAiAction copyWith({
     String? targetId,
     String? title,
+    String? description,
     String? date,
     String? time,
     String? reminderTime,
@@ -152,6 +156,7 @@ class FamilyBrainAiAction {
     String? space,
     String? assigneeName,
     String? assigneeId,
+    bool clearAssignee = false,
     List<String>? listItems,
     String? message,
     String? kind,
@@ -162,7 +167,7 @@ class FamilyBrainAiAction {
       type: type,
       targetId: targetId ?? this.targetId,
       title: title ?? this.title,
-      description: description,
+      description: description ?? this.description,
       date: date ?? this.date,
       time: time ?? this.time,
       reminderTime: reminderTime ?? this.reminderTime,
@@ -170,8 +175,8 @@ class FamilyBrainAiAction {
       priority: priority ?? this.priority,
       status: status ?? this.status,
       space: space ?? this.space,
-      assigneeName: assigneeName ?? this.assigneeName,
-      assigneeId: assigneeId ?? this.assigneeId,
+      assigneeName: clearAssignee ? null : (assigneeName ?? this.assigneeName),
+      assigneeId: clearAssignee ? null : (assigneeId ?? this.assigneeId),
       listItems: listItems ?? this.listItems,
       location: location,
       message: message ?? this.message,
@@ -304,23 +309,21 @@ class FamilyBrainAiAction {
       explanation: explanation,
       personal: space == 'personal' || space == 'private',
       priority: PriorityFromLanguage.tryParse(priority) ?? TaskPriority.normal,
+      status: _statusOf(status),
       imagePath: imagePath,
     );
   }
 
   static DateTime? combineDateTime(dynamic date, dynamic time, DateTime now) {
-    DateTime? day;
-    if (date is String && date.isNotEmpty) {
-      day = DateTime.tryParse(date);
-    }
-    if (time is String && time.isNotEmpty) {
-      final parts = time.split(':');
-      final hour = int.tryParse(parts.first) ?? 0;
-      final minute = parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
-      final base = day ?? DateTime(now.year, now.month, now.day);
-      return DateTime(base.year, base.month, base.day, hour, minute);
-    }
-    return day;
+    return CivilDateTime.combine(date, time, now);
+  }
+
+  static TaskStatus _statusOf(String? raw) {
+    return switch (raw?.trim()) {
+      'completed' => TaskStatus.completed,
+      'inProgress' || 'in_progress' => TaskStatus.inProgress,
+      _ => TaskStatus.pending,
+    };
   }
 
   static String? _text(dynamic value) {
@@ -456,9 +459,9 @@ class FamilyBrainAiResponse {
       type: type,
       title: draft.title,
       description: draft.description,
-      date: _dateOnly(draft.dueDate),
-      time: draft.hasDueTime ? _timeOnly(draft.dueDate) : null,
-      reminderTime: _timeOnly(draft.reminderAt),
+      date: draft.dueDate == null ? null : CivilDateTime.dateOnly(draft.dueDate!),
+      time: draft.hasDueTime ? CivilDateTime.timeOnly(draft.dueDate) : null,
+      reminderTime: CivilDateTime.timeOnly(draft.reminderAt),
       hasDueTime: draft.hasDueTime,
       priority: draft.priority.name,
       space: draft.personal ? 'personal' : 'family',
@@ -470,22 +473,8 @@ class FamilyBrainAiResponse {
       kind: draft.kind.name,
       lowConfidence: draft.lowConfidence,
       imagePath: draft.imagePath,
+      status: draft.status.name,
     );
-  }
-
-  static String? _dateOnly(DateTime? value) {
-    if (value == null) return null;
-    final y = value.year.toString().padLeft(4, '0');
-    final m = value.month.toString().padLeft(2, '0');
-    final d = value.day.toString().padLeft(2, '0');
-    return '$y-$m-$d';
-  }
-
-  static String? _timeOnly(DateTime? value) {
-    if (value == null) return null;
-    final h = value.hour.toString().padLeft(2, '0');
-    final m = value.minute.toString().padLeft(2, '0');
-    return '$h:$m';
   }
 }
 
@@ -497,7 +486,10 @@ class FamilyBrainAiValidator {
     String originalText = '',
   }) {
     final source = raw.sourceText.isNotEmpty ? raw.sourceText : originalText;
+    final localDrafts = _localDrafts(source, context);
     final actions = <FamilyBrainAiAction>[];
+    var localIndex = 0;
+    var askedWho = false;
     for (var action in raw.actions) {
       if (action.type == FamilyBrainAiActionType.askForClarification ||
           action.type == FamilyBrainAiActionType.conversationalResponse) {
@@ -525,11 +517,28 @@ class FamilyBrainAiValidator {
         continue;
       }
 
-      final member = _matchMember(
-        action.assigneeId,
-        action.assigneeName,
-        context.members,
+      BrainDraft? local;
+      if (action.type.writesData && localIndex < localDrafts.length) {
+        local = _localFor(action, localDrafts) ?? localDrafts[localIndex];
+        localIndex += 1;
+      }
+
+      if (action.type.writesData && local != null) {
+        action = _fillFromLocal(action, local);
+      }
+
+      final assignment = AssignmentResolver.resolve(
+        text: source,
+        members: context.members,
+        currentUser: context.currentUser,
+        hintedId: action.assigneeId,
+        hintedName: action.assigneeName,
       );
+      if (action.type == FamilyBrainAiActionType.identifyFamilyMember &&
+          !assignment.hasAssignee) {
+        continue;
+      }
+
       var priority = PriorityFromLanguage.tryParse(action.priority);
       if (priority == null && action.type.writesData) {
         priority = PriorityFromLanguage.infer(
@@ -537,18 +546,38 @@ class FamilyBrainAiValidator {
         );
       }
 
-      if (action.type == FamilyBrainAiActionType.identifyFamilyMember &&
-          member == null) {
-        continue;
-      }
+      final space = assignment.personal
+          ? 'personal'
+          : assignment.familyWide
+              ? 'family'
+              : action.space;
 
       actions.add(
         action.copyWith(
-          assigneeId: member?.id ?? action.assigneeId,
-          assigneeName: member?.name ?? action.assigneeName,
+          assigneeId: assignment.hasAssignee ? assignment.assigneeId : null,
+          assigneeName: assignment.hasAssignee ? assignment.assigneeName : null,
+          clearAssignee: assignment.familyWide ||
+              assignment.ambiguous ||
+              !assignment.hasAssignee,
           priority: priority?.name ?? action.priority,
+          space: space,
+          lowConfidence: action.lowConfidence || assignment.ambiguous,
+          date: CivilDateTime.parseDate(action.date) == null
+              ? action.date
+              : CivilDateTime.dateOnly(CivilDateTime.parseDate(action.date)!),
         ),
       );
+      if (assignment.ambiguous && !askedWho) {
+        askedWho = true;
+        actions.add(
+          FamilyBrainAiAction(
+            type: FamilyBrainAiActionType.askForClarification,
+            message: context.language == 'he'
+                ? 'למי לשבץ את המשימה?'
+                : 'Who should this be assigned to?',
+          ),
+        );
+      }
     }
 
     return FamilyBrainAiResponse(
@@ -560,27 +589,60 @@ class FamilyBrainAiValidator {
     );
   }
 
-  static FamilyBrainMemberRef? _matchMember(
-    String? id,
-    String? name,
-    List<FamilyBrainMemberRef> members,
+  static List<BrainDraft> _localDrafts(
+    String source,
+    FamilyBrainContext context,
   ) {
-    if (id != null && id.isNotEmpty) {
-      for (final member in members) {
-        if (member.id == id) return member;
-      }
-    }
-    if (name == null || name.trim().isEmpty) return null;
-    final needle = name.toLowerCase();
-    for (final member in members) {
-      if (needle.contains(member.name.toLowerCase()) ||
-          member.name
-              .toLowerCase()
-              .split(' ')
-              .any((part) => part.isNotEmpty && needle.contains(part))) {
-        return member;
-      }
+    if (source.trim().isEmpty) return const [];
+    return FamilyBrainParser.parseAll(
+      source,
+      now: context.now,
+      members: [
+        for (final member in context.members)
+          AppUser(
+            id: member.id,
+            name: member.name,
+            phone: '',
+            language: context.language,
+            createdAt: context.now,
+          ),
+      ],
+      currentUser: context.currentUser == null
+          ? null
+          : AppUser(
+              id: context.currentUser!.id,
+              name: context.currentUser!.name,
+              phone: '',
+              language: context.language,
+              createdAt: context.now,
+            ),
+    );
+  }
+
+  static BrainDraft? _localFor(
+    FamilyBrainAiAction action,
+    List<BrainDraft> localDrafts,
+  ) {
+    for (final draft in localDrafts) {
+      if (draft.kind == action.informationKind) return draft;
     }
     return null;
+  }
+
+  static FamilyBrainAiAction _fillFromLocal(
+    FamilyBrainAiAction action,
+    BrainDraft local,
+  ) {
+    return action.copyWith(
+      date: action.date ??
+          (local.dueDate == null ? null : CivilDateTime.dateOnly(local.dueDate!)),
+      time: action.time ??
+          (local.hasDueTime ? CivilDateTime.timeOnly(local.dueDate) : null),
+      reminderTime: action.reminderTime ?? CivilDateTime.timeOnly(local.reminderAt),
+      hasDueTime: action.hasDueTime || local.hasDueTime,
+      assigneeId: action.assigneeId ?? local.assigneeId,
+      assigneeName: action.assigneeName ?? local.assigneeName,
+      space: action.space ?? (local.personal ? 'personal' : 'family'),
+    );
   }
 }

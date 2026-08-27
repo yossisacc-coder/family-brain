@@ -248,7 +248,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     imagePath: _imagePath,
                     statusKind: _brainStatus,
                     statusMessage: _brainStatusMessage,
-                    onSubmit: () => _submitComposer(context, l10n, members),
+                    onSubmit: () => _submitComposer(
+                      context,
+                      l10n,
+                      members,
+                      user,
+                      open,
+                    ),
                     onAdd: (buttonContext) => _showInputMenu(
                       buttonContext,
                       l10n,
@@ -654,6 +660,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     BuildContext context,
     AppLocalizations l10n,
     List<AppUser> members,
+    AppUser user,
+    List<TaskItem> openItems,
   ) async {
     if (_sending) return;
     final text = _composer.text.trim();
@@ -680,6 +688,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         text: text,
         now: DateTime.now(),
         members: members,
+        items: openItems,
+        currentUser: user,
         imagePath: imagePath,
         imageBase64: imageBase64,
         mimeType: 'image/jpeg',
@@ -1106,17 +1116,10 @@ class _FamilyMembersRow extends StatelessWidget {
   final VoidCallback onViewFamily;
   final VoidCallback onAdd;
 
-  static const _avatarColors = [
-    Color(0xFFE8D5F2),
-    Color(0xFFD6E4FF),
-    Color(0xFFFFE0D1),
-    Color(0xFFD4F0E2),
-    Color(0xFFFFE8B8),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final palette = context.palette;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1144,7 +1147,13 @@ class _FamilyMembersRow extends StatelessWidget {
                     ? l10n.you
                     : member.name.split(' ').first,
                 initial: member.name,
-                color: _avatarColors[(index - 1) % _avatarColors.length],
+                color: [
+                  palette.primarySoft,
+                  palette.homeFamilySoft,
+                  palette.homeEventsSoft,
+                  palette.homeTasksSoft,
+                  palette.homeRemindersSoft,
+                ][(index - 1) % 5],
                 onTap: () => context.push('/family/members/${member.id}'),
               );
             },

@@ -5,11 +5,17 @@ import 'app_colors.dart';
 
 enum AppearanceMode { professional, colorful }
 
+extension AppearanceModeVisual on AppearanceMode {
+  bool get isProfessional => this == AppearanceMode.professional;
+  bool get isPersonal => this == AppearanceMode.colorful;
+}
+
 /// Central Family Brain surfaces. Add a new [AppearanceMode] + palette here
 /// to introduce another full visual theme without per-widget colors.
 class FamilyBrainPalette extends ThemeExtension<FamilyBrainPalette> {
   const FamilyBrainPalette({
     required this.mode,
+    required this.brightness,
     required this.background,
     required this.surface,
     required this.card,
@@ -21,6 +27,7 @@ class FamilyBrainPalette extends ThemeExtension<FamilyBrainPalette> {
     required this.primary,
     required this.primaryDark,
     required this.primarySoft,
+    required this.onPrimary,
     required this.homeEvents,
     required this.homeEventsSoft,
     required this.homeTasks,
@@ -32,6 +39,7 @@ class FamilyBrainPalette extends ThemeExtension<FamilyBrainPalette> {
   });
 
   final AppearanceMode mode;
+  final Brightness brightness;
   final Color background;
   final Color surface;
   final Color card;
@@ -43,6 +51,7 @@ class FamilyBrainPalette extends ThemeExtension<FamilyBrainPalette> {
   final Color primary;
   final Color primaryDark;
   final Color primarySoft;
+  final Color onPrimary;
   final Color homeEvents;
   final Color homeEventsSoft;
   final Color homeTasks;
@@ -52,81 +61,141 @@ class FamilyBrainPalette extends ThemeExtension<FamilyBrainPalette> {
   final Color homeFamily;
   final Color homeFamilySoft;
 
-  /// Coordinated pastel theme: lavender wash, tinted cards, vivid actions.
-  static const colorful = FamilyBrainPalette(
-    mode: AppearanceMode.colorful,
-    background: Color(0xFFF3EDFF),
-    surface: Color(0xFFE9E0FA),
-    card: Color(0xFFFCFAFF),
-    text: Color(0xFF1B1D29),
-    textMuted: Color(0xFF5D5678),
-    border: Color(0xFFD9CEF0),
-    nav: Color(0xFFF8F4FF),
-    desktopBackdrop: Color(0xFFE0D4F4),
-    primary: AppColors.primary,
-    primaryDark: AppColors.primaryDark,
-    primarySoft: AppColors.primarySoft,
-    homeEvents: Color(0xFF7B61FF),
-    homeEventsSoft: Color(0xFFEEE6FF),
-    homeTasks: Color(0xFF2FA874),
-    homeTasksSoft: Color(0xFFE1F6EA),
-    homeReminders: Color(0xFFE0893C),
-    homeRemindersSoft: Color(0xFFFFF0E0),
-    homeFamily: Color(0xFF4C82F0),
-    homeFamilySoft: Color(0xFFE4EEFE),
-  );
+  bool get isDark => brightness == Brightness.dark;
 
-  /// Mature, slightly darker professional theme — still light and readable.
-  static const professional = FamilyBrainPalette(
-    mode: AppearanceMode.professional,
-    background: Color(0xFFE7E5EB),
-    surface: Color(0xFFDCD9E2),
-    card: Color(0xFFF2F0F4),
-    text: Color(0xFF16141F),
-    textMuted: Color(0xFF5A5666),
-    border: Color(0xFFCBC6D2),
-    nav: Color(0xFFEEECF1),
-    desktopBackdrop: Color(0xFFD0CCD6),
-    primary: Color(0xFF584CC8),
-    primaryDark: Color(0xFF3F3698),
-    primarySoft: Color(0xFFE4E0F4),
-    homeEvents: Color(0xFF5B4FBF),
-    homeEventsSoft: Color(0xFFE2DEEC),
-    homeTasks: Color(0xFF2F8A68),
-    homeTasksSoft: Color(0xFFD5E8DC),
-    homeReminders: Color(0xFFB56E32),
-    homeRemindersSoft: Color(0xFFEBDCCE),
-    homeFamily: Color(0xFF3B6FCF),
-    homeFamilySoft: Color(0xFFD7E2F0),
-  );
+  /// Personal / original Family Brain identity (purple, clean white).
+  static final colorful = of(AppearanceMode.colorful);
+
+  /// Professional companion of the default purple family.
+  static final professional = of(AppearanceMode.professional);
 
   static FamilyBrainPalette of(
     AppearanceMode mode, {
     AppAccent accent = AppAccent.purple,
   }) {
-    final base = mode == AppearanceMode.professional ? professional : colorful;
-    final primary = mode == AppearanceMode.professional
-        ? Color.lerp(accent.color, const Color(0xFF2A2733), 0.22)!
-        : accent.color;
-    return base.copyWith(
+    final seed = accent.color;
+    if (mode == AppearanceMode.professional) {
+      return _professional(seed);
+    }
+    return _personal(seed);
+  }
+
+  /// Friendly light theme: clean white base, selected color throughout.
+  static FamilyBrainPalette _personal(Color seed) {
+    final background = Color.lerp(const Color(0xFFFFFFFF), seed, 0.07)!;
+    final surface = Color.lerp(const Color(0xFFF7F6FB), seed, 0.12)!;
+    final card = Color.lerp(const Color(0xFFFFFFFF), seed, 0.03)!;
+    final nav = Color.lerp(const Color(0xFFFFFFFF), seed, 0.06)!;
+    final border = Color.lerp(const Color(0xFFE4E2EA), seed, 0.32)!;
+    final text = const Color(0xFF1B1D29);
+    final textMuted = Color.lerp(const Color(0xFF667085), seed, 0.14)!;
+    final primary = seed;
+    final primaryDark = Color.lerp(seed, const Color(0xFF101018), 0.28)!;
+    final primarySoft = Color.lerp(seed, const Color(0xFFFFFFFF), 0.86)!;
+    return FamilyBrainPalette(
+      mode: AppearanceMode.colorful,
+      brightness: Brightness.light,
+      background: background,
+      surface: surface,
+      card: card,
+      text: text,
+      textMuted: textMuted,
+      border: border,
+      nav: nav,
+      desktopBackdrop: Color.lerp(const Color(0xFFE8EBF3), seed, 0.18)!,
       primary: primary,
-      primaryDark: Color.lerp(primary, const Color(0xFF101018), 0.28)!,
-      primarySoft: Color.lerp(primary, base.background, 0.84)!,
+      primaryDark: primaryDark,
+      primarySoft: primarySoft,
+      onPrimary: Colors.white,
+      homeEvents: Color.lerp(const Color(0xFF7B61FF), seed, 0.32)!,
+      homeEventsSoft: Color.lerp(const Color(0xFFEEE6FF), seed, 0.18)!,
+      homeTasks: Color.lerp(const Color(0xFF2FA874), seed, 0.28)!,
+      homeTasksSoft: Color.lerp(const Color(0xFFE1F6EA), seed, 0.16)!,
+      homeReminders: Color.lerp(const Color(0xFFE0893C), seed, 0.28)!,
+      homeRemindersSoft: Color.lerp(const Color(0xFFFFF0E0), seed, 0.16)!,
+      homeFamily: Color.lerp(const Color(0xFF4C82F0), seed, 0.28)!,
+      homeFamilySoft: Color.lerp(const Color(0xFFE4EEFE), seed, 0.16)!,
+    );
+  }
+
+  /// Darker, higher-contrast workspace using the same color family.
+  static FamilyBrainPalette _professional(Color seed) {
+    final background = Color.lerp(const Color(0xFF121018), seed, 0.20)!;
+    final surface = Color.lerp(const Color(0xFF1A1822), seed, 0.24)!;
+    final card = Color.lerp(const Color(0xFF24212C), seed, 0.22)!;
+    final nav = Color.lerp(const Color(0xFF18161F), seed, 0.18)!;
+    final border = Color.lerp(const Color(0xFF3C3848), seed, 0.30)!;
+    final text = const Color(0xFFF4F2F8);
+    final textMuted = Color.lerp(const Color(0xFFB8B3C4), seed, 0.12)!;
+    final primary = Color.lerp(seed, const Color(0xFFFFFFFF), 0.12)!;
+    final primaryDark = Color.lerp(seed, const Color(0xFF000000), 0.22)!;
+    final primarySoft = Color.lerp(seed, background, 0.62)!;
+    return FamilyBrainPalette(
+      mode: AppearanceMode.professional,
+      brightness: Brightness.dark,
+      background: background,
+      surface: surface,
+      card: card,
+      text: text,
+      textMuted: textMuted,
+      border: border,
+      nav: nav,
+      desktopBackdrop: Color.lerp(const Color(0xFF0C0B10), seed, 0.14)!,
+      primary: primary,
+      primaryDark: primaryDark,
+      primarySoft: primarySoft,
+      onPrimary: Colors.white,
+      homeEvents: Color.lerp(const Color(0xFF9B89FF), seed, 0.40)!,
+      homeEventsSoft: Color.lerp(card, const Color(0xFF7B61FF), 0.22)!,
+      homeTasks: Color.lerp(const Color(0xFF3FBF88), seed, 0.32)!,
+      homeTasksSoft: Color.lerp(card, const Color(0xFF2FA874), 0.22)!,
+      homeReminders: Color.lerp(const Color(0xFFE39A55), seed, 0.32)!,
+      homeRemindersSoft: Color.lerp(card, const Color(0xFFE0893C), 0.22)!,
+      homeFamily: Color.lerp(const Color(0xFF6A9AFF), seed, 0.32)!,
+      homeFamilySoft: Color.lerp(card, const Color(0xFF4C82F0), 0.22)!,
     );
   }
 
   ColorScheme get colorScheme {
+    if (isDark) {
+      return ColorScheme.dark(
+        primary: primary,
+        onPrimary: onPrimary,
+        primaryContainer: primarySoft,
+        onPrimaryContainer: text,
+        secondary: homeFamily,
+        onSecondary: onPrimary,
+        secondaryContainer: homeFamilySoft,
+        onSecondaryContainer: homeFamily,
+        tertiary: homeEvents,
+        onTertiary: onPrimary,
+        tertiaryContainer: homeEventsSoft,
+        onTertiaryContainer: homeEvents,
+        surface: card,
+        onSurface: text,
+        onSurfaceVariant: textMuted,
+        error: AppColors.urgent,
+        onError: Colors.white,
+        outline: border,
+        outlineVariant: border,
+        surfaceContainerLowest: background,
+        surfaceContainerLow: surface,
+        surfaceContainer: card,
+        surfaceContainerHigh: nav,
+        surfaceContainerHighest: surface,
+      );
+    }
     return ColorScheme.light(
       primary: primary,
-      onPrimary: Colors.white,
+      onPrimary: onPrimary,
       primaryContainer: primarySoft,
       onPrimaryContainer: primaryDark,
       secondary: homeFamily,
-      onSecondary: Colors.white,
+      onSecondary: onPrimary,
       secondaryContainer: homeFamilySoft,
       onSecondaryContainer: homeFamily,
       tertiary: homeEvents,
-      onTertiary: Colors.white,
+      onTertiary: onPrimary,
       tertiaryContainer: homeEventsSoft,
       onTertiaryContainer: homeEvents,
       surface: card,
@@ -147,6 +216,7 @@ class FamilyBrainPalette extends ThemeExtension<FamilyBrainPalette> {
   @override
   FamilyBrainPalette copyWith({
     AppearanceMode? mode,
+    Brightness? brightness,
     Color? background,
     Color? surface,
     Color? card,
@@ -158,6 +228,7 @@ class FamilyBrainPalette extends ThemeExtension<FamilyBrainPalette> {
     Color? primary,
     Color? primaryDark,
     Color? primarySoft,
+    Color? onPrimary,
     Color? homeEvents,
     Color? homeEventsSoft,
     Color? homeTasks,
@@ -169,6 +240,7 @@ class FamilyBrainPalette extends ThemeExtension<FamilyBrainPalette> {
   }) {
     return FamilyBrainPalette(
       mode: mode ?? this.mode,
+      brightness: brightness ?? this.brightness,
       background: background ?? this.background,
       surface: surface ?? this.surface,
       card: card ?? this.card,
@@ -180,6 +252,7 @@ class FamilyBrainPalette extends ThemeExtension<FamilyBrainPalette> {
       primary: primary ?? this.primary,
       primaryDark: primaryDark ?? this.primaryDark,
       primarySoft: primarySoft ?? this.primarySoft,
+      onPrimary: onPrimary ?? this.onPrimary,
       homeEvents: homeEvents ?? this.homeEvents,
       homeEventsSoft: homeEventsSoft ?? this.homeEventsSoft,
       homeTasks: homeTasks ?? this.homeTasks,

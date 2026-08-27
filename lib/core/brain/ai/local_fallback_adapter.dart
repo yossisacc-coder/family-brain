@@ -29,6 +29,15 @@ class LocalFallbackAdapter implements AiProvider {
             createdAt: context.now,
           ),
       ],
+      currentUser: context.currentUser == null
+          ? null
+          : AppUser(
+              id: context.currentUser!.id,
+              name: context.currentUser!.name,
+              phone: '',
+              language: context.language,
+              createdAt: context.now,
+            ),
       imagePath: input.imagePath,
     );
     return FamilyBrainAiResponse.fromDrafts(

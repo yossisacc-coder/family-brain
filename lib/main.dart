@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'app.dart';
+import 'core/brain/family_brain_ai.dart';
 import 'core/notifications/local_reminder_scheduler.dart';
 import 'core/routing/root_keys.dart';
 import 'data/firebase/firebase_bootstrap.dart';
@@ -31,4 +32,5 @@ Future<void> main() async {
       child: const FamilyBrainApp(),
     ),
   );
+  FamilyBrainAi.warmup();
 }

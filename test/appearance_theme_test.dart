@@ -15,6 +15,7 @@ ThemeData themeWithoutFonts(AppearanceMode mode, {AppAccent accent = AppAccent.p
   final palette = FamilyBrainPalette.of(mode, accent: accent);
   return ThemeData(
     useMaterial3: true,
+    brightness: palette.brightness,
     colorScheme: palette.colorScheme,
     scaffoldBackgroundColor: palette.background,
     canvasColor: palette.background,
@@ -50,7 +51,40 @@ void main() {
     expect(colorful.colorScheme.primary, colorful.primary);
     expect(professional.colorScheme.primary, professional.primary);
     expect(colorful.background.computeLuminance(), greaterThan(0.7));
-    expect(professional.background.computeLuminance(), greaterThan(0.55));
+    expect(professional.background.computeLuminance(), lessThan(0.25));
+    expect(colorful.brightness, Brightness.light);
+    expect(professional.brightness, Brightness.dark);
+  });
+
+  test('selected app color tints the whole personal and professional themes', () {
+    final purple = FamilyBrainPalette.of(
+      AppearanceMode.colorful,
+      accent: AppAccent.purple,
+    );
+    final red = FamilyBrainPalette.of(
+      AppearanceMode.colorful,
+      accent: AppAccent.red,
+    );
+    expect(red.background, isNot(equals(purple.background)));
+    expect(red.card, isNot(equals(purple.card)));
+    expect(red.surface, isNot(equals(purple.surface)));
+    expect(red.nav, isNot(equals(purple.nav)));
+    expect(red.border, isNot(equals(purple.border)));
+    expect(red.primary, AppAccent.red.color);
+    expect(
+      FamilyBrainPalette.of(
+        AppearanceMode.professional,
+        accent: AppAccent.red,
+      ).background,
+      isNot(
+        equals(
+          FamilyBrainPalette.of(
+            AppearanceMode.professional,
+            accent: AppAccent.blue,
+          ).background,
+        ),
+      ),
+    );
   });
 
   test('app color still tints primary in both appearance modes', () {

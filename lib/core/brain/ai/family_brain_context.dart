@@ -1,5 +1,6 @@
 import '../../../domain/models/app_user.dart';
 import '../../../domain/models/task_item.dart';
+import '../civil_datetime.dart';
 
 /// Compact family member sent to an AI provider. No extra profile data.
 class FamilyBrainMemberRef {
@@ -56,6 +57,7 @@ class FamilyBrainContext {
     required this.now,
     this.language = 'en',
     this.members = const [],
+    this.currentUser,
     this.tasks = const [],
     this.events = const [],
     this.reminders = const [],
@@ -65,6 +67,7 @@ class FamilyBrainContext {
   final DateTime now;
   final String language;
   final List<FamilyBrainMemberRef> members;
+  final FamilyBrainMemberRef? currentUser;
   final List<FamilyBrainItemRef> tasks;
   final List<FamilyBrainItemRef> events;
   final List<FamilyBrainItemRef> reminders;
@@ -75,25 +78,32 @@ class FamilyBrainContext {
     String language = 'en',
     List<AppUser> members = const [],
     List<TaskItem> items = const [],
+    AppUser? currentUser,
   }) {
+    final open = items.where((item) => item.isOpen).take(24).toList();
     return FamilyBrainContext(
       now: now,
       language: language,
-      members: [for (final member in members) FamilyBrainMemberRef.fromAppUser(member)],
+      members: [
+        for (final member in members) FamilyBrainMemberRef.fromAppUser(member),
+      ],
+      currentUser: currentUser == null
+          ? null
+          : FamilyBrainMemberRef.fromAppUser(currentUser),
       tasks: [
-        for (final item in items)
+        for (final item in open)
           if (item.kind == InformationKind.task) FamilyBrainItemRef.fromTask(item),
       ],
       events: [
-        for (final item in items)
+        for (final item in open)
           if (item.kind == InformationKind.event) FamilyBrainItemRef.fromTask(item),
       ],
       reminders: [
-        for (final item in items)
+        for (final item in open)
           if (item.kind == InformationKind.reminder) FamilyBrainItemRef.fromTask(item),
       ],
       lists: [
-        for (final item in items)
+        for (final item in open)
           if (item.kind == InformationKind.list) FamilyBrainItemRef.fromTask(item),
       ],
     );
@@ -102,17 +112,17 @@ class FamilyBrainContext {
   /// Payload for the current gateway. Omits empty collections.
   Map<String, dynamic> toProviderPayload() {
     return {
-      'now': now.toIso8601String(),
+      'now': CivilDateTime.localStamp(now),
+      'timezoneOffsetMinutes': now.timeZoneOffset.inMinutes,
       'language': language,
       'members': [for (final member in members) member.toJson()],
-      if (tasks.isNotEmpty)
-        'tasks': [for (final item in tasks) item.toJson()],
+      if (currentUser != null) 'currentUser': currentUser!.toJson(),
+      if (tasks.isNotEmpty) 'tasks': [for (final item in tasks) item.toJson()],
       if (events.isNotEmpty)
         'events': [for (final item in events) item.toJson()],
       if (reminders.isNotEmpty)
         'reminders': [for (final item in reminders) item.toJson()],
-      if (lists.isNotEmpty)
-        'lists': [for (final item in lists) item.toJson()],
+      if (lists.isNotEmpty) 'lists': [for (final item in lists) item.toJson()],
     };
   }
 }

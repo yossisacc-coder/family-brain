@@ -38,7 +38,7 @@ class ActionEngine {
     List<TaskItem> existing = const [],
   }) async {
     final stamp = now ?? DateTime.now();
-    final created = <TaskItem>[];
+    final createdDrafts = <TaskItem>[];
     final updated = <TaskItem>[];
     final byId = {for (final item in existing) item.id: item};
 
@@ -53,13 +53,14 @@ class ActionEngine {
             now: stamp,
           );
           if (draft == null) continue;
-          final task = draft.toTaskItem(
-            id: nextId(),
-            familyId: familyId,
-            creatorId: creatorId,
-            now: stamp,
+          createdDrafts.add(
+            draft.toTaskItem(
+              id: nextId(),
+              familyId: familyId,
+              creatorId: creatorId,
+              now: stamp,
+            ),
           );
-          created.add(await repository.createTask(task));
         case FamilyBrainAiActionType.updateTask:
         case FamilyBrainAiActionType.updateEvent:
         case FamilyBrainAiActionType.updateListItem:
@@ -88,6 +89,12 @@ class ActionEngine {
           break;
       }
     }
+
+    final created = createdDrafts.isEmpty
+        ? const <TaskItem>[]
+        : await Future.wait([
+            for (final task in createdDrafts) repository.createTask(task),
+          ]);
 
     return ActionEngineResult(created: created, updated: updated);
   }

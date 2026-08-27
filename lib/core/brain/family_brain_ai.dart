@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:http/http.dart' as http;
 
 import '../../domain/models/app_user.dart';
+import '../../domain/models/task_item.dart';
 import '../config/app_config.dart';
 import 'ai/ai_provider.dart';
 import 'ai/family_brain_ai_schema.dart';
@@ -37,6 +40,9 @@ class BrainUnderstandResult {
 ///
 /// Secrets stay on the server. Falls back to the on-device parser.
 class FamilyBrainAi {
+  static http.Client? _sharedClient;
+  static http.Client get sharedClient => _sharedClient ??= http.Client();
+
   static FamilyBrainAiService service({
     http.Client? client,
     Duration timeout = const Duration(seconds: 12),
@@ -46,8 +52,25 @@ class FamilyBrainAi {
     return FamilyBrainAiService(
       provider: url.isEmpty
           ? null
-          : GeminiAiAdapter(origin: url, client: client, timeout: timeout),
+          : GeminiAiAdapter(
+              origin: url,
+              client: client ?? sharedClient,
+              timeout: timeout,
+            ),
       fallback: const LocalFallbackAdapter(),
+    );
+  }
+
+  /// Wakes the Render gateway so the first user request is less likely to
+  /// wait on a cold start. Does not block UI or invent a result.
+  static void warmup({String? backendUrl, http.Client? client}) {
+    final url = _origin(backendUrl ?? AppConfig.aiBackendUrl);
+    if (url.isEmpty) return;
+    unawaited(
+      (client ?? sharedClient)
+          .get(Uri.parse('$url/health'))
+          .timeout(const Duration(seconds: 8))
+          .catchError((_) => http.Response('', 599)),
     );
   }
 
@@ -55,6 +78,8 @@ class FamilyBrainAi {
     required String text,
     required DateTime now,
     List<AppUser> members = const [],
+    List<TaskItem> items = const [],
+    AppUser? currentUser,
     String? imagePath,
     String? imageBase64,
     String? mimeType,
@@ -78,6 +103,8 @@ class FamilyBrainAi {
         now: now,
         language: language,
         members: members,
+        items: items,
+        currentUser: currentUser,
       ),
     );
     return BrainUnderstandResult(

@@ -23,7 +23,7 @@ class AppTheme {
 
     final base = ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
+      brightness: palette.brightness,
       colorScheme: scheme,
       extensions: [palette],
     );
@@ -90,7 +90,7 @@ class AppTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: palette.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: palette.onPrimary,
           disabledBackgroundColor: palette.border,
           disabledForegroundColor: palette.textMuted,
           minimumSize: const Size(AppSpacing.touch, 52),
@@ -118,12 +118,16 @@ class AppTheme {
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: palette.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: palette.onPrimary,
         elevation: 2,
         extendedPadding: const EdgeInsets.symmetric(horizontal: 18),
       ),
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(foregroundColor: palette.text),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: palette.primary,
+        circularTrackColor: palette.primarySoft,
       ),
       chipTheme: ChipThemeData(
         backgroundColor: palette.surface,
@@ -156,10 +160,10 @@ class AppTheme {
         backgroundColor: palette.card,
         surfaceTintColor: Colors.transparent,
         headerBackgroundColor: palette.primary,
-        headerForegroundColor: Colors.white,
+        headerForegroundColor: palette.onPrimary,
         dividerColor: palette.border,
         dayForegroundColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return Colors.white;
+          if (states.contains(WidgetState.selected)) return palette.onPrimary;
           if (states.contains(WidgetState.disabled)) return palette.textMuted;
           return palette.text;
         }),
@@ -168,7 +172,7 @@ class AppTheme {
           return Colors.transparent;
         }),
         todayForegroundColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return Colors.white;
+          if (states.contains(WidgetState.selected)) return palette.onPrimary;
           return palette.primary;
         }),
         todayBackgroundColor: WidgetStateProperty.resolveWith((states) {
@@ -178,7 +182,7 @@ class AppTheme {
         todayBorder: BorderSide(color: palette.primary),
         weekdayStyle: textTheme.labelMedium?.copyWith(color: palette.textMuted),
         yearForegroundColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return Colors.white;
+          if (states.contains(WidgetState.selected)) return palette.onPrimary;
           return palette.text;
         }),
         yearBackgroundColor: WidgetStateProperty.resolveWith((states) {
@@ -188,8 +192,10 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: palette.text,
-        contentTextStyle: textTheme.bodyMedium?.copyWith(color: Colors.white),
+        backgroundColor: palette.isDark ? palette.card : palette.text,
+        contentTextStyle: textTheme.bodyMedium?.copyWith(
+          color: palette.isDark ? palette.text : Colors.white,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       navigationBarTheme: NavigationBarThemeData(

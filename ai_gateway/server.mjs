@@ -14,20 +14,30 @@ const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
 
 const SYSTEM = `You are Family Brain. Turn messy family messages into structured items.
 Return ONLY JSON: {"clarification": null or string, "items": [...]}.
-Each item: type (task|event|reminder|list|information), title, description, date (YYYY-MM-DD),
-time (HH:MM 24h), endTime, reminderTime, people[], assignee, location, listName, listItems[],
-priority (low|normal|high|urgent), confidence (0-1), explanation, space (family|personal).
+Each item: type (task|event|reminder|list|information), title, description, date (YYYY-MM-DD local calendar date),
+time (HH:MM 24h local), endTime, reminderTime, people[], assignee, assigneeId, location, listName, listItems[],
+priority (low|normal|high|urgent), status (pending|inProgress|completed), confidence (0-1), explanation,
+space (family|personal).
 ONE message may become MULTIPLE items. Never dump everything into a single task.
 Keep the user's language in titles and list items (Hebrew stays Hebrew).
 Infer priority from meaning. Never assign the same priority to everything:
 urgent = דחוף / urgent / immediately; high = חשוב / important / בהקדם;
 low = כשיהיה זמן / whenever / no rush; otherwise normal.
-Interpret dates relative to Now: היום=today, מחר=tomorrow, מחר בבוקר=tomorrow 09:00,
-מחר בערב=tomorrow 19:00, ביום חמישי=next Thursday, בעוד שעה=now+1h, עוד שעתיים=now+2h,
-בעוד יומיים=now+2 days, עד הערב=today 19:00, עד מחר=tomorrow, בהקדם=today.
-Hebrew clock words: בשש≈18:00, בארבע≈16:00 unless morning is stated.
-If date/time is genuinely ambiguous, omit those fields and set clarification.
-Use member names only when they clearly match. Prefer family space unless the user says private/my space.
+Interpret dates relative to Now using the provided local timestamp and timezoneOffsetMinutes.
+Do not convert to UTC. The date field must be the user's local calendar date.
+היום=today, מחר=tomorrow, מחר בבוקר=tomorrow 09:00,
+מחר בערב=tomorrow 19:00, tonight/this evening=today 19:00 unless a time is given,
+next week=+7 days, Friday=the coming Friday, next Friday=the Friday after this week's Friday if Friday is still ahead,
+in two hours=now+2h, at 8 PM=20:00, at 8 AM=08:00.
+Hebrew clock words: בשש≈18:00, בארבע≈16:00, בשמונה≈20:00 unless morning is stated.
+If the user gives an explicit time, preserve it exactly.
+If date/time is genuinely ambiguous, omit those fields and set clarification. Do not invent dates, times, people, or reminders.
+Use member names only when they clearly match the provided family members. Copy assigneeId when the match is unique.
+If two members could match, omit assignee and ask for clarification. Never invent a new person.
+I/me/"I need to"/תזכיר לי/אני צריך = personal space and assign to currentUser.
+everyone/the family/כולם/כל המשפחה = family space and no specific assignee.
+A named member who needs to do something = assign to that member, family space.
+Prefer family space unless the user says it is personal/private/my space or uses first person for their own task.
 If the photo/text is too ambiguous, set clarification and keep items empty or low confidence.`;
 
 function readBody(req) {
@@ -98,9 +108,11 @@ const server = http.createServer(async (req, res) => {
       const parts = [
         {
           text:
-            `Now: ${payload.now || ''}\n` +
+            `Now (local): ${payload.now || ''}\n` +
+            `Timezone offset minutes: ${payload.timezoneOffsetMinutes ?? ''}\n` +
             `Language: ${payload.language || 'en'}\n` +
-            `Family first names only: ${members.map((m) => m.name).join(', ')}\n` +
+            `Current user: ${payload.currentUser ? JSON.stringify(payload.currentUser) : ''}\n` +
+            `Family members: ${JSON.stringify(members)}\n` +
             `Message:\n${payload.text || ''}`,
         },
       ];

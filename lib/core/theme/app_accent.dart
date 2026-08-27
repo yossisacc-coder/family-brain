@@ -3,7 +3,7 @@ import 'package:family_brain/core/l10n/app_localizations.dart';
 
 import 'app_colors.dart';
 
-/// Selectable app accent/primary. Backgrounds stay white/light.
+/// Selectable app accent/primary. Surfaces, cards, and chrome follow this color.
 enum AppAccent {
   purple,
   blue,

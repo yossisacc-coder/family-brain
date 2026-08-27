@@ -593,21 +593,21 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get appearanceHint =>
-      'בחרו ערכת נושא. רקעים, כרטיסים וכפתורים משתנים יחד. צבע האפליקציה עדיין צובע פעולות ראשיות.';
+      'בחרו אישי או מקצועי. צבע האפליקציה שנבחר צובע את כל הממשק.';
 
   @override
   String get appearanceProfessional => 'מקצועי';
 
   @override
-  String get appearanceColorful => 'צבעוני';
+  String get appearanceColorful => 'אישי';
 
   @override
   String get appearanceProfessionalHint =>
-      'פסטלים בוגרים, מעט כהים יותר, כולל רקע, כרטיסים וכפתורים.';
+      'סביבת עבודה כהה יותר, עם ניגודיות גבוהה, באותה משפחת צבע.';
 
   @override
   String get appearanceColorfulHint =>
-      'פסטלים מתואמים לרקע, כרטיסים וכפתורים.';
+      'מראה משפחתי ידידותי עם רקע לבן נקי והצבע שנבחר בכל הממשק.';
 
   @override
   String get calendarItemsForDay => 'פריטים ליום זה';

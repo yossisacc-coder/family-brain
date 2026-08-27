@@ -43,7 +43,7 @@ class QuickActionCard extends StatelessWidget {
             border: Border.all(
               color: emphasized ? palette.primary : palette.border,
             ),
-            boxShadow: emphasized ? null : AppShadows.card,
+            boxShadow: emphasized ? null : AppShadows.cardFor(palette),
           ),
           child: Container(
             constraints: const BoxConstraints(minHeight: 56, maxHeight: 64),

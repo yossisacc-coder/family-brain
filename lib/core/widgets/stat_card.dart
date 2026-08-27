@@ -43,7 +43,7 @@ class StatCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: background,
                 borderRadius: AppRadii.card,
-                boxShadow: AppShadows.card,
+                boxShadow: AppShadows.cardFor(palette),
               ),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),

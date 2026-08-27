@@ -1,5 +1,7 @@
 import '../../domain/models/app_user.dart';
 import '../../domain/models/task_item.dart';
+import 'ai/family_brain_context.dart';
+import 'assignment_resolver.dart';
 import 'priority_from_language.dart';
 
 class BrainDraft {
@@ -20,6 +22,7 @@ class BrainDraft {
     this.explanation,
     this.personal = false,
     this.priority = TaskPriority.normal,
+    this.status = TaskStatus.pending,
   });
 
   final InformationKind kind;
@@ -38,6 +41,7 @@ class BrainDraft {
   final String? explanation;
   final bool personal;
   final TaskPriority priority;
+  final TaskStatus status;
 
   String get notes {
     final parts = <String>[];
@@ -78,6 +82,7 @@ class BrainDraft {
     String? explanation,
     bool? personal,
     TaskPriority? priority,
+    TaskStatus? status,
   }) {
     return BrainDraft(
       kind: kind ?? this.kind,
@@ -96,6 +101,7 @@ class BrainDraft {
       explanation: explanation ?? this.explanation,
       personal: personal ?? this.personal,
       priority: priority ?? this.priority,
+      status: status ?? this.status,
     );
   }
 
@@ -118,7 +124,7 @@ class BrainDraft {
       kind: kind,
       type: personal ? TaskType.personal : TaskType.family,
       priority: priority,
-      status: TaskStatus.pending,
+      status: status,
       createdAt: stamp,
       updatedAt: stamp,
       assigneeId: assigneeId,
@@ -156,6 +162,7 @@ class FamilyBrainParser {
     String raw, {
     required DateTime now,
     List<AppUser> members = const [],
+    AppUser? currentUser,
   }) {
     final text = raw.trim();
     if (text.isEmpty) {
@@ -166,7 +173,7 @@ class FamilyBrainParser {
     }
 
     final lower = text.toLowerCase();
-    final person = _matchPerson(text, members);
+    final assignment = _assignment(text, members, currentUser);
     final when = _extractWhen(text, now);
     final items = _extractListItems(text);
     final kind = _kind(lower, items: items, hasTime: when.hasTime, hasDate: when.date != null);
@@ -192,13 +199,15 @@ class FamilyBrainParser {
         dueDate: when.date,
         hasDueTime: when.hasTime,
         reminderAt: hebrewDontForget ? null : reminder,
-        assigneeId: person?.id,
-        assigneeName: person?.name,
+        assigneeId: assignment.assigneeId,
+        assigneeName: assignment.assigneeName,
         listItems: kind == InformationKind.list ? items : const [],
-        lowConfidence: kind == InformationKind.task &&
-            when.date == null &&
-            items.length < 2 &&
-            !_hasActionVerb(lower),
+        lowConfidence: (kind == InformationKind.task &&
+                when.date == null &&
+                items.length < 2 &&
+                !_hasActionVerb(lower)) ||
+            assignment.ambiguous,
+        personal: assignment.personal,
         priority: PriorityFromLanguage.infer(text),
       ),
     );
@@ -313,19 +322,19 @@ class FamilyBrainParser {
     return cleaned[0].toUpperCase() + cleaned.substring(1);
   }
 
-  static AppUser? _matchPerson(String text, List<AppUser> members) {
-    final lower = text.toLowerCase();
-    for (final member in members) {
-      final parts = member.name
-          .split(RegExp(r'\s+'))
-          .where((part) => part.length > 1)
-          .toList();
-      for (final part in parts) {
-        if (lower.contains(part.toLowerCase())) return member;
-      }
-      if (lower.contains(member.name.toLowerCase())) return member;
-    }
-    return null;
+  static AssignmentDecision _assignment(
+    String text,
+    List<AppUser> members,
+    AppUser? currentUser,
+  ) {
+    return AssignmentResolver.resolve(
+      text: text,
+      members: [
+        for (final member in members) FamilyBrainMemberRef.fromAppUser(member),
+      ],
+      currentUser:
+          currentUser == null ? null : FamilyBrainMemberRef.fromAppUser(currentUser),
+    );
   }
 
   static List<String> _extractListItems(String text) {
@@ -411,7 +420,7 @@ class FamilyBrainParser {
     if (_he(text, 'מחרתיים') || _he(text, 'בעוד יומיים')) {
       day = day.add(const Duration(days: 2));
       hasDate = true;
-    } else if (RegExp(r'\b(today|tonight)\b').hasMatch(lower) ||
+    } else if (RegExp(r'\b(today|tonight|this evening)\b').hasMatch(lower) ||
         _he(text, 'היום') ||
         _he(text, 'הערב') ||
         _he(text, 'בהקדם') ||
@@ -422,6 +431,11 @@ class FamilyBrainParser {
             _he(text, 'עד מחר')) &&
         !_he(text, 'מחרתיים')) {
       day = day.add(const Duration(days: 1));
+      hasDate = true;
+    } else if (RegExp(r'\bnext week\b').hasMatch(lower) ||
+        text.contains('שבוע הבא') ||
+        text.contains('בשבוע הבא')) {
+      day = day.add(const Duration(days: 7));
       hasDate = true;
     } else {
       final weekday = _nextWeekday(lower, now);
@@ -435,7 +449,10 @@ class FamilyBrainParser {
     if (time == null) {
       if (RegExp(r'בבוקר|tomorrow morning', unicode: true).hasMatch(lower)) {
         time = (9, 0);
-      } else if (RegExp(r'בערב|הערב|עד הערב|tonight', unicode: true).hasMatch(lower)) {
+      } else if (RegExp(
+        r'בערב|הערב|עד הערב|tonight|this evening',
+        unicode: true,
+      ).hasMatch(lower)) {
         time = (19, 0);
       }
     }
@@ -464,7 +481,14 @@ class FamilyBrainParser {
     final at = RegExp(r'\b(?:at|@|בשעה)\s*(\d{1,2})\b').firstMatch(lower);
     if (at != null) {
       var hour = int.parse(at.group(1)!);
-      if (hour >= 1 && hour <= 7) hour += 12;
+      final evening = RegExp(
+        r'\b(tonight|this evening|evening|tonight|pm)\b|בערב|הערב',
+        unicode: true,
+      ).hasMatch(lower);
+      final morning = RegExp(r'\b(morning|a\.?m\.?)\b|בבוקר', unicode: true)
+          .hasMatch(lower);
+      if (evening && hour >= 1 && hour <= 11) hour += 12;
+      if (!evening && !morning && hour >= 1 && hour <= 7) hour += 12;
       return (hour, 0);
     }
     const words = {
@@ -484,7 +508,7 @@ class FamilyBrainParser {
       if (RegExp('ב(?:שעה\\s+)?${entry.key}', unicode: true).hasMatch(text)) {
         var hour = entry.value;
         final morning = RegExp(r'בבוקר', unicode: true).hasMatch(text);
-        if (!morning && hour >= 1 && hour <= 7) hour += 12;
+        if (!morning && hour >= 1 && hour <= 10) hour += 12;
         return (hour, 0);
       }
     }
@@ -496,6 +520,7 @@ class FamilyBrainParser {
     String raw, {
     required DateTime now,
     List<AppUser> members = const [],
+    AppUser? currentUser,
     String? imagePath,
   }) {
     final text = raw.trim();
@@ -541,6 +566,7 @@ class FamilyBrainParser {
         text: text,
         now: now,
         members: members,
+        currentUser: currentUser,
         imagePath: imagePath,
         eventCue: eventCue,
         listItems: listItems,
@@ -549,7 +575,7 @@ class FamilyBrainParser {
       );
     }
 
-    final one = parse(text, now: now, members: members);
+    final one = parse(text, now: now, members: members, currentUser: currentUser);
     if (!one.isOk || one.draft == null) return const [];
     return [one.draft!.copyWith(imagePath: imagePath)];
   }
@@ -558,6 +584,7 @@ class FamilyBrainParser {
     required String text,
     required DateTime now,
     required List<AppUser> members,
+    required AppUser? currentUser,
     required String? imagePath,
     required bool eventCue,
     required List<String> listItems,
@@ -565,12 +592,17 @@ class FamilyBrainParser {
     required int? hoursBefore,
   }) {
     final drafts = <BrainDraft>[];
-    final person = _matchPerson(text, members);
+    final assignment = _assignment(text, members, currentUser);
     final when = _extractWhen(text, now);
-    final personal = RegExp(
-      r'\b(just me|private|my space|only me)\b',
-      caseSensitive: false,
-    ).hasMatch(text);
+    final person = assignment.hasAssignee
+        ? AppUser(
+            id: assignment.assigneeId!,
+            name: assignment.assigneeName ?? assignment.assigneeId!,
+            phone: '',
+            language: 'en',
+            createdAt: now,
+          )
+        : null;
 
     if (eventCue) {
       drafts.add(
@@ -580,10 +612,10 @@ class FamilyBrainParser {
           originalText: text,
           dueDate: when.date,
           hasDueTime: when.hasTime,
-          assigneeId: person?.id,
-          assigneeName: person?.name,
+          assigneeId: assignment.assigneeId,
+          assigneeName: assignment.assigneeName,
           imagePath: imagePath,
-          personal: personal,
+          personal: assignment.personal,
           priority: PriorityFromLanguage.infer(text),
         ),
       );
@@ -598,7 +630,7 @@ class FamilyBrainParser {
         final remindWhen = _extractWhen(remindText, now);
         at = remindWhen.date ?? when.date ?? now.add(const Duration(hours: 1));
       }
-      final remindPerson = _matchPerson(_remindSlice(text), members) ?? person;
+      final remindPerson = _assignment(_remindSlice(text), members, currentUser);
       drafts.add(
         BrainDraft(
           kind: InformationKind.reminder,
@@ -609,9 +641,9 @@ class FamilyBrainParser {
           dueDate: at,
           hasDueTime: true,
           reminderAt: at,
-          assigneeId: remindPerson?.id,
-          assigneeName: remindPerson?.name,
-          personal: personal,
+          assigneeId: remindPerson.assigneeId ?? assignment.assigneeId,
+          assigneeName: remindPerson.assigneeName ?? assignment.assigneeName,
+          personal: remindPerson.personal || assignment.personal,
           priority: PriorityFromLanguage.infer(text),
         ),
       );
@@ -624,7 +656,7 @@ class FamilyBrainParser {
           title: listItems.length <= 3 ? listItems.join(', ') : 'Shopping list',
           originalText: text,
           listItems: listItems,
-          personal: personal,
+          personal: assignment.personal,
           priority: PriorityFromLanguage.infer(text),
         ),
       );
@@ -632,7 +664,7 @@ class FamilyBrainParser {
 
     return drafts.isEmpty
         ? [
-            parse(text, now: now, members: members).draft ??
+            parse(text, now: now, members: members, currentUser: currentUser).draft ??
                 BrainDraft(
                   kind: InformationKind.task,
                   title: text,
@@ -711,15 +743,20 @@ class FamilyBrainParser {
     };
     for (final entry in names.entries) {
       final hebrew = RegExp(r'[\u0590-\u05FF]').hasMatch(entry.key);
+      final nextPrefixed = !hebrew &&
+          RegExp('\\bnext\\s+${entry.key}\\b').hasMatch(lower);
       final hit = hebrew
           ? lower.contains(entry.key)
-          : RegExp('\\b${entry.key}\\b').hasMatch(lower);
+          : nextPrefixed || RegExp('\\b${entry.key}\\b').hasMatch(lower);
       if (!hit) continue;
       var day = DateTime(now.year, now.month, now.day);
       while (day.weekday != entry.value) {
         day = day.add(const Duration(days: 1));
       }
-      if (!day.isAfter(DateTime(now.year, now.month, now.day))) {
+      final today = DateTime(now.year, now.month, now.day);
+      if (!day.isAfter(today)) {
+        day = day.add(const Duration(days: 7));
+      } else if (nextPrefixed && day.isAfter(today)) {
         day = day.add(const Duration(days: 7));
       }
       return day;
