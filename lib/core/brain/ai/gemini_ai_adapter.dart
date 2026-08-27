@@ -14,9 +14,9 @@ import 'family_brain_context.dart';
 class GeminiAiAdapter implements AiProvider {
   GeminiAiAdapter({
     required this.origin,
-    http.Client? client,
+    this._client,
     this.timeout = const Duration(seconds: 12),
-  }) : _client = client;
+  });
 
   final String origin;
   final http.Client? _client;
