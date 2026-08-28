@@ -66,6 +66,9 @@ void main() {
     ],
   };
 
+  const datedSource =
+      'Tomorrow at 6 PM take David to the doctor. Remind me to call Dad tomorrow at 4. Need milk and bread.';
+
   group('normalized Family Brain AI schema', () {
     test('parses canonical JSON into typed actions', () {
       final response = FamilyBrainAiResponse.fromJson({
@@ -103,12 +106,12 @@ void main() {
     test('Family Brain produces the normalized format from Gemini gateway JSON', () {
       final mapped = GeminiAiAdapter.mapGatewayPayload(
         gatewayFixture,
-        sourceText: 'demo',
+        sourceText: datedSource,
       );
       final resolved = FamilyBrainAiValidator.resolve(
         mapped,
         context: context,
-        originalText: 'demo',
+        originalText: datedSource,
       );
       expect(
         resolved.actions.map((a) => a.type.wireName),
@@ -185,7 +188,7 @@ void main() {
       final resolved = FamilyBrainAiValidator.resolve(
         mapped,
         context: context,
-        originalText: 'demo',
+        originalText: datedSource,
       );
       expect(
         resolved.actions
@@ -205,9 +208,12 @@ void main() {
         nextId: () => 'id-${n++}',
       );
       final response = FamilyBrainAiValidator.resolve(
-        GeminiAiAdapter.mapGatewayPayload(gatewayFixture, sourceText: 'demo'),
+        GeminiAiAdapter.mapGatewayPayload(
+          gatewayFixture,
+          sourceText: datedSource,
+        ),
         context: context,
-        originalText: 'demo',
+        originalText: datedSource,
       );
       final result = await engine.apply(
         response: response,
@@ -292,6 +298,42 @@ void main() {
       );
       expect(result.written, isEmpty);
       expect(await repo.watchFamilyTasks('fam').first, isEmpty);
+    });
+
+    test('delete_task is never written without confirmation', () async {
+      final repo = LocalTaskRepository(LocalJsonStore(persist: false));
+      final existing = TaskItem(
+        id: 'shop',
+        familyId: 'fam',
+        creatorId: 'maya',
+        title: "David's shopping task",
+        type: TaskType.family,
+        priority: TaskPriority.normal,
+        status: TaskStatus.pending,
+        createdAt: now,
+        updatedAt: now,
+      );
+      await repo.createTask(existing);
+      final result = await ActionEngine(repository: repo).apply(
+        response: const FamilyBrainAiResponse(
+          actions: [
+            FamilyBrainAiAction(
+              type: FamilyBrainAiActionType.deleteTask,
+              targetId: 'shop',
+              title: "David's shopping task",
+            ),
+          ],
+        ),
+        familyId: 'fam',
+        creatorId: 'maya',
+        now: now,
+        existing: [existing],
+      );
+      expect(result.written, isEmpty);
+      expect(
+        (await repo.watchFamilyTasks('fam').first).single.id,
+        'shop',
+      );
     });
   });
 

@@ -2,6 +2,7 @@ import '../../../domain/models/app_user.dart';
 import '../../../domain/models/task_item.dart';
 import '../assignment_resolver.dart';
 import '../civil_datetime.dart';
+import '../family_brain_intent.dart';
 import '../family_brain_parser.dart';
 import '../priority_from_language.dart';
 import 'family_brain_context.dart';
@@ -31,9 +32,10 @@ import 'family_brain_context.dart';
 /// ```
 ///
 /// Action `type` values:
-/// create_task, update_task, complete_task, create_event, update_event,
-/// create_reminder, create_list_item, update_list_item,
-/// identify_family_member, determine_priority, determine_date, determine_time,
+/// create_task, update_task, complete_task, delete_task, list_tasks,
+/// list_reminders, create_event, update_event, create_reminder,
+/// create_list_item, update_list_item, identify_family_member,
+/// determine_priority, determine_date, determine_time,
 /// ask_for_clarification, conversational_response.
 ///
 /// Gemini does not apply these. Family Brain validates them, then the
@@ -42,6 +44,9 @@ enum FamilyBrainAiActionType {
   createTask('create_task'),
   updateTask('update_task'),
   completeTask('complete_task'),
+  deleteTask('delete_task'),
+  listTasks('list_tasks'),
+  listReminders('list_reminders'),
   createEvent('create_event'),
   updateEvent('update_event'),
   createReminder('create_reminder'),
@@ -157,8 +162,12 @@ class FamilyBrainAiAction {
     String? assigneeName,
     String? assigneeId,
     bool clearAssignee = false,
+    bool clearDate = false,
+    bool clearTime = false,
+    bool clearReminderTime = false,
     List<String>? listItems,
     String? message,
+    String? explanation,
     String? kind,
     bool? lowConfidence,
     String? imagePath,
@@ -168,9 +177,9 @@ class FamilyBrainAiAction {
       targetId: targetId ?? this.targetId,
       title: title ?? this.title,
       description: description ?? this.description,
-      date: date ?? this.date,
-      time: time ?? this.time,
-      reminderTime: reminderTime ?? this.reminderTime,
+      date: clearDate ? null : (date ?? this.date),
+      time: clearTime ? null : (time ?? this.time),
+      reminderTime: clearReminderTime ? null : (reminderTime ?? this.reminderTime),
       hasDueTime: hasDueTime ?? this.hasDueTime,
       priority: priority ?? this.priority,
       status: status ?? this.status,
@@ -181,7 +190,7 @@ class FamilyBrainAiAction {
       location: location,
       message: message ?? this.message,
       confidence: confidence,
-      explanation: explanation,
+      explanation: explanation ?? this.explanation,
       kind: kind ?? this.kind,
       lowConfidence: lowConfidence ?? this.lowConfidence,
       imagePath: imagePath ?? this.imagePath,
@@ -277,7 +286,9 @@ class FamilyBrainAiAction {
   DateTime? reminderAt(DateTime now) {
     final at = combineDateTime(date, reminderTime, now);
     if (at != null) return at;
-    if (type == FamilyBrainAiActionType.createReminder) return dueAt(now);
+    if (type == FamilyBrainAiActionType.createReminder) {
+      return dueAt(now);
+    }
     return null;
   }
 
@@ -356,6 +367,24 @@ class FamilyBrainAiResponse {
             action.type == FamilyBrainAiActionType.createReminder ||
             action.type == FamilyBrainAiActionType.createListItem,
       );
+
+  bool get hasUserFacingResult {
+    if (hasCreateActions) return true;
+    if ((clarification ?? '').trim().isNotEmpty) return true;
+    if (conversationText != null) return true;
+    return actions.any(
+      (action) =>
+          action.type == FamilyBrainAiActionType.deleteTask ||
+          action.type == FamilyBrainAiActionType.listTasks ||
+          action.type == FamilyBrainAiActionType.listReminders ||
+          action.type == FamilyBrainAiActionType.updateTask ||
+          action.type == FamilyBrainAiActionType.updateEvent ||
+          action.type == FamilyBrainAiActionType.updateListItem ||
+          action.type == FamilyBrainAiActionType.completeTask ||
+          action.type == FamilyBrainAiActionType.askForClarification ||
+          action.type == FamilyBrainAiActionType.conversationalResponse,
+    );
+  }
 
   String? get conversationText {
     for (final action in actions) {
@@ -490,13 +519,41 @@ class FamilyBrainAiValidator {
     final actions = <FamilyBrainAiAction>[];
     var localIndex = 0;
     var askedWho = false;
+    var askedWhen = false;
+    var askedDelete = false;
     for (var action in raw.actions) {
       if (action.type == FamilyBrainAiActionType.askForClarification ||
-          action.type == FamilyBrainAiActionType.conversationalResponse) {
-        if ((action.message ?? raw.clarification ?? '').trim().isEmpty) {
+          action.type == FamilyBrainAiActionType.conversationalResponse ||
+          action.type == FamilyBrainAiActionType.listTasks ||
+          action.type == FamilyBrainAiActionType.listReminders) {
+        if ((action.message ?? raw.clarification ?? '').trim().isEmpty &&
+            action.type != FamilyBrainAiActionType.listTasks &&
+            action.type != FamilyBrainAiActionType.listReminders) {
           continue;
         }
         actions.add(action);
+        continue;
+      }
+
+      if (action.type == FamilyBrainAiActionType.deleteTask) {
+        final target = _resolveTarget(action, context, source);
+        if (!askedDelete) {
+          askedDelete = true;
+          actions.add(
+            FamilyBrainAiAction(
+              type: FamilyBrainAiActionType.askForClarification,
+              targetId: target?.id,
+              title: target?.title,
+              message: FamilyBrainAiValidator.deletePrompt(
+                context.language,
+                target?.title,
+              ),
+            ),
+          );
+        }
+        if (target != null) {
+          actions.add(action.copyWith(targetId: target.id, title: target.title));
+        }
         continue;
       }
 
@@ -508,13 +565,27 @@ class FamilyBrainAiValidator {
       }
       if (action.type == FamilyBrainAiActionType.completeTask &&
           (action.targetId == null || action.targetId!.isEmpty)) {
-        continue;
+        final target = _resolveTarget(action, context, source);
+        if (target == null) continue;
+        action = action.copyWith(targetId: target.id, title: target.title);
       }
       if ((action.type == FamilyBrainAiActionType.updateTask ||
               action.type == FamilyBrainAiActionType.updateEvent ||
               action.type == FamilyBrainAiActionType.updateListItem) &&
           (action.targetId == null || action.targetId!.isEmpty)) {
-        continue;
+        final target = _resolveTarget(action, context, source);
+        if (target == null) {
+          actions.add(
+            FamilyBrainAiAction(
+              type: FamilyBrainAiActionType.askForClarification,
+              message: context.language == 'he'
+                  ? 'איזו משימה לעדכן?'
+                  : 'Which task should I update?',
+            ),
+          );
+          continue;
+        }
+        action = action.copyWith(targetId: target.id, title: target.title);
       }
 
       BrainDraft? local;
@@ -525,6 +596,21 @@ class FamilyBrainAiValidator {
 
       if (action.type.writesData && local != null) {
         action = _fillFromLocal(action, local);
+      }
+
+      if ((action.type == FamilyBrainAiActionType.createEvent ||
+              action.type == FamilyBrainAiActionType.createReminder) &&
+          !FamilyBrainParser.hasTemporalCue(source) &&
+          local?.dueDate == null &&
+          local?.reminderAt == null) {
+        action = action.copyWith(
+          clearDate: true,
+          clearTime: true,
+          clearReminderTime: true,
+          hasDueTime: false,
+          lowConfidence: true,
+          explanation: FamilyBrainParser.missingDateTimeKey,
+        );
       }
 
       final assignment = AssignmentResolver.resolve(
@@ -578,6 +664,22 @@ class FamilyBrainAiValidator {
           ),
         );
       }
+      if ((action.type == FamilyBrainAiActionType.createEvent ||
+              action.type == FamilyBrainAiActionType.createReminder) &&
+          action.date == null &&
+          action.time == null &&
+          action.reminderTime == null &&
+          !askedWhen) {
+        askedWhen = true;
+        actions.add(
+          FamilyBrainAiAction(
+            type: FamilyBrainAiActionType.askForClarification,
+            message: context.language == 'he'
+                ? 'חסרים תאריך ושעה. אפשר לשמור כפריט כללי, או להוסיף מתי זה אמור לקרות.'
+                : 'I\'m missing the date and time. I can keep this as a general item, or you can add when it should happen.',
+          ),
+        );
+      }
     }
 
     return FamilyBrainAiResponse(
@@ -587,6 +689,34 @@ class FamilyBrainAiValidator {
       clarification: raw.clarification,
       actions: actions,
     );
+  }
+
+  static FamilyBrainItemRef? _resolveTarget(
+    FamilyBrainAiAction action,
+    FamilyBrainContext context,
+    String source,
+  ) {
+    if (action.targetId != null && action.targetId!.isNotEmpty) {
+      for (final item in context.catalog) {
+        if (item.id == action.targetId) return item;
+      }
+    }
+    final probe = [
+      action.title ?? '',
+      source,
+    ].where((part) => part.trim().isNotEmpty).join(' ');
+    return FamilyBrainIntent.matchRef(probe, context.catalog);
+  }
+
+  static String deletePrompt(String language, String? title) {
+    if (title == null || title.trim().isEmpty) {
+      return language == 'he'
+          ? 'איזו משימה למחוק?'
+          : 'Which task should I delete?';
+    }
+    return language == 'he'
+        ? 'מצאתי את "$title". למחוק אותה?'
+        : 'I found "$title". Do you want me to delete it?';
   }
 
   static List<BrainDraft> _localDrafts(

@@ -180,6 +180,20 @@ class _BrainConfirmScreenState extends ConsumerState<BrainConfirmScreen> {
             ],
             const SizedBox(height: AppSpacing.md),
           ],
+          if (draft.explanation == FamilyBrainParser.missingDateTimeKey ||
+              ((draft.kind == InformationKind.event ||
+                      draft.kind == InformationKind.reminder) &&
+                  draft.dueDate == null &&
+                  draft.reminderAt == null)) ...[
+            Text(
+              l10n.missingDateTimeMessage,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: context.palette.textMuted,
+                    height: 1.4,
+                  ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
           AppCard(
             child: _editing ? _editForm(l10n, members, draft) : _summary(l10n, draft),
           ),

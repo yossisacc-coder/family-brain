@@ -1022,4 +1022,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get activityClearOlder => 'Clear older than 7 days';
+
+  @override
+  String get calendarToday => 'Today';
+
+  @override
+  String get moreTasks => 'Show more';
+
+  @override
+  String get missingDateTimeMessage =>
+      'I understood this, but I\'m missing the date and time. I can keep it as a general item, or you can add when it should happen.';
+
+  @override
+  String get calendarGroupEvents => 'Events';
+
+  @override
+  String get calendarGroupTasks => 'Tasks';
+
+  @override
+  String get calendarGroupReminders => 'Reminders';
+
+  @override
+  String voiceConfirmDelete(String title) =>
+      'I found $title. Do you want me to delete it?';
+
+  @override
+  String get voiceDeleteCancelled => 'Okay, I won\'t delete it.';
 }

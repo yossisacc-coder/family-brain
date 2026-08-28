@@ -12,6 +12,7 @@ import '../../core/widgets/app_notice.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
 import '../../core/widgets/primary_button.dart';
+import '../../core/widgets/secondary_button.dart';
 import '../../core/widgets/task_trash.dart';
 import '../../data/providers.dart';
 import '../../domain/models/family_activity.dart';
@@ -50,10 +51,15 @@ class TaskDetailsScreen extends ConsumerWidget {
           ),
         );
       }
-      return Scaffold(
-        appBar: AppBar(title: Text(l10n.taskDetails)),
-        body: Center(child: Text(l10n.errorGeneric)),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go('/app/home');
+        }
+      });
+      return const SizedBox.shrink();
     }
     final assignee =
         members.where((member) => member.id == task.assigneeId).firstOrNull;
@@ -233,10 +239,9 @@ class TaskDetailsScreen extends ConsumerWidget {
               label: Text(l10n.edit),
             ),
             const SizedBox(height: 8),
-            TextButton.icon(
+            DangerButton(
+              label: l10n.deleteTask,
               onPressed: () => _confirmDelete(context, ref, task, l10n),
-              icon: const Icon(Icons.delete_outline),
-              label: Text(l10n.deleteTask),
             ),
           ],
         ],

@@ -353,5 +353,18 @@
   "accessPlanBetaHint": "You are on Family Brain Beta. The full product is available with no payment. A Premium plan can be added later without rebuilding the app.",
   "brainUnsureAssignee": "I found a task, but I'm not sure who it belongs to.",
   "brainAssignFamily": "Family",
-  "activityClearOlder": "Clear older than 7 days"
+  "activityClearOlder": "Clear older than 7 days",
+  "calendarToday": "Today",
+  "moreTasks": "Show more",
+  "missingDateTimeMessage": "I understood this, but I'm missing the date and time. I can keep it as a general item, or you can add when it should happen.",
+  "calendarGroupEvents": "Events",
+  "calendarGroupTasks": "Tasks",
+  "calendarGroupReminders": "Reminders",
+  "voiceConfirmDelete": "I found {title}. Do you want me to delete it?",
+  "@voiceConfirmDelete": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "voiceDeleteCancelled": "Okay, I won't delete it."
 }

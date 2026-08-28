@@ -118,7 +118,16 @@ class GeminiAiAdapter implements AiProvider {
         for (final entry in item['listItems'] as List)
           if (entry.toString().trim().isNotEmpty) entry.toString().trim(),
     ];
-    if (title == null && listItems.isEmpty) return null;
+    final operational = type == FamilyBrainAiActionType.completeTask ||
+        type == FamilyBrainAiActionType.deleteTask ||
+        type == FamilyBrainAiActionType.listTasks ||
+        type == FamilyBrainAiActionType.listReminders ||
+        type == FamilyBrainAiActionType.updateTask ||
+        type == FamilyBrainAiActionType.updateEvent ||
+        type == FamilyBrainAiActionType.updateListItem ||
+        type == FamilyBrainAiActionType.askForClarification ||
+        type == FamilyBrainAiActionType.conversationalResponse;
+    if (title == null && listItems.isEmpty && !operational) return null;
 
     final assignee = item['assignee'] ??
         (item['people'] is List && (item['people'] as List).isNotEmpty
@@ -127,6 +136,7 @@ class GeminiAiAdapter implements AiProvider {
     final confidence = item['confidence'];
     return FamilyBrainAiAction(
       type: type,
+      targetId: _text(item['targetId']),
       title: title,
       description: _text(item['description']),
       date: _text(item['date']),
@@ -140,6 +150,7 @@ class GeminiAiAdapter implements AiProvider {
       assigneeId: _text(item['assigneeId']),
       listItems: listItems,
       location: _text(item['location']),
+      message: _text(item['message'] ?? item['clarification']),
       explanation: _text(item['explanation'] ?? item['context']),
       confidence: confidence is num ? confidence.toDouble() : null,
       kind: rawType == 'information' || rawType == 'note' || rawType == 'info'

@@ -11,8 +11,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 import '../../core/brain/family_brain_ai.dart';
+import '../../core/brain/family_brain_ask.dart';
+import '../../core/brain/family_brain_intent.dart';
 import '../../core/brain/speech_locale.dart';
 import '../../core/brain/voice_listen_patience.dart';
+import '../../core/brain/ai/action_engine.dart';
+import '../../core/brain/ai/family_brain_ai_schema.dart';
 import '../../core/share/incoming_share.dart';
 import '../../core/share/share_intake_controller.dart';
 import '../settings/locale_controller.dart';
@@ -26,6 +30,7 @@ import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
 import '../../core/widgets/quick_action_card.dart';
 import '../../core/widgets/stat_card.dart';
+import '../../core/widgets/task_trash.dart';
 import 'home_day_task.dart';
 import '../../data/providers.dart';
 import '../../domain/models/app_user.dart';
@@ -62,6 +67,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   IncomingShare? _sharePreview;
   String? _shareSource;
   String? _handledShareId;
+  var _showAllToday = false;
+  String? _pendingDeleteId;
 
   static const _maxImageBytes = 8 * 1024 * 1024;
 
@@ -82,8 +89,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final membersAsync = ref.watch(familyMembersProvider);
     final unread = ref.watch(unreadCountProvider);
     final incomingShare = ref.watch(shareIntakeControllerProvider);
-    final recentActivity =
-        (ref.watch(familyActivityProvider).valueOrNull ?? const []).take(3).toList();
+    final hasActivity =
+        (ref.watch(familyActivityProvider).valueOrNull ?? const []).isNotEmpty;
 
     return userAsync.when(
       loading: () => LoadingView(label: l10n.loading),
@@ -110,6 +117,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 open.where((task) => task.hasReminder).toList();
             final events = open.where((task) => task.dueDate != null).toList();
             final today = _todayItems(open);
+            final visibleToday =
+                _showAllToday ? today : today.take(3).toList();
             final palette = context.palette;
             if (incomingShare != null) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -200,11 +209,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: QuickActionCard(
-                          icon: Icons.ios_share_rounded,
-                          label: l10n.sendToFamilyBrain,
-                          iconColor: palette.homeTasks,
-                          iconBackground: palette.homeTasksSoft,
-                          onTap: () => _focusComposer(),
+                          icon: Icons.timeline_rounded,
+                          label: l10n.activityTitle,
+                          iconColor: palette.homeFamily,
+                          iconBackground: palette.homeFamilySoft,
+                          onTap: () => context.push('/activity'),
                         ),
                       ),
                     ],
@@ -234,6 +243,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
+                  AppSectionHeader(title: l10n.sendToFamilyBrain),
                   if (_sharePreview != null) ...[
                     _ShareReceivedCard(
                       share: _sharePreview!,
@@ -288,49 +298,83 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                       ),
                     )
-                  else
-                    for (var i = 0; i < today.length; i++)
+                  else ...[
+                    for (var i = 0; i < visibleToday.length; i++)
                       HomeDayTask(
-                        task: today[i],
+                        task: visibleToday[i],
                         members: members,
                         isFirst: i == 0,
-                        isLast: i == today.length - 1,
-                        onTap: () => context.push('/tasks/${today[i].id}'),
+                        isLast: i == visibleToday.length - 1,
+                        onTap: () => context.push('/tasks/${visibleToday[i].id}'),
                       ),
-                  const SizedBox(height: 12),
-                  AppSectionHeader(
-                    title: l10n.activityTitle,
-                    actionLabel: l10n.activitySeeAll,
-                    onAction: () => context.push('/activity'),
-                  ),
-                  if (recentActivity.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Text(
-                        l10n.activityEmptyTitle,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: palette.textMuted,
-                            ),
-                      ),
-                    )
-                  else
-                    for (final item in recentActivity)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          dense: true,
-                          leading: Icon(
-                            Icons.timeline_rounded,
-                            color: palette.primary,
+                    if (today.length > 3)
+                      Align(
+                        alignment: Alignment.center,
+                        child: IconButton(
+                          tooltip: l10n.moreTasks,
+                          onPressed: () =>
+                              setState(() => _showAllToday = !_showAllToday),
+                          icon: Icon(
+                            _showAllToday
+                                ? Icons.expand_less_rounded
+                                : Icons.expand_more_rounded,
                           ),
-                          title: Text(item.summary),
-                          subtitle: Text(
-                            '${item.actorName} · ${_activityWhen(item.createdAt)}',
-                          ),
-                          onTap: () => context.push('/activity'),
                         ),
                       ),
+                  ],
+                  const SizedBox(height: 12),
+                  Material(
+                    color: palette.card,
+                    borderRadius: BorderRadius.circular(18),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(18),
+                      onTap: () => context.push('/activity'),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 14,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.timeline_rounded,
+                              color: palette.primary,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    l10n.activityTitle,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall
+                                        ?.copyWith(fontWeight: FontWeight.w800),
+                                  ),
+                                  Text(
+                                    hasActivity
+                                        ? l10n.activitySeeAll
+                                        : l10n.activityEmptyTitle,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(color: palette.textMuted),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Icon(
+                              Directionality.of(context) == TextDirection.rtl
+                                  ? Icons.chevron_left_rounded
+                                  : Icons.chevron_right_rounded,
+                              color: palette.textMuted,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: AppSpacing.md),
                   _FamilyMembersRow(
                     members: members,
@@ -380,7 +424,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       final bTime = b.dueDate ?? b.reminderAt ?? b.createdAt;
       return aTime.compareTo(bTime);
     });
-    return matches.take(3).toList();
+    return matches;
   }
 
   Future<void> _showInputMenu(
@@ -691,13 +735,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       await _speech.stop();
     } catch (_) {}
     if (!mounted) return;
-    final empty = !_heardSpeech && _composer.text.trim().isEmpty;
+    final text = _composer.text.trim();
+    final empty = !_heardSpeech && text.isEmpty;
     setState(() => _listening = false);
     if (empty && l10n != null) {
       _setBrainStatus(BrainStatusKind.error, l10n.voiceEmpty);
-    } else if (_brainStatus == BrainStatusKind.listening) {
+      return;
+    }
+    if (_brainStatus == BrainStatusKind.listening) {
       _setBrainStatus(null);
     }
+    if (l10n == null || text.isEmpty || _sending) return;
+    final user = ref.read(currentUserProvider).valueOrNull;
+    if (user == null) return;
+    final members = ref.read(familyMembersProvider).valueOrNull ?? const [];
+    final open = (ref.read(familyTasksProvider).valueOrNull ?? const [])
+        .where((task) => task.isVisibleTo(user.id) && task.isOpen)
+        .toList();
+    await _submitComposer(context, l10n, members, user, open);
   }
 
   Future<void> _submitComposer(
@@ -715,6 +770,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return;
     }
     FocusManager.instance.primaryFocus?.unfocus();
+    if (_pendingDeleteId != null && FamilyBrainIntent.isAffirmative(text)) {
+      await _finishPendingDelete(l10n);
+      return;
+    }
+    if (_pendingDeleteId != null && FamilyBrainIntent.isNegative(text)) {
+      setState(() {
+        _pendingDeleteId = null;
+      });
+      _composer.clear();
+      _setBrainStatus(BrainStatusKind.info, l10n.voiceDeleteCancelled);
+      return;
+    }
     final language = Localizations.localeOf(context).languageCode;
     setState(() {
       _sending = true;
@@ -743,14 +810,100 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         source: _shareSource,
       );
       if (!mounted) return;
-      if (!result.isOk) {
-        _setBrainStatus(BrainStatusKind.error, l10n.brainUnclear);
+      _pendingDeleteId = null;
+
+      final delete = result.actions
+          .where((action) => action.type == FamilyBrainAiActionType.deleteTask)
+          .firstOrNull;
+      final listAction = result.actions
+          .where(
+            (action) =>
+                action.type == FamilyBrainAiActionType.listTasks ||
+                action.type == FamilyBrainAiActionType.listReminders,
+          )
+          .firstOrNull;
+      final updateActions = result.actions
+          .where(
+            (action) =>
+                action.type == FamilyBrainAiActionType.updateTask ||
+                action.type == FamilyBrainAiActionType.updateEvent ||
+                action.type == FamilyBrainAiActionType.updateListItem ||
+                action.type == FamilyBrainAiActionType.completeTask,
+          )
+          .toList();
+      final ask = result.clarification?.trim();
+
+      if (delete != null) {
+        _pendingDeleteId = delete.targetId;
+        _composer.clear();
+        _setBrainStatus(
+          BrainStatusKind.info,
+          ask == null || ask.isEmpty
+              ? l10n.voiceConfirmDelete(delete.title ?? text)
+              : ask,
+        );
         return;
       }
+
+      if (listAction != null) {
+        _composer.clear();
+        _setBrainStatus(
+          BrainStatusKind.success,
+          FamilyBrainAsk.answer(
+            question: text,
+            visibleTasks: openItems,
+            now: DateTime.now(),
+            languageCode: language,
+          ),
+        );
+        return;
+      }
+
+      if (updateActions.isNotEmpty && result.drafts.isEmpty) {
+        if (!user.hasFamily) {
+          _setBrainStatus(BrainStatusKind.error, l10n.errorUnavailable);
+          return;
+        }
+        final written = await ActionEngine(
+          repository: ref.read(taskRepositoryProvider),
+        ).apply(
+          response: FamilyBrainAiResponse(
+            sourceText: text,
+            actions: updateActions,
+          ),
+          familyId: user.familyId!,
+          creatorId: user.id,
+          existing: openItems,
+        );
+        _composer.clear();
+        if (written.written.isEmpty) {
+          _setBrainStatus(
+            BrainStatusKind.info,
+            ask == null || ask.isEmpty ? l10n.brainUnclear : ask,
+          );
+          return;
+        }
+        _setBrainStatus(BrainStatusKind.success, l10n.brainStatusSuccess);
+        return;
+      }
+
+      if (result.drafts.isEmpty) {
+        _composer.clear();
+        _setBrainStatus(
+          (ask != null && ask.isNotEmpty)
+              ? BrainStatusKind.info
+              : BrainStatusKind.error,
+          (ask != null && ask.isNotEmpty) ? ask : l10n.brainUnclear,
+        );
+        return;
+      }
+
       if (result.usedFallback && result.error == 'offline') {
         _setBrainStatus(BrainStatusKind.info, l10n.brainUsingOnDevice);
       } else if (result.usedFallback) {
         _setBrainStatus(BrainStatusKind.info, l10n.brainAiFailed);
+      } else if (ask != null && ask.isNotEmpty) {
+        _setBrainStatus(BrainStatusKind.info, ask);
       } else {
         _setBrainStatus(BrainStatusKind.success, l10n.brainStatusSuccess);
       }
@@ -769,6 +922,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
     } finally {
       if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  Future<void> _finishPendingDelete(AppLocalizations l10n) async {
+    final id = _pendingDeleteId;
+    _pendingDeleteId = null;
+    _composer.clear();
+    if (id == null) return;
+    final tasks = ref.read(familyTasksProvider).valueOrNull ?? const [];
+    final task = tasks.where((item) => item.id == id).firstOrNull;
+    if (task == null) {
+      _setBrainStatus(BrainStatusKind.error, l10n.brainUnclear);
+      return;
+    }
+    await TaskTrash.move(
+      context: context,
+      ref: ref,
+      task: task,
+      l10n: l10n,
+    );
+    if (mounted) {
+      _setBrainStatus(BrainStatusKind.success, l10n.taskMovedToTrash);
     }
   }
 
@@ -803,22 +978,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     await _submitComposer(context, l10n, members, user, openItems);
   }
 
-  String _activityWhen(DateTime at) {
-    final local = at.toLocal();
-    final hh = local.hour.toString().padLeft(2, '0');
-    final mm = local.minute.toString().padLeft(2, '0');
-    return '$hh:$mm';
-  }
-
   String _greeting(AppLocalizations l10n, String name) {
     final hour = DateTime.now().hour;
     if (hour < 12) return l10n.greetingMorning(name);
     if (hour < 17) return l10n.greetingAfternoon(name);
     return l10n.greetingEvening(name);
-  }
-
-  void _focusComposer() {
-    _composerFocus.requestFocus();
   }
 }
 
@@ -1051,6 +1215,14 @@ class _ComposerCardState extends State<_ComposerCard> {
                   IconButton(
                     tooltip: widget.listening ? l10n.listening : l10n.voiceInput,
                     onPressed: widget.sending ? null : widget.onMic,
+                    style: IconButton.styleFrom(
+                      backgroundColor: widget.listening
+                          ? palette.primarySoft
+                          : palette.homeFamilySoft,
+                      foregroundColor: widget.listening
+                          ? palette.primary
+                          : palette.homeFamily,
+                    ),
                     constraints: const BoxConstraints(
                       minWidth: 44,
                       minHeight: 44,
@@ -1059,9 +1231,6 @@ class _ComposerCardState extends State<_ComposerCard> {
                       widget.listening
                           ? Icons.stop_circle_outlined
                           : Icons.mic_none_rounded,
-                      color: widget.listening
-                          ? palette.primary
-                          : palette.primary,
                     ),
                   ),
                   _ComposerSendButton(

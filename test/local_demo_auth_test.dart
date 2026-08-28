@@ -26,7 +26,13 @@ void main() {
 
     final family = await families.watchFamily(user.familyId!).first;
     expect(family?.name, AppConfig.demoFamilyName);
-    expect(family?.memberIds, containsAll([user.id, AppConfig.demoPartnerId]));
+    expect(family?.memberIds, containsAll([
+      user.id,
+      AppConfig.demoPartnerId,
+      AppConfig.demoChildId,
+      AppConfig.demoDaughterId,
+      AppConfig.demoGrandparentId,
+    ]));
 
     final openTasks = await tasks.watchFamilyTasks(user.familyId!).first;
     expect(openTasks, isNotEmpty);

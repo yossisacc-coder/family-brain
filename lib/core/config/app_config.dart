@@ -52,6 +52,12 @@ class AppConfig {
   static const String demoFamilyName = 'The Cohens';
   static const String demoUserId = 'demo-user-alex';
   static const String demoPartnerId = 'demo-user-maya';
+  static const String demoChildId = 'demo-user-david';
+  static const String demoChildName = 'David';
+  static const String demoDaughterId = 'demo-user-noa';
+  static const String demoDaughterName = 'Noa';
+  static const String demoGrandparentId = 'demo-user-ruth';
+  static const String demoGrandparentName = 'Ruth';
   static const String demoFamilyId = 'demo-family';
   static const String demoInviteCode = 'DEMO01';
 

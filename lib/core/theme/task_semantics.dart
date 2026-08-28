@@ -62,6 +62,12 @@ class TaskSemantics {
     if (task.status == TaskStatus.inProgress) return AppColors.success;
     if (task.isUrgent) return AppColors.urgent;
     if (task.isHigh || task.isOverdue()) return AppColors.high;
-    return primary ?? AppColors.primary;
+    return switch (task.kind) {
+      InformationKind.event => AppColors.homeEvents,
+      InformationKind.reminder => AppColors.homeReminders,
+      InformationKind.task => AppColors.homeTasks,
+      InformationKind.list => AppColors.homeFamily,
+      InformationKind.information => primary ?? AppColors.primary,
+    };
   }
 }
