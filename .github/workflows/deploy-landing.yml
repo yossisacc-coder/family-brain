@@ -9,6 +9,7 @@ on:
       - main
     paths:
       - "landing/**"
+      - "index.html"
       - ".github/workflows/deploy-landing.yml"
 
 permissions:
@@ -28,18 +29,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Confirm landing folder only
-        run: test -d landing && test -f landing/index.html && test -f landing/robots.txt && test -f landing/sitemap.xml
-      - name: Switch Pages source to GitHub Actions
+      - name: Confirm landing page files
+        run: test -f landing/index.html && test -f index.html
+      - name: Detect Pages build type
+        id: pages
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh api --method PUT "repos/${GITHUB_REPOSITORY}/pages" \
-            -H "Accept: application/vnd.github+json" \
-            -f build_type=workflow
+          type=$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq .build_type)
+          echo "build_type=$type" >> "$GITHUB_OUTPUT"
+          echo "Pages build_type=$type"
       - uses: actions/configure-pages@v5
+        if: steps.pages.outputs.build_type == 'workflow'
       - uses: actions/upload-pages-artifact@v3
+        if: steps.pages.outputs.build_type == 'workflow'
         with:
           path: landing
       - id: deployment
+        if: steps.pages.outputs.build_type == 'workflow'
         uses: actions/deploy-pages@v4
