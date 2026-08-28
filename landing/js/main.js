@@ -4,6 +4,7 @@
   var themeBtn = document.querySelector(".theme-toggle");
   var form = document.getElementById("beta-form");
   var formMsg = document.getElementById("form-msg");
+  var download = document.getElementById("download");
 
   function setExpanded(open) {
     if (!toggle || !links) return;
@@ -40,6 +41,25 @@
         document.documentElement.removeAttribute("data-theme");
       }
       localStorage.setItem("fb-theme", next);
+    });
+  }
+
+  if (download) {
+    var androidUrl = (download.getAttribute("data-android-store") || "").trim();
+    var iosUrl = (download.getAttribute("data-ios-store") || "").trim();
+    download.querySelectorAll("[data-store]").forEach(function (btn) {
+      var kind = btn.getAttribute("data-store");
+      var url = kind === "ios" ? iosUrl : androidUrl;
+      if (url) {
+        btn.setAttribute("href", url);
+        btn.removeAttribute("aria-disabled");
+        btn.textContent =
+          kind === "ios" ? "Download on the App Store" : "Get it on Google Play";
+      } else {
+        btn.addEventListener("click", function (event) {
+          event.preventDefault();
+        });
+      }
     });
   }
 
