@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -11,24 +11,47 @@
     <link rel="stylesheet" href="css/styles.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <script>
+      (function () {
+        try {
+          var lang = localStorage.getItem("fb-lang");
+          if (lang === "he" || lang === "en") {
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
-  <body>
-    <header class="nav">
+  <body data-page="terms">
+    <header class="nav legal-chrome">
       <div class="nav-inner">
         <a class="brand" href="index.html">
           <img src="images/logo-mark.png" width="36" height="36" alt="Family Brain logo" />
           <span><span class="word-family">Family</span> <span class="word-brain">Brain</span></span>
         </a>
-        <a class="btn btn-primary" href="index.html#join">Join the Beta</a>
+        <div class="nav-actions">
+          <div class="lang-switch" role="group" data-i18n-aria="nav.language" aria-label="Language">
+            <button class="lang-btn" type="button" data-lang="en" aria-pressed="true">EN</button>
+            <button class="lang-btn" type="button" data-lang="he" aria-pressed="false">עב</button>
+          </div>
+          <a class="btn btn-primary nav-cta" href="index.html#download">
+            <span class="cta-full" data-i18n="cta.getApp">Get Family Brain</span>
+            <span class="cta-short" data-i18n="cta.getAppShort">Get the app</span>
+          </a>
+        </div>
       </div>
     </header>
     <main class="wrap legal-page">
-      <p class="eyebrow">Placeholder</p>
-      <h1>Terms</h1>
-      <p class="lede">This page is a placeholder. Full terms of use will be published before a public launch.</p>
+      <p class="legal-lang-note" data-i18n="legal.enNotice" hidden>The legal text on this page is currently in English.</p>
+      <p class="eyebrow" data-i18n="legal.placeholder">Placeholder</p>
+      <h1 data-i18n="legal.termsH1">Terms</h1>
+      <p class="lede" data-i18n="legal.termsLede">This page is a placeholder. Full terms of use will be published before a public launch.</p>
       <p>Family Brain is offered as a beta. Features, availability and pricing can change after the testing period. The product is provided as-is during testing.</p>
-      <p><a href="index.html">Back to Family Brain</a></p>
+      <p><a href="index.html" data-i18n="legal.back">Back to Family Brain</a></p>
     </main>
+    <script src="js/i18n.js"></script>
+    <script src="js/main.js"></script>
   </body>
 </html>

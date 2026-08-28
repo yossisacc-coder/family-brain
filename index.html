@@ -1,35 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Family Brain — Your Family's Intelligent Brain</title>
+    <title>Family Brain — AI organizer for family life</title>
     <meta
       name="description"
-      content="Family Brain helps families turn messages, screenshots and shared information into organized tasks, reminders and events."
+      content="Family Brain helps families turn messages, screenshots, and shared information into organized tasks, reminders, events, and clear responsibilities."
     />
     <link rel="canonical" href="https://yossisacc-coder.github.io/family-brain/" />
     <meta name="robots" content="index,follow" />
     <meta name="theme-color" content="#012557" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Family Brain" />
-    <meta property="og:title" content="Family Brain — Your Family's Intelligent Brain" />
+    <meta property="og:title" content="Family Brain — AI organizer for family life" />
     <meta
       property="og:description"
-      content="Family Brain helps families turn messages, screenshots and shared information into organized tasks, reminders and events."
+      content="Family Brain helps families turn messages, screenshots, and shared information into organized tasks, reminders, events, and clear responsibilities."
     />
     <meta property="og:url" content="https://yossisacc-coder.github.io/family-brain/" />
     <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="he_IL" />
     <meta property="og:image" content="https://yossisacc-coder.github.io/family-brain/images/og-image.jpg" />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Family Brain two-tone FB logo and wordmark" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Family Brain — Your Family's Intelligent Brain" />
+    <meta name="twitter:title" content="Family Brain — AI organizer for family life" />
     <meta
       name="twitter:description"
-      content="Family Brain helps families turn messages, screenshots and shared information into organized tasks, reminders and events."
+      content="Family Brain helps families turn messages, screenshots, and shared information into organized tasks, reminders, events, and clear responsibilities."
     />
     <meta name="twitter:image" content="https://yossisacc-coder.github.io/family-brain/images/og-image.jpg" />
     <meta name="twitter:image:alt" content="Family Brain two-tone FB logo and wordmark" />
@@ -39,10 +40,21 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Heebo:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/styles.css" />
+    <script>
+      (function () {
+        try {
+          var lang = localStorage.getItem("fb-lang");
+          if (lang === "he" || lang === "en") {
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
+          }
+        } catch (e) {}
+      })();
+    </script>
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -51,7 +63,7 @@
             "@type": "WebSite",
             "name": "Family Brain",
             "url": "https://yossisacc-coder.github.io/family-brain/",
-            "description": "Family Brain helps families turn messages, screenshots and shared information into organized tasks, reminders and events."
+            "description": "Family Brain helps families turn messages, screenshots, and shared information into organized tasks, reminders, events, and clear responsibilities."
           },
           {
             "@type": "SoftwareApplication",
@@ -61,8 +73,8 @@
             "operatingSystem": "Android",
             "url": "https://yossisacc-coder.github.io/family-brain/",
             "image": "https://yossisacc-coder.github.io/family-brain/images/og-image.jpg",
-            "description": "Family Brain is an AI family organizer. The Family Brain app helps families turn messages, screenshots and shared information into organized tasks, reminders and events.",
-            "slogan": "Your family's intelligent brain.",
+            "description": "Family Brain is an AI family organizer. It helps families turn messages, screenshots, and shared information into organized tasks, reminders, events, and clear responsibilities.",
+            "slogan": "The AI organizer for family life.",
             "offers": {
               "@type": "Offer",
               "price": "0",
@@ -78,7 +90,7 @@
                 "name": "What is Family Brain?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Family Brain is an AI-powered family organization app. It helps turn everyday messages, screenshots and shared information into tasks, reminders, events and family information."
+                  "text": "Family Brain is an AI-powered family organization app. It helps turn everyday messages, screenshots, and shared information into tasks, reminders, events, and family notes."
                 }
               },
               {
@@ -86,7 +98,7 @@
                 "name": "How does the AI work?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "You share or send information to Family Brain. The AI reads what you shared and suggests the right task, reminder or event. When details are unclear, the app asks you to confirm instead of guessing."
+                  "text": "You share or send information to Family Brain. The AI reads what you shared and suggests the right task, reminder, or event. When details are unclear, the app asks you to confirm instead of guessing."
                 }
               },
               {
@@ -94,7 +106,7 @@
                 "name": "Can I use it with my family?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes. Family Brain includes a family workspace, personal space, assignments, calendar, activity and notifications so everyone can see what matters."
+                  "text": "Yes. Family Brain includes a family workspace, personal space, assignments, calendar, activity, and notifications so everyone can see what matters."
                 }
               },
               {
@@ -112,6 +124,14 @@
                   "@type": "Answer",
                   "text": "The beta is free to try. Pricing can change after the testing period."
                 }
+              },
+              {
+                "@type": "Question",
+                "name": "Where can I download the app?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Family Brain is not listed on Google Play or the App Store yet. When it is published, download buttons on this page will link to the official stores."
+                }
               }
             ]
           }
@@ -119,29 +139,36 @@
       }
     </script>
   </head>
-  <body>
-    <a class="skip" href="#main">Skip to content</a>
+  <body data-page="home">
+    <a class="skip" href="#main" data-i18n="skip">Skip to content</a>
     <header class="nav">
       <div class="nav-inner">
         <a class="brand" href="#top">
           <img src="images/logo-mark.png" width="36" height="36" alt="Family Brain logo" />
           <span><span class="word-family">Family</span> <span class="word-brain">Brain</span></span>
         </a>
-        <nav aria-label="Primary">
+        <nav data-i18n-aria="nav.primary" aria-label="Primary">
           <ul class="nav-links" id="nav-links">
-            <li><a href="#how-it-works">How it works</a></li>
-            <li><a href="#features">Features</a></li>
-            <li><a href="#family">For Families</a></li>
-            <li><a href="#download">Get Family Brain</a></li>
-            <li><a href="#faq">FAQ</a></li>
+            <li><a href="#how-it-works" data-i18n="nav.how">How it works</a></li>
+            <li><a href="#features" data-i18n="nav.features">Features</a></li>
+            <li><a href="#family" data-i18n="nav.family">For Families</a></li>
+            <li><a href="#download" data-i18n="nav.download">Get Family Brain</a></li>
+            <li><a href="#faq" data-i18n="nav.faq">FAQ</a></li>
           </ul>
         </nav>
         <div class="nav-actions">
-          <button class="theme-toggle" type="button" aria-label="Switch Personal and Professional appearance" title="Appearance">
+          <div class="lang-switch" role="group" data-i18n-aria="nav.language" aria-label="Language">
+            <button class="lang-btn" type="button" data-lang="en" aria-pressed="true">EN</button>
+            <button class="lang-btn" type="button" data-lang="he" aria-pressed="false">עב</button>
+          </div>
+          <button class="theme-toggle" type="button" data-i18n-aria="nav.appearance" data-i18n-title="nav.appearanceTitle" aria-label="Switch Personal and Professional appearance" title="Appearance">
             ◐
           </button>
-          <a class="btn btn-primary" href="#download">Get Family Brain</a>
-          <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">
+          <a class="btn btn-primary nav-cta" href="#download">
+            <span class="cta-full" data-i18n="cta.getApp">Get Family Brain</span>
+            <span class="cta-short" data-i18n="cta.getAppShort">Get the app</span>
+          </a>
+          <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav-links" data-i18n-aria="nav.openMenu" aria-label="Open menu">
             <span class="bar"></span>
             <span class="bar"></span>
             <span class="bar"></span>
@@ -154,23 +181,21 @@
       <section class="hero" id="top">
         <div class="wrap hero-grid">
           <div>
-            <p class="eyebrow">Family Brain</p>
-            <h1>Your family's intelligent brain.</h1>
-            <p class="lede">
-              Turn messages, screenshots and everyday information into organized
-              tasks, reminders and events.
+            <p class="eyebrow" data-i18n="hero.eyebrow">Family Brain</p>
+            <h1 data-i18n="hero.h1">The AI organizer for family life.</h1>
+            <p class="lede" data-i18n="hero.lede">
+              Family Brain helps families turn messages, screenshots, and shared information into tasks, reminders, events, and clear responsibilities.
             </p>
             <div class="hero-cta">
-              <a class="btn btn-primary btn-lg" href="#download">Get Family Brain</a>
-              <a class="btn btn-secondary btn-lg" href="#join">Join the Beta</a>
+              <a class="btn btn-primary btn-lg" href="#download" data-i18n="cta.getApp">Get Family Brain</a>
+              <a class="btn btn-secondary btn-lg" href="#join" data-i18n="cta.join">Join the Beta</a>
             </div>
-            <p class="hero-note">
-              Built for families who receive information everywhere — and still
-              need one calm place to act on it.
+            <p class="hero-note" data-i18n="hero.note">
+              One calm place for the information, tasks, and responsibilities that keep a household running.
             </p>
           </div>
           <div class="hero-visual" aria-hidden="false">
-            <div class="float-card fc-1"><span class="dot" style="background:#25d366"></span> WhatsApp message</div>
+            <div class="float-card fc-1"><span class="dot" style="background:#25d366"></span> <span data-i18n="mock.whatsapp">WhatsApp message</span></div>
             <div class="phone" aria-label="Family Brain home preview">
               <div class="phone-screen">
                 <div class="phone-bar"><span></span></div>
@@ -183,35 +208,35 @@
                   <span></span>
                 </div>
                 <div class="mock-body">
-                  <div class="mock-hi">Good morning</div>
-                  <div class="mock-sub">Your family, organized in one place.</div>
+                  <div class="mock-hi" data-i18n="mock.hi">Good morning</div>
+                  <div class="mock-sub" data-i18n="mock.sub">Your family, organized in one place.</div>
                   <div class="stats">
-                    <div class="stat" style="background:var(--event-soft);color:var(--event)"><strong>2</strong> Events</div>
-                    <div class="stat" style="background:var(--success-soft);color:var(--success)"><strong>5</strong> Tasks</div>
-                    <div class="stat" style="background:var(--remind-soft);color:var(--remind)"><strong>1</strong> Reminders</div>
-                    <div class="stat" style="background:var(--family-soft);color:var(--family)"><strong>4</strong> Family</div>
+                    <div class="stat" style="background:var(--event-soft);color:var(--event)"><strong>2</strong> <span data-i18n="mock.events">Events</span></div>
+                    <div class="stat" style="background:var(--success-soft);color:var(--success)"><strong>5</strong> <span data-i18n="mock.tasks">Tasks</span></div>
+                    <div class="stat" style="background:var(--remind-soft);color:var(--remind)"><strong>1</strong> <span data-i18n="mock.reminders">Reminders</span></div>
+                    <div class="stat" style="background:var(--family-soft);color:var(--family)"><strong>4</strong> <span data-i18n="mock.family">Family</span></div>
                   </div>
                   <div class="qa">
-                    <span>Calendar</span>
-                    <span>Send to Family Brain</span>
-                    <span>My Space</span>
-                    <span>Family Space</span>
+                    <span data-i18n="mock.calendar">Calendar</span>
+                    <span data-i18n="mock.sendTo">Send to Family Brain</span>
+                    <span data-i18n="mock.mySpace">My Space</span>
+                    <span data-i18n="mock.familySpace">Family Space</span>
                   </div>
                   <div class="composer">
-                    Share a message, screenshot or reminder…
-                    <div class="composer-row"><span>Voice · Photo</span><span class="send-pill">Send</span></div>
+                    <span data-i18n="mock.composer">Share a message, screenshot or reminder…</span>
+                    <div class="composer-row"><span data-i18n="mock.voicePhoto">Voice · Photo</span><span class="send-pill" data-i18n="mock.send">Send</span></div>
                   </div>
                 </div>
                 <div class="mock-nav">
-                  <span class="on">Home</span>
-                  <span>Tasks</span>
-                  <span>Family</span>
-                  <span>Settings</span>
+                  <span class="on" data-i18n="mock.home">Home</span>
+                  <span data-i18n="mock.tasks">Tasks</span>
+                  <span data-i18n="mock.family">Family</span>
+                  <span data-i18n="mock.settings">Settings</span>
                 </div>
               </div>
             </div>
-            <div class="float-card fc-2"><span class="dot" style="background:var(--azure)"></span> Email forwarded</div>
-            <div class="float-card fc-3"><span class="dot" style="background:var(--purple)"></span> Screenshot shared</div>
+            <div class="float-card fc-2"><span class="dot" style="background:var(--azure)"></span> <span data-i18n="mock.email">Email forwarded</span></div>
+            <div class="float-card fc-3"><span class="dot" style="background:var(--purple)"></span> <span data-i18n="mock.screenshot">Screenshot shared</span></div>
           </div>
         </div>
       </section>
@@ -219,65 +244,64 @@
       <section class="section problem" id="problem">
         <div class="wrap">
           <div class="section-head center">
-            <p class="eyebrow">The problem</p>
-            <h2>Family information is scattered everywhere.</h2>
-            <p class="lede">
-              Messages. WhatsApp. Emails. Screenshots. Notes. Calendar.
-              Important details get forgotten, buried, or never turned into an action.
+            <p class="eyebrow" data-i18n="problem.eyebrow">The problem</p>
+            <h2 data-i18n="problem.h2">Family information is scattered. Actions get lost.</h2>
+            <p class="lede" data-i18n="problem.lede">
+              Messages. WhatsApp. Email. Screenshots. Notes. Calendar. Important details get buried, forgotten, or never turned into something someone can do.
             </p>
           </div>
           <div class="scatter">
             <article class="scatter-card">
-              <h3>Messages</h3>
-              <p>“Can you pick up Maya at 16:00?” lives in a chat and disappears.</p>
+              <h3 data-i18n="problem.messages">Messages</h3>
+              <p data-i18n="problem.messagesP">“Can you pick up Maya at 16:00?” lives in a chat — and disappears.</p>
             </article>
             <article class="scatter-card">
-              <h3>WhatsApp</h3>
-              <p>School updates sit next to stickers, photos and yesterday’s plans.</p>
+              <h3 data-i18n="problem.whatsapp">WhatsApp</h3>
+              <p data-i18n="problem.whatsappP">School updates sit next to stickers, photos, and yesterday’s plans.</p>
             </article>
             <article class="scatter-card">
-              <h3>Email</h3>
-              <p>Appointments arrive as long threads nobody wants to file.</p>
+              <h3 data-i18n="problem.email">Email</h3>
+              <p data-i18n="problem.emailP">Appointments arrive as long threads nobody wants to file.</p>
             </article>
             <article class="scatter-card">
-              <h3>Screenshots</h3>
-              <p>A photo of a flyer is not a reminder — unless someone makes it one.</p>
+              <h3 data-i18n="problem.screenshots">Screenshots</h3>
+              <p data-i18n="problem.screenshotsP">A photo of a flyer is not a reminder — unless someone makes it one.</p>
             </article>
             <article class="scatter-card">
-              <h3>Notes</h3>
-              <p>Personal lists stay personal. The rest of the family never sees them.</p>
+              <h3 data-i18n="problem.notes">Notes</h3>
+              <p data-i18n="problem.notesP">Personal lists stay personal. The rest of the family never sees them.</p>
             </article>
             <article class="scatter-card">
-              <h3>Calendar</h3>
-              <p>Events exist, but the tasks and reminders around them often do not.</p>
+              <h3 data-i18n="problem.calendar">Calendar</h3>
+              <p data-i18n="problem.calendarP">Events exist, but the tasks and reminders around them often do not.</p>
             </article>
           </div>
-          <p class="lost">The result: things slip. Someone was supposed to remember. Nobody did.</p>
+          <p class="lost" data-i18n="problem.lost">The result: things slip. Someone was supposed to remember. Nobody did.</p>
         </div>
       </section>
 
       <section class="section" id="how-it-works">
         <div class="wrap">
           <div class="section-head center">
-            <p class="eyebrow">How it works</p>
-            <h2>Share. Understand. Organize.</h2>
-            <p class="lede">Three steps. No extra ritual. Family Brain fits the way information already arrives.</p>
+            <p class="eyebrow" data-i18n="how.eyebrow">How it works</p>
+            <h2 data-i18n="how.h2">Share. Understand. Organize.</h2>
+            <p class="lede" data-i18n="how.lede">Three steps — without another system to remember. Family Brain works with information the way it already arrives.</p>
           </div>
           <div class="steps">
             <article class="step">
-              <div class="step-num">01 — SHARE</div>
-              <h3>Share</h3>
-              <p>Share a message, screenshot or information with Family Brain — from another app on Android, or from inside Home.</p>
+              <div class="step-num" data-i18n="how.shareNum">01 — SHARE</div>
+              <h3 data-i18n="how.shareH">Share</h3>
+              <p data-i18n="how.shareP">Share a message, screenshot, or note with Family Brain — from another app on Android, or from Home.</p>
             </article>
             <article class="step">
-              <div class="step-num">02 — UNDERSTAND</div>
-              <h3>Understand</h3>
-              <p>AI reads what the information means: what needs to happen, when, and who it is for.</p>
+              <div class="step-num" data-i18n="how.understandNum">02 — UNDERSTAND</div>
+              <h3 data-i18n="how.understandH">Understand</h3>
+              <p data-i18n="how.understandP">AI reads what the information means: what needs to happen, when, and who it is for.</p>
             </article>
             <article class="step">
-              <div class="step-num">03 — ORGANIZE</div>
-              <h3>Organize</h3>
-              <p>Family Brain turns it into the right task, reminder, event or family information — ready for the whole household.</p>
+              <div class="step-num" data-i18n="how.organizeNum">03 — ORGANIZE</div>
+              <h3 data-i18n="how.organizeH">Organize</h3>
+              <p data-i18n="how.organizeP">Family Brain turns it into the right task, reminder, event, or family note — ready for the household.</p>
             </article>
           </div>
         </div>
@@ -286,87 +310,85 @@
       <section class="section ai" id="ai">
         <div class="wrap">
           <div class="section-head center">
-            <p class="eyebrow">AI understanding</p>
-            <h2>Don't organize everything yourself. Let Family Brain understand it.</h2>
-            <p class="lede">A realistic example of how incoming information becomes something the family can act on.</p>
+            <p class="eyebrow" data-i18n="ai.eyebrow">AI understanding</p>
+            <h2 data-i18n="ai.h2">Let Family Brain read the details. You stay in control.</h2>
+            <p class="lede" data-i18n="ai.lede">A realistic example of how incoming information becomes something the family can act on.</p>
           </div>
           <div class="ai-grid">
             <article class="msg">
-              <p class="eyebrow">Incoming message</p>
-              <blockquote>“David has a dentist appointment Thursday at 17:30. Please remind him.”</blockquote>
+              <p class="eyebrow" data-i18n="ai.incoming">Incoming message</p>
+              <blockquote data-i18n="ai.quote">“David has a dentist appointment Thursday at 17:30. Please remind him.”</blockquote>
             </article>
-            <div class="arrow-col" aria-hidden="true">↓</div>
+            <div class="arrow-col" aria-hidden="true"></div>
             <article class="understood">
-              <p class="eyebrow">Family Brain understands</p>
-              <h3>Task / Reminder</h3>
+              <p class="eyebrow" data-i18n="ai.understands">Family Brain understands</p>
+              <h3 data-i18n="ai.taskReminder">Task / Reminder</h3>
               <div class="chips">
-                <span class="chip">Thursday</span>
-                <span class="chip">17:30</span>
-                <span class="chip">David</span>
-                <span class="chip">Reminder</span>
+                <span class="chip" data-i18n="ai.chipThu">Thursday</span>
+                <span class="chip" data-i18n="ai.chipTime">17:30</span>
+                <span class="chip" data-i18n="ai.chipDavid">David</span>
+                <span class="chip" data-i18n="ai.chipReminder">Reminder</span>
               </div>
             </article>
           </div>
           <div class="ai-points">
             <article>
-              <h3>What</h3>
-              <p class="lede">The action that needs to happen.</p>
+              <h3 data-i18n="ai.what">What</h3>
+              <p class="lede" data-i18n="ai.whatP">The action that needs to happen.</p>
             </article>
             <article>
-              <h3>When</h3>
-              <p class="lede">The day and time, when they are present.</p>
+              <h3 data-i18n="ai.when">When</h3>
+              <p class="lede" data-i18n="ai.whenP">The day and time, when they are present.</p>
             </article>
             <article>
-              <h3>Who</h3>
-              <p class="lede">One person, or the whole family.</p>
+              <h3 data-i18n="ai.who">Who</h3>
+              <p class="lede" data-i18n="ai.whoP">One person, or the whole family.</p>
             </article>
           </div>
-          <p class="ai-caveat">
-            The AI is a helper, not a perfect reader. When information is ambiguous, Family Brain asks you to confirm instead of guessing.
+          <p class="ai-caveat" data-i18n="ai.caveat">
+            The AI is a helper, not a perfect reader. When details are missing or unclear, Family Brain asks you to confirm instead of guessing.
           </p>
         </div>
       </section>
 
       <section class="section share" id="share">
         <div class="wrap">
-          <p class="eyebrow">Share to Family Brain</p>
-          <h2>Make organization part of the conversation you already had.</h2>
-          <p class="lede">
-            The goal is not another empty inbox you have to remember to open.
-            Family Brain is meant to sit in the share flow you already use.
+          <p class="eyebrow" data-i18n="share.eyebrow">Share to Family Brain</p>
+          <h2 data-i18n="share.h2">Bring organization into the conversation you already had.</h2>
+          <p class="lede" data-i18n="share.lede">
+            The goal is not another empty inbox you have to remember to open. Family Brain is meant to sit in the share flow you already use.
           </p>
           <div class="flow" aria-label="Share flow">
-            <span class="flow-node">WhatsApp</span>
-            <span class="flow-arrow">→</span>
-            <span class="flow-node">Share</span>
-            <span class="flow-arrow">→</span>
-            <span class="flow-node">Family Brain</span>
-            <span class="flow-arrow">→</span>
-            <span class="flow-node">AI understands</span>
-            <span class="flow-arrow">→</span>
-            <span class="flow-node">Task / Reminder / Event</span>
+            <span class="flow-node" data-i18n="share.nodeWa">WhatsApp</span>
+            <span class="flow-arrow" aria-hidden="true"></span>
+            <span class="flow-node" data-i18n="share.nodeShare">Share</span>
+            <span class="flow-arrow" aria-hidden="true"></span>
+            <span class="flow-node" data-i18n="share.nodeFb">Family Brain</span>
+            <span class="flow-arrow" aria-hidden="true"></span>
+            <span class="flow-node" data-i18n="share.nodeAi">AI understands</span>
+            <span class="flow-arrow" aria-hidden="true"></span>
+            <span class="flow-node" data-i18n="share.nodeOut">Task / Reminder / Event</span>
           </div>
           <div class="share-grid">
             <article class="share-item">
-              <h3>WhatsApp</h3>
-              <p>Share a chat snippet or image into Family Brain.</p>
+              <h3 data-i18n="share.waH">WhatsApp</h3>
+              <p data-i18n="share.waP">Share a chat snippet or image into Family Brain.</p>
             </article>
             <article class="share-item">
-              <h3>Email</h3>
-              <p>Forward the details that actually need an action.</p>
+              <h3 data-i18n="share.emailH">Email</h3>
+              <p data-i18n="share.emailP">Forward the details that actually need an action.</p>
             </article>
             <article class="share-item">
-              <h3>Screenshots</h3>
-              <p>Send a photo of a flyer, note or invitation.</p>
+              <h3 data-i18n="share.ssH">Screenshots</h3>
+              <p data-i18n="share.ssP">Send a photo of a flyer, note, or invitation.</p>
             </article>
             <article class="share-item">
-              <h3>Other apps</h3>
-              <p>Any Android app that can share text or images.</p>
+              <h3 data-i18n="share.otherH">Other apps</h3>
+              <p data-i18n="share.otherP">Any Android app that can share text or images.</p>
             </article>
           </div>
-          <p class="share-note">
-            On Android, Family Brain can receive shared text and images through the system share sheet.
-            You can also paste or send information from Home. iOS share-sheet support is not claimed here.
+          <p class="share-note" data-i18n="share.note">
+            On Android, Family Brain can receive shared text and images through the system share sheet. You can also paste or send information from Home. iOS share-sheet support is not claimed here.
           </p>
         </div>
       </section>
@@ -374,60 +396,60 @@
       <section class="section" id="features">
         <div class="wrap">
           <div class="section-head center">
-            <p class="eyebrow">Features</p>
-            <h2>Everything the family needs to stay aligned.</h2>
-            <p class="lede">These are capabilities in Family Brain today — not a wishlist.</p>
+            <p class="eyebrow" data-i18n="features.eyebrow">Features</p>
+            <h2 data-i18n="features.h2">Organize information, tasks, reminders, events, and who is responsible.</h2>
+            <p class="lede" data-i18n="features.lede">These are capabilities in Family Brain today — not a roadmap.</p>
           </div>
           <div class="feature-grid">
             <article class="feature">
               <div class="icon" style="background:var(--event-soft)">✦</div>
-              <h3>AI-powered task creation</h3>
-              <p>Send information and let Family Brain draft the task.</p>
+              <h3 data-i18n="features.aiH">AI-powered task creation</h3>
+              <p data-i18n="features.aiP">Send information and let Family Brain draft the task.</p>
             </article>
             <article class="feature">
               <div class="icon" style="background:var(--remind-soft)">⏰</div>
-              <h3>Smart reminders</h3>
-              <p>Turn a time and a person into a reminder the app can keep.</p>
+              <h3 data-i18n="features.remindH">Smart reminders</h3>
+              <p data-i18n="features.remindP">Turn a time and a person into a reminder the app can keep.</p>
             </article>
             <article class="feature">
               <div class="icon" style="background:var(--family-soft)">👤</div>
-              <h3>Family assignments</h3>
-              <p>Give work to a member, keep it personal, or share it with everyone.</p>
+              <h3 data-i18n="features.assignH">Family assignments</h3>
+              <p data-i18n="features.assignP">Give work to a member, keep it personal, or share it with everyone.</p>
             </article>
             <article class="feature">
               <div class="icon" style="background:var(--event-soft)">📅</div>
-              <h3>Calendar</h3>
-              <p>See what is coming up, not only what is on a to-do list.</p>
+              <h3 data-i18n="features.calH">Calendar</h3>
+              <p data-i18n="features.calP">See what is coming up — not only what is on a to-do list.</p>
             </article>
             <article class="feature">
               <div class="icon" style="background:var(--success-soft)">✓</div>
-              <h3>Tasks</h3>
-              <p>Open, complete and follow the work that actually matters.</p>
+              <h3 data-i18n="features.tasksH">Tasks</h3>
+              <p data-i18n="features.tasksP">Open, complete, and follow the work that actually matters.</p>
             </article>
             <article class="feature">
               <div class="icon" style="background:var(--family-soft)">🏠</div>
-              <h3>Family space</h3>
-              <p>A shared place for information the whole household should see.</p>
+              <h3 data-i18n="features.famH">Family space</h3>
+              <p data-i18n="features.famP">A shared place for information the whole household should see.</p>
             </article>
             <article class="feature">
               <div class="icon" style="background:var(--bg-warm)">✦</div>
-              <h3>Personal space</h3>
-              <p>Keep private items with you without mixing them into family work.</p>
+              <h3 data-i18n="features.meH">Personal space</h3>
+              <p data-i18n="features.meP">Keep private items with you without mixing them into family work.</p>
             </article>
             <article class="feature">
               <div class="icon" style="background:var(--bg-alt)">◎</div>
-              <h3>Activity</h3>
-              <p>A trail of what was shared, created and completed.</p>
+              <h3 data-i18n="features.actH">Activity</h3>
+              <p data-i18n="features.actP">A trail of what was shared, created, and completed.</p>
             </article>
             <article class="feature">
               <div class="icon" style="background:var(--remind-soft)">🔔</div>
-              <h3>Notifications</h3>
-              <p>Stay aware of updates without hunting through chats.</p>
+              <h3 data-i18n="features.notifH">Notifications</h3>
+              <p data-i18n="features.notifP">Stay aware of updates without hunting through chats.</p>
             </article>
             <article class="feature">
-              <div class="icon" style="background:var(--family-soft)">↗</div>
-              <h3>Share to Family Brain</h3>
-              <p>Bring information in from the apps you already use.</p>
+              <div class="icon flip-rtl" style="background:var(--family-soft)">↗</div>
+              <h3 data-i18n="features.shareH">Share to Family Brain</h3>
+              <p data-i18n="features.shareP">Bring information in from the apps you already use.</p>
             </article>
           </div>
         </div>
@@ -436,24 +458,23 @@
       <section class="section" id="tasks">
         <div class="wrap split">
           <div>
-            <p class="eyebrow">Tasks &amp; reminders</p>
-            <h2>From a sentence to something someone can finish.</h2>
-            <p class="lede">
-              Family Brain is built around tasks, reminders, events and assignments —
-              so a dentist appointment is not just text in a thread.
+            <p class="eyebrow" data-i18n="tasks.eyebrow">Tasks &amp; reminders</p>
+            <h2 data-i18n="tasks.h2">From a sentence to something someone can finish.</h2>
+            <p class="lede" data-i18n="tasks.lede">
+              Family Brain is built around tasks, reminders, events, and assignments — so a dentist appointment is not just text in a thread.
             </p>
             <ul class="checklist">
-              <li>Create tasks from shared information or from Home.</li>
-              <li>Set reminders when a time is known.</li>
-              <li>Assign work to a person or keep it in the family.</li>
-              <li>See what is open, what is coming, and what is done.</li>
+              <li data-i18n="tasks.li1">Create tasks from shared information or from Home.</li>
+              <li data-i18n="tasks.li2">Set reminders when a time is known.</li>
+              <li data-i18n="tasks.li3">Assign work to a person or keep it in the family.</li>
+              <li data-i18n="tasks.li4">See what is open, what is coming, and what is done.</li>
             </ul>
           </div>
           <div class="panel">
-            <div class="row"><span>David · Dentist</span><span class="tag" style="background:var(--remind-soft);color:var(--remind)">Thu 17:30</span></div>
-            <div class="row"><span>Maya · Pickup</span><span class="tag" style="background:var(--event-soft);color:var(--event)">Today 16:00</span></div>
-            <div class="row"><span>Groceries · Family</span><span class="tag" style="background:var(--success-soft);color:var(--success)">Open</span></div>
-            <div class="row"><span>Permission slip</span><span class="tag" style="background:var(--family-soft);color:var(--family)">Assigned</span></div>
+            <div class="row"><span>David · <span data-i18n="mock.dentist">Dentist</span></span><span class="tag" style="background:var(--remind-soft);color:var(--remind)">Thu 17:30</span></div>
+            <div class="row"><span>Maya · <span data-i18n="mock.pickup">Pickup</span></span><span class="tag" style="background:var(--event-soft);color:var(--event)">Today 16:00</span></div>
+            <div class="row"><span><span data-i18n="mock.groceries">Groceries</span> · <span data-i18n="mock.family">Family</span></span><span class="tag" style="background:var(--success-soft);color:var(--success)" data-i18n="mock.open">Open</span></div>
+            <div class="row"><span data-i18n="mock.permission">Permission slip</span><span class="tag" style="background:var(--family-soft);color:var(--family)" data-i18n="mock.assigned">Assigned</span></div>
           </div>
         </div>
       </section>
@@ -461,21 +482,19 @@
       <section class="section" id="family" style="background:var(--bg-alt)">
         <div class="wrap split">
           <div class="panel">
-            <div class="row"><strong>Who</strong><span>David, Maya, Noa, You</span></div>
-            <div class="row"><strong>What</strong><span>Pickup, dentist, groceries</span></div>
-            <div class="row"><strong>When</strong><span>Today · Thursday · This week</span></div>
-            <div class="row"><strong>Done</strong><span>Completed items stay visible in activity</span></div>
+            <div class="row"><strong data-i18n="family.who">Who</strong><span data-i18n="family.whoV">David, Maya, Noa, You</span></div>
+            <div class="row"><strong data-i18n="family.what">What</strong><span data-i18n="family.whatV">Pickup, dentist, groceries</span></div>
+            <div class="row"><strong data-i18n="family.when">When</strong><span data-i18n="family.whenV">Today · Thursday · This week</span></div>
+            <div class="row"><strong data-i18n="family.done">Done</strong><span data-i18n="family.doneV">Completed items stay visible in activity</span></div>
           </div>
           <div>
-            <p class="eyebrow">For families</p>
-            <h2>Everyone can see what matters.</h2>
-            <p class="lede">
-              Who needs to do what. When it needs to happen. What is coming up.
-              What has been completed. Simple language. Shared clarity.
+            <p class="eyebrow" data-i18n="family.eyebrow">For families</p>
+            <h2 data-i18n="family.h2">Everyone can see what matters.</h2>
+            <p class="lede" data-i18n="family.lede">
+              Who needs to do what. When it needs to happen. What is coming up. What has been completed. Simple language. Shared clarity.
             </p>
-            <p class="lede" style="margin-top:16px">
-              Personal space stays personal. Family space is for the household.
-              Assignments make ownership obvious — without another group chat.
+            <p class="lede" style="margin-top:16px" data-i18n="family.lede2">
+              Personal space stays personal. Family space is for the household. Assignments make ownership obvious — without another group chat.
             </p>
           </div>
         </div>
@@ -484,11 +503,10 @@
       <section class="section showcase" id="screens">
         <div class="wrap">
           <div class="section-head center">
-            <p class="eyebrow">Product</p>
-            <h2>A calm place for family work.</h2>
-            <p class="lede">
-              These previews illustrate real Family Brain screens: Home, Tasks, Calendar, Family, AI and Activity.
-              They are not device photographs.
+            <p class="eyebrow" data-i18n="product.eyebrow">Product</p>
+            <h2 data-i18n="product.h2">A calm place for family work.</h2>
+            <p class="lede" data-i18n="product.lede">
+              These previews illustrate real Family Brain screens: Home, Tasks, Calendar, Family, AI, and Activity. They are not device photographs.
             </p>
           </div>
           <div class="shots">
@@ -502,67 +520,67 @@
                     <span></span>
                   </div>
                   <div class="mock-body">
-                    <div class="mock-hi">Home</div>
+                    <div class="mock-hi" data-i18n="mock.home">Home</div>
                     <div class="stats">
-                      <div class="stat" style="background:var(--event-soft)"><strong>2</strong> Events</div>
-                      <div class="stat" style="background:var(--success-soft)"><strong>5</strong> Tasks</div>
+                      <div class="stat" style="background:var(--event-soft)"><strong>2</strong> <span data-i18n="mock.events">Events</span></div>
+                      <div class="stat" style="background:var(--success-soft)"><strong>5</strong> <span data-i18n="mock.tasks">Tasks</span></div>
                     </div>
-                    <div class="qa"><span>Calendar</span><span>Send to Family Brain</span></div>
-                    <div class="composer">Share with Family Brain…</div>
+                    <div class="qa"><span data-i18n="mock.calendar">Calendar</span><span data-i18n="mock.sendTo">Send to Family Brain</span></div>
+                    <div class="composer" data-i18n="mock.composer">Share a message, screenshot or reminder…</div>
                   </div>
-                  <div class="mock-nav"><span class="on">Home</span><span>Tasks</span><span>Family</span><span>Settings</span></div>
+                  <div class="mock-nav"><span class="on" data-i18n="mock.home">Home</span><span data-i18n="mock.tasks">Tasks</span><span data-i18n="mock.family">Family</span><span data-i18n="mock.settings">Settings</span></div>
                 </div>
               </div>
-              <figcaption>Home</figcaption>
+              <figcaption data-i18n="product.home">Home</figcaption>
             </figure>
             <figure class="shot">
               <div class="phone">
                 <div class="phone-screen">
                   <div class="phone-bar"><span></span></div>
                   <div class="mock-body">
-                    <div class="mock-hi">Tasks</div>
-                    <div class="task-line"><span>Dentist · David</span><span>Thu</span></div>
-                    <div class="task-line"><span>Pickup · Maya</span><span>16:00</span></div>
-                    <div class="task-line"><span>Groceries</span><span>Family</span></div>
-                    <div class="task-line"><span>Permission slip</span><span>Open</span></div>
+                    <div class="mock-hi" data-i18n="mock.tasks">Tasks</div>
+                    <div class="task-line"><span><span data-i18n="mock.dentist">Dentist</span> · David</span><span>Thu</span></div>
+                    <div class="task-line"><span><span data-i18n="mock.pickup">Pickup</span> · Maya</span><span>16:00</span></div>
+                    <div class="task-line"><span data-i18n="mock.groceries">Groceries</span><span data-i18n="mock.family">Family</span></div>
+                    <div class="task-line"><span data-i18n="mock.permission">Permission slip</span><span data-i18n="mock.open">Open</span></div>
                   </div>
-                  <div class="mock-nav"><span>Home</span><span class="on">Tasks</span><span>Family</span><span>Settings</span></div>
+                  <div class="mock-nav"><span data-i18n="mock.home">Home</span><span class="on" data-i18n="mock.tasks">Tasks</span><span data-i18n="mock.family">Family</span><span data-i18n="mock.settings">Settings</span></div>
                 </div>
               </div>
-              <figcaption>Tasks</figcaption>
+              <figcaption data-i18n="product.tasks">Tasks</figcaption>
             </figure>
             <figure class="shot">
               <div class="phone">
                 <div class="phone-screen">
                   <div class="phone-bar"><span></span></div>
                   <div class="mock-body">
-                    <div class="mock-hi">Calendar</div>
+                    <div class="mock-hi" data-i18n="mock.calendar">Calendar</div>
                     <div class="cal-grid">
                       <span>M</span><span>T</span><span>W</span><span class="hit">T</span><span>F</span><span>S</span><span>S</span>
                       <span>10</span><span>11</span><span>12</span><span class="hit">13</span><span>14</span><span>15</span><span>16</span>
                     </div>
-                    <div class="task-line"><span>Dentist 17:30</span><span>David</span></div>
+                    <div class="task-line"><span><span data-i18n="mock.dentist">Dentist</span> 17:30</span><span>David</span></div>
                   </div>
-                  <div class="mock-nav"><span>Home</span><span class="on">Tasks</span><span>Family</span><span>Settings</span></div>
+                  <div class="mock-nav"><span data-i18n="mock.home">Home</span><span class="on" data-i18n="mock.tasks">Tasks</span><span data-i18n="mock.family">Family</span><span data-i18n="mock.settings">Settings</span></div>
                 </div>
               </div>
-              <figcaption>Calendar</figcaption>
+              <figcaption data-i18n="product.calendar">Calendar</figcaption>
             </figure>
             <figure class="shot">
               <div class="phone">
                 <div class="phone-screen">
                   <div class="phone-bar"><span></span></div>
                   <div class="mock-body">
-                    <div class="mock-hi">Family</div>
+                    <div class="mock-hi" data-i18n="mock.family">Family</div>
                     <div class="member"><span class="avatar" style="background:var(--navy)">D</span> David</div>
                     <div class="member"><span class="avatar" style="background:var(--azure)">M</span> Maya</div>
                     <div class="member"><span class="avatar" style="background:var(--purple)">N</span> Noa</div>
                     <div class="member"><span class="avatar" style="background:var(--success)">Y</span> You</div>
                   </div>
-                  <div class="mock-nav"><span>Home</span><span>Tasks</span><span class="on">Family</span><span>Settings</span></div>
+                  <div class="mock-nav"><span data-i18n="mock.home">Home</span><span data-i18n="mock.tasks">Tasks</span><span class="on" data-i18n="mock.family">Family</span><span data-i18n="mock.settings">Settings</span></div>
                 </div>
               </div>
-              <figcaption>Family</figcaption>
+              <figcaption data-i18n="product.family">Family</figcaption>
             </figure>
             <figure class="shot">
               <div class="phone">
@@ -570,70 +588,73 @@
                   <div class="phone-bar"><span></span></div>
                   <div class="mock-body">
                     <div class="mock-hi">AI</div>
-                    <div class="composer">“David has a dentist appointment Thursday at 17:30…”</div>
-                    <div class="task-line"><span>Understood · Reminder</span><span>Confirm</span></div>
-                    <div class="task-line"><span>David · Thu 17:30</span><span>Save</span></div>
+                    <div class="composer" data-i18n="ai.quote">“David has a dentist appointment Thursday at 17:30. Please remind him.”</div>
+                    <div class="task-line"><span data-i18n="mock.understood">Understood · Reminder</span><span data-i18n="mock.confirm">Confirm</span></div>
+                    <div class="task-line"><span>David · Thu 17:30</span><span data-i18n="mock.save">Save</span></div>
                   </div>
-                  <div class="mock-nav"><span class="on">Home</span><span>Tasks</span><span>Family</span><span>Settings</span></div>
+                  <div class="mock-nav"><span class="on" data-i18n="mock.home">Home</span><span data-i18n="mock.tasks">Tasks</span><span data-i18n="mock.family">Family</span><span data-i18n="mock.settings">Settings</span></div>
                 </div>
               </div>
-              <figcaption>AI interaction</figcaption>
+              <figcaption data-i18n="product.ai">AI interaction</figcaption>
             </figure>
             <figure class="shot">
               <div class="phone">
                 <div class="phone-screen">
                   <div class="phone-bar"><span></span></div>
                   <div class="mock-body">
-                    <div class="mock-hi">Activity</div>
-                    <div class="act-line"><span>Shared from WhatsApp</span><span>2m</span></div>
-                    <div class="act-line"><span>Reminder created</span><span>2m</span></div>
-                    <div class="act-line"><span>Task completed</span><span>1h</span></div>
+                    <div class="mock-hi" data-i18n="product.activity">Activity</div>
+                    <div class="act-line"><span data-i18n="mock.sharedWa">Shared from WhatsApp</span><span>2m</span></div>
+                    <div class="act-line"><span data-i18n="mock.reminderCreated">Reminder created</span><span>2m</span></div>
+                    <div class="act-line"><span data-i18n="mock.taskDone">Task completed</span><span>1h</span></div>
                   </div>
-                  <div class="mock-nav"><span class="on">Home</span><span>Tasks</span><span>Family</span><span>Settings</span></div>
+                  <div class="mock-nav"><span class="on" data-i18n="mock.home">Home</span><span data-i18n="mock.tasks">Tasks</span><span data-i18n="mock.family">Family</span><span data-i18n="mock.settings">Settings</span></div>
                 </div>
               </div>
-              <figcaption>Activity</figcaption>
+              <figcaption data-i18n="product.activity">Activity</figcaption>
             </figure>
           </div>
-          <p class="caption-note">Illustrations of the real product structure. No invented screens or fake features.</p>
+          <p class="caption-note" data-i18n="product.caption">Illustrations of the real product structure. No invented screens or fake features.</p>
+          <div class="center product-cta">
+            <p class="hero-note" data-i18n="product.ctaNote">Ready to try Family Brain?</p>
+            <a class="btn btn-primary btn-lg" href="#download" data-i18n="cta.getApp">Get Family Brain</a>
+          </div>
         </div>
       </section>
 
       <section class="section" id="download" data-android-store="" data-ios-store="">
         <div class="wrap center">
-          <p class="eyebrow">Download</p>
-          <h2>Get Family Brain</h2>
-          <p class="lede">
-            Family Brain will be available on Google Play for Android and the App Store for iPhone.
-            Store links will appear here as soon as the app is published. They are not invented now.
+          <p class="eyebrow" data-i18n="download.eyebrow">Download</p>
+          <h2 data-i18n="download.h2">Get Family Brain</h2>
+          <p class="lede" data-i18n="download.lede">
+            The Family Brain app will be available on Google Play for Android and the App Store for iPhone. Store links will appear here when the app is published.
           </p>
           <div class="store-row">
             <a class="btn btn-primary btn-lg store-btn" data-store="android" aria-disabled="true" href="#download">Google Play — coming soon</a>
             <a class="btn btn-secondary btn-lg store-btn" data-store="ios" aria-disabled="true" href="#download">App Store — coming soon</a>
           </div>
-          <p class="hero-note">Meanwhile, you can join the beta waitlist below.</p>
+          <p class="hero-note" data-i18n="download.note">In the meantime, you can join the beta waitlist below.</p>
         </div>
       </section>
 
       <section class="section beta" id="join">
         <div class="wrap center">
-          <p class="eyebrow" style="color:#cfe3ff">Beta</p>
-          <h2>Be one of the first families to try Family Brain.</h2>
-          <p class="lede">Leave your details. The beta is free. Pricing can change after the testing period.</p>
+          <p class="eyebrow" style="color:#cfe3ff" data-i18n="beta.eyebrow">Beta</p>
+          <h2 data-i18n="beta.h2">Join the Family Brain beta.</h2>
+          <p class="lede" data-i18n="beta.lede">Leave your details if you would like an invitation. The beta is free. Pricing can change after the testing period.</p>
           <form class="beta-card" id="beta-form" novalidate>
             <label class="field">
-              <span>Name</span>
-              <input name="name" type="text" autocomplete="name" required placeholder="Your name" />
+              <span data-i18n="beta.name">Name</span>
+              <input name="name" type="text" autocomplete="name" required data-i18n-placeholder="beta.namePh" placeholder="Your name" />
             </label>
             <label class="field">
-              <span>Email</span>
-              <input name="email" type="email" autocomplete="email" required placeholder="you@example.com" />
+              <span data-i18n="beta.email">Email</span>
+              <input name="email" type="email" autocomplete="email" required data-i18n-placeholder="beta.emailPh" placeholder="you@example.com" />
             </label>
             <label class="field">
-              <span>Anything we should know? (optional)</span>
-              <textarea name="note" rows="3" placeholder="Family size, Android device, languages…"></textarea>
+              <span data-i18n="beta.note">Anything we should know? (optional)</span>
+              <textarea name="note" rows="3" data-i18n-placeholder="beta.notePh" placeholder="Family size, Android device, languages…"></textarea>
             </label>
-            <button class="btn btn-primary btn-lg" type="submit">Join the Beta</button>
+            <button class="btn btn-primary btn-lg" type="submit" data-i18n="beta.submit">Join the Beta</button>
             <p class="form-msg" id="form-msg" hidden></p>
           </form>
         </div>
@@ -642,29 +663,33 @@
       <section class="section" id="faq">
         <div class="wrap">
           <div class="section-head center">
-            <p class="eyebrow">FAQ</p>
-            <h2>Questions families usually ask.</h2>
+            <p class="eyebrow" data-i18n="faq.eyebrow">FAQ</p>
+            <h2 data-i18n="faq.h2">Questions families usually ask.</h2>
           </div>
           <div class="faq-list">
             <details class="faq-item" open>
-              <summary>What is Family Brain?</summary>
-              <p>Family Brain is an AI-powered family organization app. It helps turn everyday messages, screenshots and shared information into tasks, reminders, events and family information.</p>
+              <summary data-i18n="faq.q1">What is Family Brain?</summary>
+              <p data-i18n="faq.a1">Family Brain is an AI-powered family organization app. It helps turn everyday messages, screenshots, and shared information into tasks, reminders, events, and family notes.</p>
             </details>
             <details class="faq-item">
-              <summary>How does the AI work?</summary>
-              <p>You share or send information to Family Brain. The AI reads what you shared and suggests the right task, reminder or event. When details are unclear, the app asks you to confirm instead of guessing.</p>
+              <summary data-i18n="faq.q2">How does the AI work?</summary>
+              <p data-i18n="faq.a2">You share or send information to Family Brain. The AI reads what you shared and suggests the right task, reminder, or event. When details are unclear, the app asks you to confirm instead of guessing.</p>
             </details>
             <details class="faq-item">
-              <summary>Can I use it with my family?</summary>
-              <p>Yes. Family Brain includes a family workspace, personal space, assignments, calendar, activity and notifications so everyone can see what matters.</p>
+              <summary data-i18n="faq.q3">Can I use it with my family?</summary>
+              <p data-i18n="faq.a3">Yes. Family Brain includes a family workspace, personal space, assignments, calendar, activity, and notifications so everyone can see what matters.</p>
             </details>
             <details class="faq-item">
-              <summary>Can I share information from other apps?</summary>
-              <p>On Android, you can share text and images from other apps into Family Brain using the system share sheet. You can also paste or send information from inside the app.</p>
+              <summary data-i18n="faq.q4">Can I share information from other apps?</summary>
+              <p data-i18n="faq.a4">On Android, you can share text and images from other apps into Family Brain using the system share sheet. You can also paste or send information from inside the app.</p>
             </details>
             <details class="faq-item">
-              <summary>Is Family Brain free?</summary>
-              <p>The beta is free to try. Pricing can change after the testing period.</p>
+              <summary data-i18n="faq.q5">Is Family Brain free?</summary>
+              <p data-i18n="faq.a5">The beta is free to try. Pricing can change after the testing period.</p>
+            </details>
+            <details class="faq-item">
+              <summary data-i18n="faq.q6">Where can I download the app?</summary>
+              <p data-i18n="faq.a6">Family Brain is not listed on Google Play or the App Store yet. When it is published, download buttons on this page will link to the official stores.</p>
             </details>
           </div>
         </div>
@@ -678,28 +703,29 @@
             <img src="images/logo-mark.png" width="36" height="36" alt="Family Brain logo" />
             <span><span class="word-family" style="color:#d5e4f6">Family</span> <span class="word-brain">Brain</span></span>
           </a>
-          <p>Your family's intelligent brain. Turn everyday information into tasks, reminders and events.</p>
+          <p data-i18n="footer.blurb">The AI organizer for family life. Turn everyday information into tasks, reminders, events, and clear responsibilities.</p>
         </div>
         <div>
-          <h3>Product</h3>
+          <h3 data-i18n="footer.product">Product</h3>
           <ul>
-            <li><a href="#how-it-works">How it works</a></li>
-            <li><a href="#features">Features</a></li>
-            <li><a href="#download">Get Family Brain</a></li>
-            <li><a href="#join">Join the Beta</a></li>
+            <li><a href="#how-it-works" data-i18n="nav.how">How it works</a></li>
+            <li><a href="#features" data-i18n="nav.features">Features</a></li>
+            <li><a href="#download" data-i18n="nav.download">Get Family Brain</a></li>
+            <li><a href="#join" data-i18n="cta.join">Join the Beta</a></li>
           </ul>
         </div>
         <div>
-          <h3>Legal</h3>
+          <h3 data-i18n="footer.legal">Legal</h3>
           <ul>
-            <li><a href="privacy.html">Privacy Policy</a></li>
-            <li><a href="terms.html">Terms</a></li>
-            <li><a href="#join">Contact</a></li>
+            <li><a href="privacy.html" data-i18n="footer.privacy">Privacy Policy</a></li>
+            <li><a href="terms.html" data-i18n="footer.terms">Terms</a></li>
+            <li><a href="#join" data-i18n="footer.contact">Contact</a></li>
           </ul>
         </div>
       </div>
-      <div class="wrap legal">© 2026 Family Brain. All rights reserved.</div>
+      <div class="wrap legal" data-i18n="footer.copy">© 2026 Family Brain. All rights reserved.</div>
     </footer>
+    <script src="js/i18n.js"></script>
     <script src="js/main.js"></script>
   </body>
 </html>
