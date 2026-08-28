@@ -30,9 +30,14 @@ jobs:
       - uses: actions/checkout@v4
       - name: Confirm landing folder only
         run: test -d landing && test -f landing/index.html && test -f landing/robots.txt && test -f landing/sitemap.xml
+      - name: Switch Pages source to GitHub Actions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --method PUT "repos/${GITHUB_REPOSITORY}/pages" \
+            -H "Accept: application/vnd.github+json" \
+            -f build_type=workflow
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: landing
