@@ -1,0 +1,4 @@
+{
+  "BACKEND_MODE": "firebase",
+  "USE_EMULATOR": "false"
+}

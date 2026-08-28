@@ -53,7 +53,7 @@ Then open **http://127.0.0.1:5173** in a browser. The app is framed like a phone
 
 **Android APK (physical phone)**
 
-The published debug APK uses on-device demo data. Install `dist/family_brain_android.zip` from this repository (unzip and install `family_brain.apk`). On the welcome screen tap **Development demo login**. No SMS and no Firebase connection are required.
+The default **debug** build uses on-device demo data. Install `dist/family_brain_android.zip` from this repository (unzip and install `family_brain.apk`). On the welcome screen tap **Development demo login**. No SMS and no Firebase connection are required.
 
 ```bash
 flutter run -d android
@@ -67,6 +67,8 @@ flutter run -d android --dart-define=BACKEND_MODE=firebase --dart-define=USE_EMU
 
 On the Android emulator, `127.0.0.1` is remapped to `10.0.2.2` automatically.
 
+**Release / store builds do not use demo mode.** They default to `BACKEND_MODE=firebase` and `USE_EMULATOR=false`. If `lib/firebase_options.dart` is still a placeholder, the app fails at startup instead of silently using local demo data.
+
 ### 4. Try it
 
 On the welcome screen, tap **Development demo login**. The app opens a seeded demo family so you can use Home, Family, Tasks, Notifications, and Hebrew/English RTL immediately.
@@ -75,13 +77,17 @@ Phone/OTP remains available for the Firebase backend (`BACKEND_MODE=firebase`). 
 
 ## Production Firebase
 
-Before a public release:
+Firebase Production is **not configured yet**. Do not invent project IDs, API keys, or SHA fingerprints.
 
-1. Create a Firebase project on the Spark (free) plan.
+Before a public release (manual / external):
+
+1. Create a Firebase project in the Firebase Console.
 2. Enable Authentication (Phone), Cloud Firestore, and Cloud Messaging.
 3. Run `flutterfire configure` and replace `lib/firebase_options.dart`.
-4. Deploy `firestore.rules`.
-5. Run the app with `--dart-define=BACKEND_MODE=firebase --dart-define=USE_EMULATOR=false`.
+4. Add `android/app/google-services.json` from that project (do not commit secrets).
+5. Deploy `firestore.rules`.
+6. Copy `android/key.properties.example` to `android/key.properties` and generate an upload keystore locally.
+7. Build with `tool/build_production.sh` (or `flutter build appbundle --dart-define-from-file=tool/production.defines.json`).
 
 Phone SMS in production requires a Firebase project with Phone Authentication enabled.
 

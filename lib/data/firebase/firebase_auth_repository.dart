@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../../core/config/app_config.dart';
+import '../../core/config/production_config_exception.dart';
 import '../../domain/models/app_user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/repositories/user_repository.dart';
@@ -96,6 +97,12 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<AppUser> signInWithDemoAccount({required String language}) async {
+    AppConfig.assertDemoLoginAllowed();
+    if (!AppConfig.useEmulator) {
+      throw const ProductionConfigException(
+        'Demo OTP cannot be used against production Firebase.',
+      );
+    }
     final verification = await sendPhoneCode(AppConfig.demoPhone);
     var code = AppConfig.demoOtp;
     if (AppConfig.useEmulator) {

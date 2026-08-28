@@ -52,3 +52,9 @@ emulator-data/
 node_modules/
 .env
 ai_gateway/.env
+
+# Local production signing (never commit)
+android/key.properties
+
+# Real Firebase Android config from the Console (add locally; do not invent values)
+android/app/google-services.json

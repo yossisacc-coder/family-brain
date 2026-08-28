@@ -23,6 +23,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   String? _error;
 
   Future<void> _demo() async {
+    AppConfig.assertDemoLoginAllowed();
     setState(() {
       _loading = true;
       _error = null;
@@ -76,19 +77,21 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 Text(_error!, style: const TextStyle(color: AppColors.urgent)),
                 const SizedBox(height: 12),
               ],
-              _DemoLoginCard(
-                loading: _loading,
-                onPressed: _demo,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                l10n.orDivider,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: context.palette.textMuted,
-                    ),
-              ),
-              const SizedBox(height: 16),
+              if (AppConfig.demoLoginEnabled) ...[
+                _DemoLoginCard(
+                  loading: _loading,
+                  onPressed: _demo,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.orDivider,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: context.palette.textMuted,
+                      ),
+                ),
+                const SizedBox(height: 16),
+              ],
               PrimaryButton(
                 label: l10n.continueWithPhone,
                 icon: Icons.phone_iphone_rounded,
