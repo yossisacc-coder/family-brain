@@ -254,6 +254,7 @@ h3 {
 .brand img {
   width: 36px;
   height: 36px;
+  border-radius: 10px;
 }
 
 .word-family {
@@ -512,11 +513,39 @@ h3 {
 }
 
 .phone-screen {
+  /* App previews keep the real Family Brain light UI, even when the site is dark. */
+  --bg: #eef3fb;
+  --bg-alt: #e4ecf8;
+  --bg-warm: #efeaf8;
+  --surface: #ffffff;
+  --surface-soft: #f7f9fd;
+  --text: #12203a;
+  --text-muted: #5b6a82;
+  --border: #d4dfef;
+  --navy: #012557;
+  --azure: #0568ca;
+  --purple: #6b5aed;
+  --success: #2f9b6e;
+  --success-soft: #e6f6ee;
+  --remind: #e07a2f;
+  --remind-soft: #fff3e8;
+  --family: #3b6fe8;
+  --family-soft: #eaf1fe;
+  --event: #7b61ff;
+  --event-soft: #f3eeff;
   background: var(--surface-soft);
   border-radius: 28px;
   overflow: hidden;
   min-height: 520px;
   color: var(--text);
+}
+
+.phone-screen .word-family {
+  color: var(--navy);
+}
+
+.phone-screen .word-brain {
+  color: var(--azure);
 }
 
 .phone-bar {
@@ -1413,6 +1442,63 @@ h3 {
 :focus-visible {
   outline: 3px solid var(--azure);
   outline-offset: 2px;
+}
+
+/* ---------- Professional (dark) theme polish ---------- */
+[data-theme="professional"] .nav .brand img,
+.footer .brand img {
+  background: #f3f7fc;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+
+[data-theme="professional"] .nav-links a:hover,
+[data-theme="professional"] .nav-links a:focus-visible {
+  color: #e8eef8;
+}
+
+[data-theme="professional"] .lang-btn:hover,
+[data-theme="professional"] .lang-btn:focus-visible {
+  color: #e8eef8;
+}
+
+[data-theme="professional"] .theme-toggle,
+[data-theme="professional"] .menu-toggle {
+  color: #e8eef8;
+  border-color: var(--border-strong);
+}
+
+[data-theme="professional"] .btn-primary:hover {
+  background: linear-gradient(180deg, #7a6bf0, var(--purple));
+  color: #fff;
+}
+
+[data-theme="professional"] .btn-secondary:hover {
+  color: #c9dbf5;
+  border-color: #8eb4e8;
+}
+
+[data-theme="professional"] .hero {
+  background:
+    radial-gradient(900px 420px at 10% -10%, rgba(5, 104, 202, 0.22), transparent 60%),
+    radial-gradient(700px 380px at 90% 10%, rgba(107, 90, 237, 0.22), transparent 55%),
+    radial-gradient(600px 300px at 50% 100%, rgba(26, 125, 224, 0.1), transparent 50%),
+    var(--bg);
+}
+
+[data-theme="professional"] .phone {
+  box-shadow:
+    0 22px 50px rgba(0, 0, 0, 0.48),
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 0 28px rgba(5, 104, 202, 0.22);
+}
+
+[data-theme="professional"] .shot {
+  background: #151c2a;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.38);
+}
+
+[data-theme="professional"] .legal-lang-note {
+  color: #e8eef8;
 }
 
 [dir="rtl"] .flip-rtl {
