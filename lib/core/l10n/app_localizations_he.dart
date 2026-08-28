@@ -603,7 +603,7 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get appearanceProfessionalHint =>
-      'סביבת עבודה כהה יותר, עם ניגודיות גבוהה, באותה משפחת צבע.';
+      'סביבת עבודה בהירה ורגועה, עם משטחים קרירים יותר וצבע ראשי עמוק יותר.';
 
   @override
   String get appearanceColorfulHint =>

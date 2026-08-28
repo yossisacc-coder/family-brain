@@ -66,7 +66,7 @@ class FamilyBrainPalette extends ThemeExtension<FamilyBrainPalette> {
   /// Personal / original Family Brain identity (purple, clean white).
   static final colorful = of(AppearanceMode.colorful);
 
-  /// Professional companion of the default purple family.
+  /// Calm light companion of the default purple family.
   static final professional = of(AppearanceMode.professional);
 
   static FamilyBrainPalette of(
@@ -118,35 +118,38 @@ class FamilyBrainPalette extends ThemeExtension<FamilyBrainPalette> {
     );
   }
 
-  /// Darker, higher-contrast workspace using the same color family.
+  /// Calm light workspace: cooler surfaces, deeper primary, same family accents.
   static FamilyBrainPalette _professional(Color seed) {
+    final deep = Color.lerp(seed, const Color(0xFF1B2433), 0.28)!;
     final scheme = ColorScheme.fromSeed(
-      seedColor: seed,
-      brightness: Brightness.dark,
+      seedColor: deep,
+      brightness: Brightness.light,
     );
     return FamilyBrainPalette(
       mode: AppearanceMode.professional,
-      brightness: Brightness.dark,
-      background: Color.lerp(const Color(0xFF12141C), seed, 0.16)!,
-      surface: Color.lerp(scheme.surfaceContainer, seed, 0.10)!,
-      card: Color.lerp(scheme.surfaceContainerHigh, seed, 0.08)!,
-      text: scheme.onSurface,
-      textMuted: scheme.onSurfaceVariant,
-      border: scheme.outlineVariant,
-      nav: scheme.surfaceContainerLow,
-      desktopBackdrop: scheme.surfaceContainerLowest,
-      primary: Color.lerp(seed, const Color(0xFFFFFFFF), 0.16)!,
-      primaryDark: Color.lerp(seed, const Color(0xFF000000), 0.18)!,
-      primarySoft: scheme.primaryContainer,
-      onPrimary: scheme.onPrimary,
-      homeEvents: Color.lerp(const Color(0xFF9B89FF), seed, 0.40)!,
-      homeEventsSoft: Color.lerp(scheme.surfaceContainerHigh, const Color(0xFF7B61FF), 0.22)!,
-      homeTasks: Color.lerp(const Color(0xFF3FBF88), seed, 0.32)!,
-      homeTasksSoft: Color.lerp(scheme.surfaceContainerHigh, const Color(0xFF2FA874), 0.22)!,
-      homeReminders: Color.lerp(const Color(0xFFE39A55), seed, 0.32)!,
-      homeRemindersSoft: Color.lerp(scheme.surfaceContainerHigh, const Color(0xFFE0893C), 0.22)!,
-      homeFamily: Color.lerp(const Color(0xFF6A9AFF), seed, 0.32)!,
-      homeFamilySoft: Color.lerp(scheme.surfaceContainerHigh, const Color(0xFF4C82F0), 0.22)!,
+      brightness: Brightness.light,
+      background: _tint(const Color(0xFFF3F5F8), deep, 0.05),
+      surface: _tint(const Color(0xFFECEFF4), deep, 0.07),
+      card: _tint(const Color(0xFFFFFFFF), deep, 0.02),
+      text: Color.lerp(scheme.onSurface, const Color(0xFF1B2433), 0.35)!,
+      textMuted: Color.lerp(scheme.onSurfaceVariant, const Color(0xFF5B6573), 0.25)!,
+      border: _tint(const Color(0xFFD8DEE8), deep, 0.16),
+      nav: _tint(const Color(0xFFF7F8FB), deep, 0.04),
+      desktopBackdrop: _tint(const Color(0xFFE7EBF1), deep, 0.06),
+      primary: deep,
+      primaryDark: Color.lerp(deep, const Color(0xFF101018), 0.22)!,
+      primarySoft: Color.lerp(scheme.primaryContainer, const Color(0xFFFFFFFF), 0.28)!,
+      onPrimary: deep.computeLuminance() > 0.55
+          ? const Color(0xFF1B1D29)
+          : Colors.white,
+      homeEvents: Color.lerp(const Color(0xFF6B5CE7), deep, 0.28)!,
+      homeEventsSoft: Color.lerp(const Color(0xFFEEF0F8), const Color(0xFFE6E0FF), 0.55)!,
+      homeTasks: Color.lerp(const Color(0xFF2A9A6C), deep, 0.22)!,
+      homeTasksSoft: Color.lerp(const Color(0xFFEEF0F8), const Color(0xFFDFF3E8), 0.55)!,
+      homeReminders: Color.lerp(const Color(0xFFD57A32), deep, 0.22)!,
+      homeRemindersSoft: Color.lerp(const Color(0xFFEEF0F8), const Color(0xFFFFF0E0), 0.55)!,
+      homeFamily: Color.lerp(const Color(0xFF3D74DC), deep, 0.22)!,
+      homeFamilySoft: Color.lerp(const Color(0xFFEEF0F8), const Color(0xFFE2ECFC), 0.55)!,
     );
   }
 

@@ -607,7 +607,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appearanceProfessionalHint =>
-      'Darker, higher-contrast workspace using the same color family.';
+      'Calm light workspace with cooler surfaces and a deeper primary color.';
 
   @override
   String get appearanceColorfulHint =>

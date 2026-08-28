@@ -1229,7 +1229,7 @@ abstract class AppLocalizations {
   /// No description provided for @appearanceProfessionalHint.
   ///
   /// In en, this message translates to:
-  /// **'Darker, higher-contrast workspace using the same color family.'**
+  /// **'Calm light workspace with cooler surfaces and a deeper primary color.'**
   String get appearanceProfessionalHint;
 
   /// No description provided for @appearanceColorfulHint.
