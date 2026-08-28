@@ -1,0 +1,7 @@
+# Family Brain landing page
+# GitHub Pages project URL for yossisacc-coder/family-brain.
+# This file allows search engines, including Google, to crawl the site.
+User-agent: *
+Allow: /
+
+Sitemap: https://yossisacc-coder.github.io/family-brain/sitemap.xml

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Page not found — Family Brain</title>
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="images/favicon.ico" sizes="any" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <script>
+      (function () {
+        try {
+          var lang = localStorage.getItem("fb-lang");
+          if (lang === "he" || lang === "en") {
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body data-page="404">
+    <main class="wrap legal-page">
+      <h1 data-i18n="legal.notFoundH1">Page not found</h1>
+      <p class="lede" data-i18n="legal.notFoundLede">That page is not part of the Family Brain site.</p>
+      <p><a class="btn btn-primary" href="index.html" data-i18n="legal.back">Back to Family Brain</a></p>
+    </main>
+    <script src="js/i18n.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>

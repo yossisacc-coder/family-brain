@@ -1,0 +1,50 @@
+name: Deploy landing page
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cursor/family-brain-landing-d2d5
+      - cursor/family-brain-mvp-8ebd
+      - main
+    paths:
+      - "landing/**"
+      - "index.html"
+      - ".github/workflows/deploy-landing.yml"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: landing-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm landing page files
+        run: test -f landing/index.html && test -f index.html
+      - name: Detect Pages build type
+        id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          type=$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq .build_type)
+          echo "build_type=$type" >> "$GITHUB_OUTPUT"
+          echo "Pages build_type=$type"
+      - uses: actions/configure-pages@v5
+        if: steps.pages.outputs.build_type == 'workflow'
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.pages.outputs.build_type == 'workflow'
+        with:
+          path: landing
+      - id: deployment
+        if: steps.pages.outputs.build_type == 'workflow'
+        uses: actions/deploy-pages@v4
