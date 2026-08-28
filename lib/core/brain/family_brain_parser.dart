@@ -112,10 +112,6 @@ class BrainDraft {
     DateTime? now,
   }) {
     final stamp = now ?? DateTime.now();
-    DateTime? reminder = reminderAt;
-    if (kind == InformationKind.reminder && reminder == null) {
-      reminder = dueDate ?? stamp.add(const Duration(hours: 1));
-    }
     return TaskItem(
       id: id,
       familyId: familyId,
@@ -131,7 +127,7 @@ class BrainDraft {
       dueDate: dueDate,
       hasDueTime: hasDueTime,
       notes: notes,
-      reminderAt: reminder,
+      reminderAt: reminderAt,
     );
   }
 }
@@ -157,6 +153,13 @@ class FamilyBrainParser {
 
   static const emptyInput = 'empty';
   static const unclearInput = 'unclear';
+  static const missingDateTimeKey = 'missing_date_time';
+
+  static bool hasTemporalCue(String text) {
+    if (text.trim().isEmpty) return false;
+    final when = _extractWhen(text, DateTime.now());
+    return when.date != null || when.hasTime;
+  }
 
   static BrainParseResult parse(
     String raw, {
@@ -184,29 +187,35 @@ class FamilyBrainParser {
     }
 
     final hebrewDontForget = RegExp(r'אל תשכח', unicode: true).hasMatch(text);
+    final resolvedKind = hebrewDontForget && kind == InformationKind.reminder
+        ? InformationKind.task
+        : kind;
     DateTime? reminder;
-    if (kind == InformationKind.reminder) {
-      reminder = when.date ?? now.add(const Duration(hours: 1));
+    if (resolvedKind == InformationKind.reminder && when.date != null) {
+      reminder = when.date;
     }
+    final missingWhen = (resolvedKind == InformationKind.reminder ||
+            resolvedKind == InformationKind.event) &&
+        when.date == null;
 
     return BrainParseResult.ok(
       BrainDraft(
-        kind: hebrewDontForget && kind == InformationKind.reminder
-            ? InformationKind.task
-            : kind,
+        kind: resolvedKind,
         title: title,
         originalText: text,
         dueDate: when.date,
         hasDueTime: when.hasTime,
-        reminderAt: hebrewDontForget ? null : reminder,
+        reminderAt: reminder,
         assigneeId: assignment.assigneeId,
         assigneeName: assignment.assigneeName,
         listItems: kind == InformationKind.list ? items : const [],
-        lowConfidence: (kind == InformationKind.task &&
+        lowConfidence: missingWhen ||
+            (kind == InformationKind.task &&
                 when.date == null &&
                 items.length < 2 &&
                 !_hasActionVerb(lower)) ||
             assignment.ambiguous,
+        explanation: missingWhen ? missingDateTimeKey : null,
         personal: assignment.personal,
         priority: PriorityFromLanguage.infer(text),
       ),
@@ -231,7 +240,7 @@ class FamilyBrainParser {
     }
 
     final remindCue = (RegExp(
-              r"\b(remind|reminder|don.?t forget)\b",
+              r"\b(remind|reminder|don.?t forget|remember to)\b",
             ).hasMatch(lower) ||
             _he(lower, 'תזכיר') ||
             _he(lower, 'תזכורת')) &&
@@ -617,18 +626,23 @@ class FamilyBrainParser {
           imagePath: imagePath,
           personal: assignment.personal,
           priority: PriorityFromLanguage.infer(text),
+          lowConfidence: when.date == null,
+          explanation: when.date == null ? missingDateTimeKey : null,
         ),
       );
     }
 
     if (remindCue) {
       DateTime? at;
+      var hasTime = when.hasTime;
       if (hoursBefore != null && when.date != null) {
         at = when.date!.subtract(Duration(hours: hoursBefore));
+        hasTime = true;
       } else {
         final remindText = _remindSlice(text);
         final remindWhen = _extractWhen(remindText, now);
-        at = remindWhen.date ?? when.date ?? now.add(const Duration(hours: 1));
+        at = remindWhen.date ?? when.date;
+        hasTime = remindWhen.hasTime || when.hasTime;
       }
       final remindPerson = _assignment(_remindSlice(text), members, currentUser);
       drafts.add(
@@ -639,12 +653,14 @@ class FamilyBrainParser {
               : _titleFor(InformationKind.reminder, _remindSlice(text), const []),
           originalText: text,
           dueDate: at,
-          hasDueTime: true,
+          hasDueTime: hasTime,
           reminderAt: at,
           assigneeId: remindPerson.assigneeId ?? assignment.assigneeId,
           assigneeName: remindPerson.assigneeName ?? assignment.assigneeName,
           personal: remindPerson.personal || assignment.personal,
           priority: PriorityFromLanguage.infer(text),
+          lowConfidence: at == null,
+          explanation: at == null ? missingDateTimeKey : null,
         ),
       );
     }

@@ -51,9 +51,9 @@ void main() {
     expect(colorful.colorScheme.primary, colorful.primary);
     expect(professional.colorScheme.primary, professional.primary);
     expect(colorful.background.computeLuminance(), greaterThan(0.7));
-    expect(professional.background.computeLuminance(), lessThan(0.25));
+    expect(professional.background.computeLuminance(), greaterThan(0.7));
     expect(colorful.brightness, Brightness.light);
-    expect(professional.brightness, Brightness.dark);
+    expect(professional.brightness, Brightness.light);
   });
 
   test('selected app color tints the whole personal and professional themes', () {

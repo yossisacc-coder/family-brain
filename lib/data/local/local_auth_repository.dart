@@ -93,6 +93,7 @@ class LocalAuthRepository implements AuthRepository {
     final existing = _store.users[AppConfig.demoUserId];
     if (existing != null) {
       existing['language'] = language;
+      _ensureExtendedDemoFamily(now, language);
       return;
     }
 
@@ -122,7 +123,13 @@ class LocalAuthRepository implements AuthRepository {
       createdAt: now,
       createdBy: alex.id,
       inviteCode: AppConfig.demoInviteCode,
-      memberIds: [alex.id, maya.id],
+      memberIds: [
+        alex.id,
+        maya.id,
+        AppConfig.demoChildId,
+        AppConfig.demoDaughterId,
+        AppConfig.demoGrandparentId,
+      ],
       workspaceType: AppConfig.defaultWorkspaceType,
     );
     final milk = TaskItem(
@@ -247,6 +254,112 @@ class LocalAuthRepository implements AuthRepository {
     _store.tasks[grandma.id] = grandma.toMap();
     _store.tasks[mayaPersonal.id] = mayaPersonal.toMap();
     _store.notifications[assigned.id] = assigned.toMap();
+    _ensureExtendedDemoFamily(now, language);
+  }
+
+  void _ensureExtendedDemoFamily(DateTime now, String language) {
+    final david = AppUser(
+      id: AppConfig.demoChildId,
+      name: AppConfig.demoChildName,
+      phone: '+16505550011',
+      language: language,
+      createdAt: now,
+      familyId: AppConfig.demoFamilyId,
+      plan: AccessPlan.beta,
+      familyRole: FamilyRole.member,
+    );
+    final noa = AppUser(
+      id: AppConfig.demoDaughterId,
+      name: AppConfig.demoDaughterName,
+      phone: '+16505550012',
+      language: language,
+      createdAt: now,
+      familyId: AppConfig.demoFamilyId,
+      plan: AccessPlan.beta,
+      familyRole: FamilyRole.member,
+    );
+    final ruth = AppUser(
+      id: AppConfig.demoGrandparentId,
+      name: AppConfig.demoGrandparentName,
+      phone: '+16505550013',
+      language: language,
+      createdAt: now,
+      familyId: AppConfig.demoFamilyId,
+      plan: AccessPlan.beta,
+      familyRole: FamilyRole.member,
+    );
+    _store.users.putIfAbsent(david.id, () => david.toMap());
+    _store.users.putIfAbsent(noa.id, () => noa.toMap());
+    _store.users.putIfAbsent(ruth.id, () => ruth.toMap());
+
+    final familyMap = _store.families[AppConfig.demoFamilyId];
+    if (familyMap != null) {
+      final family = Family.fromMap(familyMap);
+      final ids = {
+        ...family.memberIds,
+        david.id,
+        noa.id,
+        ruth.id,
+      }.toList();
+      _store.families[family.id] = family.copyWith(memberIds: ids).toMap();
+    }
+
+    _store.tasks.putIfAbsent(
+      'demo-task-homework',
+      () => TaskItem(
+        id: 'demo-task-homework',
+        familyId: AppConfig.demoFamilyId,
+        creatorId: AppConfig.demoUserId,
+        title: 'Finish math homework',
+        assigneeId: david.id,
+        type: TaskType.family,
+        dueDate: DateTime(now.year, now.month, now.day, 18),
+        hasDueTime: true,
+        priority: TaskPriority.high,
+        notes: 'Worksheet in the backpack.',
+        status: TaskStatus.pending,
+        createdAt: now.subtract(const Duration(hours: 7)),
+        updatedAt: now.subtract(const Duration(hours: 7)),
+      ).toMap(),
+    );
+    _store.tasks.putIfAbsent(
+      'demo-task-piano',
+      () => TaskItem(
+        id: 'demo-task-piano',
+        familyId: AppConfig.demoFamilyId,
+        creatorId: AppConfig.demoPartnerId,
+        title: 'Piano lesson',
+        kind: InformationKind.event,
+        assigneeId: noa.id,
+        type: TaskType.family,
+        dueDate: DateTime(now.year, now.month, now.day, 17),
+        hasDueTime: true,
+        priority: TaskPriority.normal,
+        status: TaskStatus.pending,
+        createdAt: now.subtract(const Duration(hours: 8)),
+        updatedAt: now.subtract(const Duration(hours: 8)),
+      ).toMap(),
+    );
+    _store.tasks.putIfAbsent(
+      'demo-task-grandma-visit',
+      () => TaskItem(
+        id: 'demo-task-grandma-visit',
+        familyId: AppConfig.demoFamilyId,
+        creatorId: AppConfig.demoUserId,
+        title: 'Sunday lunch with Ruth',
+        kind: InformationKind.event,
+        assigneeId: ruth.id,
+        type: TaskType.family,
+        dueDate: DateTime(now.year, now.month, now.day)
+            .add(Duration(days: (DateTime.sunday - now.weekday + 7) % 7)),
+        hasDueTime: false,
+        priority: TaskPriority.normal,
+        notes: 'Family lunch at Ruth\'s.',
+        status: TaskStatus.pending,
+        createdAt: now.subtract(const Duration(days: 2)),
+        updatedAt: now.subtract(const Duration(days: 2)),
+      ).toMap(),
+    );
   }
 
   String _normalizePhone(String value) {

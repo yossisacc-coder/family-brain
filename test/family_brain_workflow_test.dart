@@ -65,6 +65,35 @@ void main() {
       expect(result.draft!.reminderAt, isNotNull);
     });
 
+    test('does not invent a date for a meeting without one', () {
+      final result = FamilyBrainParser.parse(
+        'Meeting with David',
+        now: now,
+        members: [david],
+      );
+      expect(result.draft!.kind, InformationKind.event);
+      expect(result.draft!.dueDate, isNull);
+      expect(result.draft!.reminderAt, isNull);
+      expect(result.draft!.explanation, FamilyBrainParser.missingDateTimeKey);
+    });
+
+    test('keeps ordinary todo as a task, not a reminder', () {
+      final result = FamilyBrainParser.parse('Buy milk.', now: now);
+      expect(result.draft!.kind, isNot(InformationKind.reminder));
+      expect(result.draft!.reminderAt, isNull);
+    });
+
+    test('reminder without a time is not given a made-up clock time', () {
+      final result = FamilyBrainParser.parse(
+        'Remind me to call David',
+        now: now,
+        members: [david],
+      );
+      expect(result.draft!.kind, InformationKind.reminder);
+      expect(result.draft!.reminderAt, isNull);
+      expect(result.draft!.dueDate, isNull);
+    });
+
     test('defaults ordinary requests to a task', () {
       final result = FamilyBrainParser.parse(
         'Finish the homework',

@@ -43,8 +43,7 @@ class FamilyBrainAiService {
           context: context,
           originalText: input.text,
         );
-        if (cloud.hasCreateActions ||
-            (cloud.clarification ?? '').trim().isNotEmpty) {
+        if (cloud.hasUserFacingResult) {
           return FamilyBrainUnderstand(
             response: cloud,
             usedCloud: provider!.id != fallback.id,

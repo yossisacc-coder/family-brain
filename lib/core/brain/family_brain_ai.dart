@@ -21,6 +21,7 @@ class BrainUnderstandResult {
     this.usedFallback = false,
     this.clarification,
     this.error,
+    this.actions = const [],
   });
 
   final List<BrainDraft> drafts;
@@ -29,8 +30,23 @@ class BrainUnderstandResult {
   final bool usedFallback;
   final String? clarification;
   final String? error;
+  final List<FamilyBrainAiAction> actions;
 
-  bool get isOk => drafts.isNotEmpty;
+  bool get isOk =>
+      drafts.isNotEmpty ||
+      (clarification != null && clarification!.trim().isNotEmpty) ||
+      actions.any(
+        (action) =>
+            action.type == FamilyBrainAiActionType.listTasks ||
+            action.type == FamilyBrainAiActionType.listReminders ||
+            action.type == FamilyBrainAiActionType.deleteTask ||
+            action.type == FamilyBrainAiActionType.updateTask ||
+            action.type == FamilyBrainAiActionType.updateEvent ||
+            action.type == FamilyBrainAiActionType.updateListItem ||
+            action.type == FamilyBrainAiActionType.completeTask ||
+            action.type == FamilyBrainAiActionType.conversationalResponse ||
+            action.type == FamilyBrainAiActionType.askForClarification,
+      );
 }
 
 /// App-facing Family Brain AI entry. Provider-specific code lives in adapters.
@@ -114,8 +130,10 @@ class FamilyBrainAi {
       originalText: text,
       usedCloud: understood.usedCloud,
       usedFallback: understood.usedFallback,
-      clarification: understood.response.clarification,
+      clarification: understood.response.clarification ??
+          understood.response.conversationText,
       error: understood.error,
+      actions: understood.response.actions,
     );
   }
 

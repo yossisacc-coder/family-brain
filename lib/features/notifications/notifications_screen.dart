@@ -50,6 +50,7 @@ class NotificationsScreen extends ConsumerWidget {
               title: l10n.noNotifications,
               message: l10n.noNotificationsMessage,
               icon: Icons.notifications_none_rounded,
+              expand: true,
             );
           }
           return ListView.separated(

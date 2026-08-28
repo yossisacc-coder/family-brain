@@ -205,6 +205,9 @@ void main() {
     expect(find.text('Buy milk'), findsNothing);
     expect(find.text('Bring two bottles'), findsNothing);
     expect(find.text('Show all'), findsOneWidget);
+    await tester.tap(find.byTooltip('Show more'));
+    await tester.pumpAndSettle();
+    expect(find.text('Family dinner'), findsOneWidget);
   });
 
   testWidgets('Quick Access cards stay compact on a phone viewport', (
@@ -255,7 +258,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Teacher meeting'), findsOneWidget);
-    expect(find.text('Open related task'), findsWidgets);
     await tester.tap(find.byKey(const Key('open-related-task-event-1')));
     await tester.pumpAndSettle();
     expect(find.text('Task details event-1'), findsOneWidget);

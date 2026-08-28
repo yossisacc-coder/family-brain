@@ -1229,7 +1229,7 @@ abstract class AppLocalizations {
   /// No description provided for @appearanceProfessionalHint.
   ///
   /// In en, this message translates to:
-  /// **'Darker, higher-contrast workspace using the same color family.'**
+  /// **'Calm light workspace with cooler surfaces and a deeper primary color.'**
   String get appearanceProfessionalHint;
 
   /// No description provided for @appearanceColorfulHint.
@@ -2017,6 +2017,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clear older than 7 days'**
   String get activityClearOlder;
+
+  /// Jump to today on the calendar.
+  String get calendarToday;
+
+  /// Expand additional Home tasks.
+  String get moreTasks;
+
+  /// Shown when AI understood an item but date/time were not stated.
+  String get missingDateTimeMessage;
+
+  /// Calendar day grouping for events.
+  String get calendarGroupEvents;
+
+  /// Calendar day grouping for tasks.
+  String get calendarGroupTasks;
+
+  /// Calendar day grouping for reminders.
+  String get calendarGroupReminders;
+
+  /// Voice confirmation before deleting a matched item.
+  String voiceConfirmDelete(String title);
+
+  /// Voice delete cancelled.
+  String get voiceDeleteCancelled;
 }
 
 class _AppLocalizationsDelegate

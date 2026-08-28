@@ -80,6 +80,9 @@ class ActionEngine {
           final saved = await repository.updateTask(next);
           byId[saved.id] = saved;
           updated.add(saved);
+        case FamilyBrainAiActionType.deleteTask:
+        case FamilyBrainAiActionType.listTasks:
+        case FamilyBrainAiActionType.listReminders:
         case FamilyBrainAiActionType.identifyFamilyMember:
         case FamilyBrainAiActionType.determinePriority:
         case FamilyBrainAiActionType.determineDate:

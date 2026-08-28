@@ -188,7 +188,7 @@
   "appearanceHint": "בחרו אישי או מקצועי. צבע האפליקציה שנבחר צובע את כל הממשק.",
   "appearanceProfessional": "מקצועי",
   "appearanceColorful": "אישי",
-  "appearanceProfessionalHint": "סביבת עבודה כהה יותר, עם ניגודיות גבוהה, באותה משפחת צבע.",
+  "appearanceProfessionalHint": "סביבת עבודה בהירה ורגועה, עם משטחים קרירים יותר וצבע ראשי עמוק יותר.",
   "appearanceColorfulHint": "מראה משפחתי ידידותי עם רקע לבן נקי והצבע שנבחר בכל הממשק.",
   "calendarItemsForDay": "פריטים ליום זה",
   "brainStatusSuccess": "מוכן לסקירה",
@@ -327,5 +327,18 @@
   "accessPlanBetaHint": "אתם בגרסת בטא של Family Brain. כל המוצר זמין בלי תשלום. אפשר להוסיף תוכנית Premium בעתיד בלי לבנות מחדש את האפליקציה.",
   "brainUnsureAssignee": "מצאתי משימה, אבל אני לא בטוח למי היא שייכת.",
   "brainAssignFamily": "משפחה",
-  "activityClearOlder": "ניקוי פעילות ישנה מ־7 ימים"
+  "activityClearOlder": "ניקוי פעילות ישנה מ־7 ימים",
+  "calendarToday": "היום",
+  "moreTasks": "הצג עוד",
+  "missingDateTimeMessage": "הבנתי את הבקשה, אבל חסרים תאריך ושעה. אפשר לשמור כפריט כללי, או להוסיף מתי זה אמור לקרות.",
+  "calendarGroupEvents": "אירועים",
+  "calendarGroupTasks": "משימות",
+  "calendarGroupReminders": "תזכורות",
+  "voiceConfirmDelete": "מצאתי את {title}. למחוק?",
+  "@voiceConfirmDelete": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "voiceDeleteCancelled": "בסדר, לא אמחק."
 }

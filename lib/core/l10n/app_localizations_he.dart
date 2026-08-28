@@ -603,7 +603,7 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get appearanceProfessionalHint =>
-      'סביבת עבודה כהה יותר, עם ניגודיות גבוהה, באותה משפחת צבע.';
+      'סביבת עבודה בהירה ורגועה, עם משטחים קרירים יותר וצבע ראשי עמוק יותר.';
 
   @override
   String get appearanceColorfulHint =>
@@ -1013,4 +1013,29 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get activityClearOlder => 'ניקוי פעילות ישנה מ־7 ימים';
+
+  @override
+  String get calendarToday => 'היום';
+
+  @override
+  String get moreTasks => 'הצג עוד';
+
+  @override
+  String get missingDateTimeMessage =>
+      'הבנתי את הבקשה, אבל חסרים תאריך ושעה. אפשר לשמור כפריט כללי, או להוסיף מתי זה אמור לקרות.';
+
+  @override
+  String get calendarGroupEvents => 'אירועים';
+
+  @override
+  String get calendarGroupTasks => 'משימות';
+
+  @override
+  String get calendarGroupReminders => 'תזכורות';
+
+  @override
+  String voiceConfirmDelete(String title) => 'מצאתי את $title. למחוק?';
+
+  @override
+  String get voiceDeleteCancelled => 'בסדר, לא אמחק.';
 }

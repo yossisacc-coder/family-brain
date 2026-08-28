@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:family_brain/core/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 
+import '../../core/theme/appearance.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_view.dart';
@@ -103,21 +105,35 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             return CalendarDayQuery.matchesFocus(task, widget.focus);
           }).toList();
 
+          final markedDays = <DateTime>{};
+          for (final task in dated) {
+            if (!task.isTrashed &&
+                (user == null || task.isVisibleTo(user.id))) {
+              if (task.dueDate != null) {
+                markedDays.add(CalendarDayQuery.dateOnly(task.dueDate!));
+              }
+              if (task.reminderAt != null) {
+                markedDays.add(CalendarDayQuery.dateOnly(task.reminderAt!));
+              }
+            }
+          }
+
           return Column(
             children: [
-              CalendarDatePicker(
-                initialDate: _selected,
-                firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                lastDate: DateTime.now().add(const Duration(days: 365)),
-                onDateChanged: (value) => setState(() => _selected = value),
+              _FamilyMonthCalendar(
+                selected: _selected,
+                markedDays: markedDays,
+                onSelect: (value) => setState(() => _selected = value),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
                 child: Align(
                   alignment: AlignmentDirectional.centerStart,
                   child: Text(
                     l10n.calendarItemsForDay,
-                    style: Theme.of(context).textTheme.titleSmall,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
                   ),
                 ),
               ),
@@ -136,38 +152,42 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                             message: _emptyMessage(l10n),
                             icon: Icons.event_outlined,
                           )
-                        : ListView.separated(
+                        : ListView(
                             padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                            itemCount: forDay.length,
-                            separatorBuilder: (_, _) =>
-                                const SizedBox(height: 10),
-                            itemBuilder: (context, index) {
-                              final task = forDay[index];
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
+                            children: [
+                              for (final group in _groupsForDay(l10n, forDay)) ...[
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 6,
+                                    bottom: 8,
+                                  ),
+                                  child: Text(
+                                    group.label,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelLarge
+                                        ?.copyWith(
+                                          color: context.palette.textMuted,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                  ),
+                                ),
+                                for (var i = 0; i < group.items.length; i++) ...[
                                   TaskCard(
-                                    task: task,
-                                    members: members,
-                                    onTap: () =>
-                                        context.push('/tasks/${task.id}'),
-                                  ),
-                                  Align(
-                                    alignment: AlignmentDirectional.centerStart,
-                                    child: TextButton.icon(
-                                      key: Key('open-related-task-${task.id}'),
-                                      onPressed: () =>
-                                          context.push('/tasks/${task.id}'),
-                                      icon: const Icon(
-                                        Icons.task_alt_rounded,
-                                        size: 18,
-                                      ),
-                                      label: Text(l10n.openRelatedTask),
+                                    key: Key(
+                                      'open-related-task-${group.items[i].id}',
                                     ),
+                                    task: group.items[i],
+                                    members: members,
+                                    onTap: () => context
+                                        .push('/tasks/${group.items[i].id}'),
                                   ),
+                                  if (i != group.items.length - 1)
+                                    const SizedBox(height: 10),
                                 ],
-                              );
-                            },
+                                const SizedBox(height: 12),
+                              ],
+                            ],
                           ),
               ),
             ],
@@ -211,5 +231,207 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       CalendarFocus.events => Icons.event_outlined,
       CalendarFocus.all => Icons.calendar_today_outlined,
     };
+  }
+
+  List<({String label, List<TaskItem> items})> _groupsForDay(
+    AppLocalizations l10n,
+    List<TaskItem> forDay,
+  ) {
+    final events = forDay
+        .where((task) => task.kind == InformationKind.event)
+        .toList();
+    final reminders = forDay
+        .where((task) => task.kind == InformationKind.reminder || task.hasReminder)
+        .where((task) => task.kind != InformationKind.event)
+        .toList();
+    final tasks = forDay
+        .where(
+          (task) =>
+              task.kind != InformationKind.event &&
+              task.kind != InformationKind.reminder &&
+              !reminders.contains(task),
+        )
+        .toList();
+    return [
+      if (events.isNotEmpty) (label: l10n.calendarGroupEvents, items: events),
+      if (tasks.isNotEmpty) (label: l10n.calendarGroupTasks, items: tasks),
+      if (reminders.isNotEmpty)
+        (label: l10n.calendarGroupReminders, items: reminders),
+    ];
+  }
+}
+
+class _FamilyMonthCalendar extends StatelessWidget {
+  const _FamilyMonthCalendar({
+    required this.selected,
+    required this.markedDays,
+    required this.onSelect,
+  });
+
+  final DateTime selected;
+  final Set<DateTime> markedDays;
+  final ValueChanged<DateTime> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final palette = context.palette;
+    final month = DateTime(selected.year, selected.month);
+    final first = DateTime(month.year, month.month, 1);
+    final startOffset = (first.weekday + 6) % 7; // Monday-first
+    final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
+    final today = CalendarDayQuery.dateOnly(DateTime.now());
+    final selectedDay = CalendarDayQuery.dateOnly(selected);
+    final locale = Localizations.localeOf(context).toString();
+    final monthLabel = DateFormat.yMMMM(locale).format(month);
+    final weekdays = List.generate(7, (i) {
+      final day = DateTime(2023, 1, 2 + i); // Monday
+      return DateFormat.E(locale).format(day);
+    });
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      child: Material(
+        color: palette.card,
+        borderRadius: BorderRadius.circular(22),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    tooltip: MaterialLocalizations.of(context).previousMonthTooltip,
+                    onPressed: () => onSelect(DateTime(month.year, month.month - 1, 1)),
+                    icon: const Icon(Icons.chevron_left_rounded),
+                  ),
+                  Expanded(
+                    child: Text(
+                      monthLabel,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => onSelect(today),
+                    child: Text(l10n.calendarToday),
+                  ),
+                  IconButton(
+                    tooltip: MaterialLocalizations.of(context).nextMonthTooltip,
+                    onPressed: () => onSelect(DateTime(month.year, month.month + 1, 1)),
+                    icon: const Icon(Icons.chevron_right_rounded),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  for (final label in weekdays)
+                    Expanded(
+                      child: Text(
+                        label,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: palette.textMuted,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              for (var row = 0; row < 6; row++)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    children: [
+                      for (var col = 0; col < 7; col++)
+                        Expanded(
+                          child: _dayCell(
+                            context,
+                            index: row * 7 + col,
+                            startOffset: startOffset,
+                            daysInMonth: daysInMonth,
+                            month: month,
+                            today: today,
+                            selectedDay: selectedDay,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _dayCell(
+    BuildContext context, {
+    required int index,
+    required int startOffset,
+    required int daysInMonth,
+    required DateTime month,
+    required DateTime today,
+    required DateTime selectedDay,
+  }) {
+    final palette = context.palette;
+    final dayNum = index - startOffset + 1;
+    if (dayNum < 1 || dayNum > daysInMonth) {
+      return const SizedBox(height: 40);
+    }
+    final date = DateTime(month.year, month.month, dayNum);
+    final isSelected = date == selectedDay;
+    final isToday = date == today;
+    final hasItems = markedDays.contains(date);
+    return InkWell(
+      customBorder: const CircleBorder(),
+      onTap: () => onSelect(date),
+      child: SizedBox(
+        height: 40,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 32,
+              height: 28,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? palette.primary
+                    : isToday
+                        ? palette.primarySoft
+                        : Colors.transparent,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '$dayNum',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: isSelected
+                          ? palette.onPrimary
+                          : isToday
+                              ? palette.primary
+                              : palette.text,
+                    ),
+              ),
+            ),
+            Container(
+              width: 5,
+              height: 5,
+              decoration: BoxDecoration(
+                color: hasItems
+                    ? (isSelected ? palette.onPrimary : palette.homeEvents)
+                    : Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

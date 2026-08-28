@@ -75,6 +75,13 @@ class FamilyBrainContext {
   final List<FamilyBrainItemRef> lists;
   final String? source;
 
+  List<FamilyBrainItemRef> get catalog => [
+        ...tasks,
+        ...events,
+        ...reminders,
+        ...lists,
+      ];
+
   factory FamilyBrainContext.fromApp({
     required DateTime now,
     String language = 'en',

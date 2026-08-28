@@ -11,6 +11,7 @@ class EmptyState extends StatelessWidget {
     this.actionLabel,
     this.onAction,
     this.icon = Icons.inbox_outlined,
+    this.expand = false,
   });
 
   final String title;
@@ -18,12 +19,16 @@ class EmptyState extends StatelessWidget {
   final String? actionLabel;
   final VoidCallback? onAction;
   final IconData icon;
+  final bool expand;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 20),
+    final content = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       child: Column(
+        mainAxisAlignment:
+            expand ? MainAxisAlignment.center : MainAxisAlignment.start,
+        mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
         children: [
           Container(
             width: 64,
@@ -60,5 +65,7 @@ class EmptyState extends StatelessWidget {
         ],
       ),
     );
+    if (!expand) return content;
+    return SizedBox.expand(child: Center(child: content));
   }
 }
