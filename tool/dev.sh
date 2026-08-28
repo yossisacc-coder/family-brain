@@ -14,5 +14,6 @@ trap 'kill $EMU_PID' EXIT
 sleep 6
 
 flutter run -d web-server --web-hostname 0.0.0.0 --web-port 5173 \
+  --dart-define=BACKEND_MODE=firebase \
   --dart-define=USE_EMULATOR=true \
   --dart-define=EMULATOR_HOST=127.0.0.1

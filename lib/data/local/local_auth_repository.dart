@@ -76,6 +76,7 @@ class LocalAuthRepository implements AuthRepository {
 
   @override
   Future<AppUser> signInWithDemoAccount({required String language}) async {
+    AppConfig.assertDemoLoginAllowed();
     await _ensureDemoWorkspace(language);
     _store.sessionUid = AppConfig.demoUserId;
     await _store.commit();

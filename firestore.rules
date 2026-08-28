@@ -1,4 +1,7 @@
 rules_version = '2';
+// Deploy this file to the real Firebase project before production.
+// MANUAL SETUP REQUIRED: firebase deploy --only firestore:rules
+// Do not invent a project ID here.
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() {
